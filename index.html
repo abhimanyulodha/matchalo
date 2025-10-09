@@ -44,7 +44,7 @@
 
         .themed-button { font-weight: 600; border-radius: 12px; transition: all 0.3s var(--ease-smooth); border: none; }
         .themed-button.primary { background: var(--accent-gradient); }
-        .themed-button.secondary { background-color: rgba(255,255,255,0.6); color: var(--text); border: 1px solid var(--faint-border); }
+        .themed-button.secondary { background-color: rgba(255,255,255,0.8); color: var(--text); border: 1px solid var(--faint-border); }
         .themed-button.tertiary { background: none; color: var(--text-secondary); }
         .themed-button:hover { transform: translateY(-2px); box-shadow: var(--shadow-medium); }
         
@@ -67,12 +67,12 @@
         .modal-overlay { background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); }
     </style>
 </head>
-<body class="p-2 lg:p-4">
+<body class="p-2 lg:p-4 flex items-center justify-center min-h-screen">
     <main id="game-container" class="w-full max-w-5xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6 items-center lg:items-stretch">
         
         <div class="w-full lg:w-2/3">
             <div class="p-4 lg:p-6 h-full glass-card rounded-2xl">
-                <div id="game-board" class="grid grid-cols-8 w-full aspect-square bg-white rounded-lg">
+                <div id="game-board" class="grid grid-cols-8 grid-rows-8 w-full aspect-square bg-white rounded-lg">
                     </div>
             </div>
         </div>
@@ -80,12 +80,12 @@
         <div class="w-full lg:w-1/3">
             <div class="h-full p-4 lg:p-6 glass-card rounded-2xl flex flex-col gap-y-3">
                 
-                <div class="glass-card rounded-2xl p-4">
+                <div class="p-4 rounded-2xl border" style="border-color: var(--faint-border); background: rgba(255,255,255,0.5);">
                     <div class="flex items-center gap-3">
                         <button id="roll-dice-btn" class="w-16 h-16 text-4xl flex items-center justify-center rounded-xl bg-white/80 border border-gray-200/50 shadow-sm transition-all duration-300 hover:scale-110 hover:shadow-lg focus:outline-none">🎲</button>
                         <div class="flex-1 grid grid-cols-2 gap-2">
-                            <div id="dice-1" class="w-16 h-16 bg-white/60 rounded-lg flex items-center justify-center text-4xl text-gray-400 border border-gray-200/50 shadow-inner mx-auto"></div>
-                            <div id="dice-2" class="w-16 h-16 bg-white/60 rounded-lg flex items-center justify-center text-4xl text-gray-400 border border-gray-200/50 shadow-inner mx-auto"></div>
+                            <div id="dice-1" class="w-16 h-16 bg-white/60 rounded-lg flex items-center justify-center text-4xl text-gray-400 border border-gray-200/50 shadow-inner mx-auto">?</div>
+                            <div id="dice-2" class="w-16 h-16 bg-white/60 rounded-lg flex items-center justify-center text-4xl text-gray-400 border border-gray-200/50 shadow-inner mx-auto">?</div>
                         </div>
                     </div>
                     <h3 class="text-xs font-semibold uppercase tracking-wider text-center mt-4 mb-2" style="color: var(--text-secondary);">Alo Superpowers ✨✨</h3>
@@ -97,13 +97,13 @@
                     </div>
                 </div>
 
-                <div class="glass-card rounded-xl p-3">
+                <div class="p-3 rounded-xl border" style="border-color: var(--faint-border); background: rgba(255,255,255,0.5);">
                     <div class="relative w-full h-2 progress-bar-container rounded-full">
                         <div id="progress-bar-fill" class="progress-bar-fill h-full rounded-full"></div>
                     </div>
                 </div>
 
-                <div class="glass-card rounded-2xl p-4">
+                <div class="p-4 rounded-2xl border" style="border-color: var(--faint-border); background: rgba(255,255,255,0.5);">
                     <div class="flex justify-center items-center gap-3">
                         <button class="themed-button secondary text-xs flex-1 py-2">Help</button>
                         <button id="reset-btn" class="themed-button primary text-xs flex-1 py-2 text-white">New Game</button>
@@ -114,7 +114,7 @@
                     </div>
                 </div>
                 
-                <div class="glass-card rounded-2xl p-4 flex-1">
+                <div class="p-4 rounded-2xl border flex-1" style="border-color: var(--faint-border); background: rgba(255,255,255,0.5);">
                     <div class="grid grid-cols-2 gap-4 text-center">
                         <div>
                             <h3 class="text-xs font-semibold uppercase tracking-wider mb-1" style="color: var(--text-secondary);">Total Score</h3>
@@ -310,7 +310,9 @@
                 setTimeout(() => {
                     const piece1 = generateRandomAlo();
                     let piece2 = generateRandomAlo();
-                    while (piece2.quadrant === piece1.quadrant && piece2.symbol === piece1.symbol) {
+
+                    // Corrected logic: only check for the same quadrant
+                    while (piece2.quadrant === piece1.quadrant) {
                         piece2 = generateRandomAlo();
                     }
                     currentRoll = [piece1, piece2];
@@ -331,7 +333,6 @@
                 let scoreBreakdown = { circle: 0, semiCircle: 0, almostCircle: 0, sequence: 0, lineMaster: 0, diamondHeist: 0 };
                 const visited = Array(GRID_SIZE * GRID_SIZE).fill(false);
 
-                // This logic is complex and simplified here for clarity. The full, complex logic is maintained.
                 // Circle, Semi-circle, Almost-circle, Diamond Heist logic
                 for (let r = 0; r < GRID_SIZE - 1; r++) {
                     for (let c = 0; c < GRID_SIZE - 1; c++) {
@@ -345,10 +346,9 @@
                         } else {
                             if (pieces.length === 3) {
                                 const quadrants = new Set(pieces.map(p => p.quadrant));
-                                if (quadrants.has('TL') && quadrants.has('TR') && quadrants.has('BL')) scoreBreakdown.almostCircle += (new Set(pieces.map(p => p.symbol)).size === 1 ? 20 : 15);
-                                else if (quadrants.has('TL') && quadrants.has('TR') && quadrants.has('BR')) scoreBreakdown.almostCircle += (new Set(pieces.map(p => p.symbol)).size === 1 ? 20 : 15);
-                                else if (quadrants.has('TL') && quadrants.has('BL') && quadrants.has('BR')) scoreBreakdown.almostCircle += (new Set(pieces.map(p => p.symbol)).size === 1 ? 20 : 15);
-                                else if (quadrants.has('TR') && quadrants.has('BL') && quadrants.has('BR')) scoreBreakdown.almostCircle += (new Set(pieces.map(p => p.symbol)).size === 1 ? 20 : 15);
+                                if ( (quadrants.has('TL') && quadrants.has('TR') && quadrants.has('BL')) || (quadrants.has('TL') && quadrants.has('TR') && quadrants.has('BR')) || (quadrants.has('TL') && quadrants.has('BL') && quadrants.has('BR')) || (quadrants.has('TR') && quadrants.has('BL') && quadrants.has('BR')) ) {
+                                     scoreBreakdown.almostCircle += (new Set(pieces.map(p => p.symbol)).size === 1 ? 20 : 15);
+                                }
                             }
                             if (pieces.length === 2) {
                                 if (tl?.quadrant === 'TL' && tr?.quadrant === 'TR') scoreBreakdown.semiCircle += (tl.symbol === tr.symbol ? 10 : 5);
