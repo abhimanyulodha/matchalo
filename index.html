@@ -5,10 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MATCHALO</title>
     
+    <!-- Tailwind CSS Framework -->
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- Google Fonts: Quicksand -->
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- CSS STYLES & Theme -->
     <style>
         :root {
             --bg: linear-gradient(135deg, #f5f7fa 0%, #e8e4f1 100%);
@@ -47,7 +50,7 @@
         .themed-button.secondary { background-color: rgba(255,255,255,0.8); color: var(--text); border: 1px solid var(--faint-border); }
         .themed-button.tertiary { background: none; color: var(--text-secondary); }
         .themed-button.accent-light { background: var(--accent-light); color: var(--accent); }
-        .themed-button:hover:not(:disabled) { transform: translateY(-px); box-shadow: var(--shadow-medium); }
+        .themed-button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: var(--shadow-medium); }
         
         .progress-bar-container { background: var(--accent-light); }
         .progress-bar-fill { background: var(--accent-gradient); }
@@ -76,12 +79,14 @@
 <body class="p-2 lg:p-4 flex items-center justify-center min-h-screen">
     <main id="game-container" class="w-full max-w-5xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6 items-center lg:items-stretch">
         
+        <!-- Left Panel: Game Board -->
         <div class="w-full lg:w-2/3">
             <div class="p-4 lg:p-6 h-full glass-card rounded-2xl">
                 <div id="game-board" class="grid grid-cols-8 grid-rows-8 w-full aspect-square bg-white rounded-lg"></div>
             </div>
         </div>
 
+        <!-- Right Panel: Controls & Scoring -->
         <div class="w-full lg:w-1/3">
             <div class="h-full p-4 lg:p-6 glass-card rounded-2xl flex flex-col gap-y-3">
                 
@@ -134,9 +139,9 @@
                     </div>
                     <hr class="border-t my-3">
                     <div class="grid grid-cols-3 gap-y-2 text-center">
-                        <div class="score-item"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Circle</h3><div id="score-circle" class="text-lg font-bold">0</div></div>
-                        <div class="score-item"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Semi Circle</h3><div id="score-semi-circle" class="text-lg font-bold">0</div></div>
-                        <div class="score-item"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Almost Circle</h3><div id="score-almost-circle" class="text-lg font-bold">0</div></div>
+                        <div class="score-item"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Perfect Shape</h3><div id="score-perfect-shape" class="text-lg font-bold">0</div></div>
+                        <div class="score-item"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Half Baked</h3><div id="score-half-baked" class="text-lg font-bold">0</div></div>
+                        <div class="score-item"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Almost There</h3><div id="score-almost-there" class="text-lg font-bold">0</div></div>
                         <div class="score-item"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Sequence</h3><div id="score-sequence" class="text-lg font-bold">0</div></div>
                         <div class="score-item"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Line Master</h3><div id="score-line-master" class="text-lg font-bold">0</div></div>
                         <div class="score-item"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Diamond Heist</h3><div id="score-diamond-heist" class="text-lg font-bold text-red-600">0</div></div>
@@ -146,11 +151,13 @@
         </div>
     </main>
 
+    <!-- Modals -->
     <div id="game-over-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden"><div class="modal-content w-full max-w-sm glass-card rounded-2xl p-8 text-center relative"><button id="close-modal-btn" class="absolute top-4 right-4 w-8 h-8 rounded-full text-xl flex items-center justify-center font-bold text-gray-500 hover:bg-gray-200/50">×</button><h2 class="text-2xl font-bold mb-4" style="color: var(--accent);">Game Over</h2><p class="mb-6" style="color: var(--text-secondary);">You can no longer make a move.</p><p class="text-sm" style="color: var(--text-secondary);">Final Score</p><div id="final-score" class="text-6xl font-bold my-2" style="color: var(--accent);">0</div><button id="restart-modal-btn" class="themed-button primary w-full py-2.5 px-4 text-white text-sm mt-4">Play Again</button></div></div>
     <div id="exchange-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden"><div class="modal-content w-full max-w-md glass-card rounded-2xl p-6 text-center relative"><button id="close-exchange-modal-btn" class="absolute top-2 right-2 w-8 h-8 rounded-full text-xl flex items-center justify-center font-bold text-gray-500 hover:bg-gray-200/50">×</button><h2 class="text-xl font-bold mb-4" style="color: var(--accent);">Exchange Alo</h2><div id="exchange-options" class="grid grid-cols-4 gap-2"></div></div></div>
     <div id="help-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden"><div class="modal-content w-full max-w-lg glass-card rounded-2xl p-6 relative"><div class="flex justify-between items-start mb-4"><div class="flex-grow"><h2 class="text-3xl font-bold" style="color: var(--accent);">How to Play Matchalo</h2><p class="text-sm mt-2 font-bold" style="color: var(--text-secondary);">A fun and simple block based artwork game from Abhimanyu Lodha</p></div><button id="close-help-modal-btn" class="w-10 h-10 rounded-full text-xl flex items-center justify-center font-bold flex-shrink-0">×</button></div><div id="help-modal-content" class="space-y-4 text-sm max-h-[60vh] overflow-y-auto pr-2" style="color: var(--text-secondary)"></div></div></div>
     <div id="edition-select-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden"><div class="modal-content w-full max-w-sm glass-card rounded-2xl p-6 relative"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold" style="color: var(--accent);">Select Edition</h2><button id="close-edition-select-modal-btn" class="w-10 h-10 rounded-full text-xl flex items-center justify-center font-bold">×</button></div><div id="edition-options" class="flex flex-col gap-3 max-h-64 overflow-y-auto"></div></div></div>
     
+    <!-- JAVASCRIPT LOGIC -->
     <script>
         const gameManager = {
             currentGame: null,
@@ -169,9 +176,6 @@
             switchEdition(editionId) {
                 this.activeEditionId = editionId;
                 const config = this.editionConfigs[editionId];
-                if (this.currentGame) {
-                    // Clean up old game listeners if any
-                }
                 this.currentGame = new Game(config);
                 document.getElementById('select-edition-btn').textContent = `Edition: ${config.name}`;
             },
@@ -187,25 +191,17 @@
                     button.addEventListener('click', () => {
                         this.switchEdition(config.id);
                         document.getElementById('edition-select-modal').classList.add('hidden');
-                        this.populateEditionModal(); // Re-populate to update selected style
+                        this.populateEditionModal();
                     });
                     container.appendChild(button);
                 });
             },
             
             attachGlobalListeners() {
-                document.getElementById('help-btn').addEventListener('click', () => {
-                    document.getElementById('help-modal').classList.remove('hidden');
-                });
-                document.getElementById('close-help-modal-btn').addEventListener('click', () => {
-                    document.getElementById('help-modal').classList.add('hidden');
-                });
-                document.getElementById('select-edition-btn').addEventListener('click', () => {
-                    document.getElementById('edition-select-modal').classList.remove('hidden');
-                });
-                document.getElementById('close-edition-select-modal-btn').addEventListener('click', () => {
-                    document.getElementById('edition-select-modal').classList.add('hidden');
-                });
+                document.getElementById('help-btn').addEventListener('click', () => document.getElementById('help-modal').classList.remove('hidden'));
+                document.getElementById('close-help-modal-btn').addEventListener('click', () => document.getElementById('help-modal').classList.add('hidden'));
+                document.getElementById('select-edition-btn').addEventListener('click', () => document.getElementById('edition-select-modal').classList.remove('hidden'));
+                document.getElementById('close-edition-select-modal-btn').addEventListener('click', () => document.getElementById('edition-select-modal').classList.add('hidden'));
             }
         };
 
@@ -221,7 +217,6 @@
             }
 
             getDOMElements() {
-                // Returns an object of all required DOM elements
                 return {
                     gameBoard: document.getElementById('game-board'),
                     rollDiceBtn: document.getElementById('roll-dice-btn'),
@@ -231,9 +226,9 @@
                     progressBarFill: document.getElementById('progress-bar-fill'),
                     totalScore: document.getElementById('total-score'),
                     highScore: document.getElementById('high-score'),
-                    scoreCircle: document.getElementById('score-circle'),
-                    scoreSemiCircle: document.getElementById('score-semi-circle'),
-                    scoreAlmostCircle: document.getElementById('score-almost-circle'),
+                    scorePerfectShape: document.getElementById('score-perfect-shape'),
+                    scoreHalfBaked: document.getElementById('score-half-baked'),
+                    scoreAlmostThere: document.getElementById('score-almost-there'),
                     scoreSequence: document.getElementById('score-sequence'),
                     scoreLineMaster: document.getElementById('score-line-master'),
                     scoreDiamondHeist: document.getElementById('score-diamond-heist'),
@@ -286,12 +281,12 @@
                 this.DOMElements.gameOverModal.classList.add('hidden');
                 this.DOMElements.rollDiceBtn.disabled = false;
                 
-                // Clear old listeners before adding new ones
+                // Event listener setup
                 const oldResetBtn = this.DOMElements.resetBtn;
                 const newResetBtn = oldResetBtn.cloneNode(true);
                 oldResetBtn.parentNode.replaceChild(newResetBtn, oldResetBtn);
                 this.DOMElements.resetBtn = newResetBtn;
-
+                
                 this.DOMElements.rollDiceBtn.onclick = () => this.handleRollDice();
                 this.DOMElements.resetBtn.onclick = () => gameManager.switchEdition(gameManager.activeEditionId);
                 this.DOMElements.restartModalBtn.onclick = () => gameManager.switchEdition(gameManager.activeEditionId);
@@ -300,35 +295,35 @@
                 this.DOMElements.swapBtn.onclick = () => this.activateSuperpower(this.SUPERPOWERS.SWAP);
                 this.DOMElements.exchangeBtn.onclick = () => this.activateSuperpower(this.SUPERPOWERS.EXCHANGE);
                 this.DOMElements.moveBtn.onclick = () => this.activateSuperpower(this.SUPERPOWERS.MOVE);
-                this.DOMElements.closeExchangeModalBtn.onclick = () => this.DOMElements.exchangeModal.classList.add('hidden');
+                if(this.DOMElements.closeExchangeModalBtn) this.DOMElements.closeExchangeModalBtn.onclick = () => this.DOMElements.exchangeModal.classList.add('hidden');
             }
             
             populateHelpModal() {
                 this.DOMElements.helpModalContent.innerHTML = `
                     <h3 class="font-bold text-lg" style="color: var(--accent);">🎯 The Goal</h3>
-                    <p>Fill the 8x8 grid by placing pairs of 'Alos' (quadrant pieces). Score points by forming circular patterns and sequences.</p>
+                    <p>Fill the 8x8 grid by placing pairs of 'Alos' (quadrant pieces). Score points by forming valuable patterns and sequences.</p>
                     
                     <h3 class="font-bold text-lg mt-4" style="color: var(--accent);">🕹️ How to Play</h3>
                     <ol class="list-decimal list-inside space-y-1">
-                        <li><b>Roll the Dice:</b> Click the '🎲' icon to get two random Alos for your turn.</li>
-                        <li><b>Place Your Pair:</b> Place the first Alo in any empty square. Place the second Alo in any empty square that is horizontally or vertically adjacent to the first.</li>
+                        <li><b>Roll the Dice:</b> Click the '🎲' icon to get two random Alos.</li>
+                        <li><b>Place Your Pair:</b> Place the first Alo on any empty square. Place the second in an empty square directly next to it (not diagonally).</li>
                         <li><b>Mistake?</b> Before placing the second Alo, you can double-click the first one to pick it up and move it.</li>
                     </ol>
 
                     <h3 class="font-bold text-lg mt-4" style="color: var(--accent);">✨ Superpowers</h3>
-                    <p>You can use any **two different** superpowers once per game. They are only active between turns.</p>
+                    <p>You can use any **two different** superpowers once per game, only between turns.</p>
                     <ul class="list-disc list-inside space-y-1">
                         <li><b>Rotate:</b> Click an Alo on the board to rotate it 90° clockwise.</li>
                         <li><b>Swap:</b> Click two adjacent Alos on the board to swap their positions.</li>
-                        <li><b>Exchange:</b> Click an Alo on the board, then choose a new Alo from any of the game's symbols to replace it.</li>
+                        <li><b>Exchange:</b> Click an Alo, then choose a new one from a selection to replace it.</li>
                         <li><b>Move:</b> Click an Alo, then click any empty square to move it there.</li>
                     </ul>
 
                     <h3 class="font-bold text-lg mt-4" style="color: var(--accent);">📈 Scoring</h3>
                     <ul class="list-disc list-inside space-y-1">
-                        <li><b>Full Circle (4 pcs):</b> 40 pts (same color), 20 pts (different colors)</li>
-                        <li><b>Almost Circle (3 pcs):</b> 20 pts (same color), 15 pts (different colors)</li>
-                        <li><b>Semi Circle (2 pcs):</b> 10 pts (same color), 5 pts (different colors)</li>
+                        <li><b>Perfect Shape (4 pcs):</b> 40 pts (same color), 20 pts (different colors)</li>
+                        <li><b>Almost There (3 pcs):</b> 20 pts (same color), 15 pts (different colors)</li>
+                        <li><b>Half Baked (2 pcs):</b> 10 pts (same color), 5 pts (different colors)</li>
                         <li><b>Sequence:</b> 1 pt for each Alo in a group of 2 or more same-colored, touching Alos.</li>
                         <li><b>Line Master:</b> 10 pts for a full row or column of the same color.</li>
                         <li><b>Diamond Heist (Penalty):</b> -10 pts for creating a diamond-shaped empty space with four Alos.</li>
@@ -338,10 +333,7 @@
 
             onCellClick(row, col) {
                 const now = new Date().getTime();
-                if (now - this.lastClick.time < 300 && this.lastClick.row === row && this.lastClick.col === col) {
-                    this.handleDoubleClick(row, col);
-                    this.lastClick = { time: 0, row: -1, col: -1 }; return;
-                }
+                if (now - this.lastClick.time < 300 && this.lastClick.row === row && this.lastClick.col === col) { this.handleDoubleClick(row, col); this.lastClick = { time: 0, row: -1, col: -1 }; return; }
                 this.lastClick = { time: now, row, col };
                 if (this.activeSuperpower) this.handleSuperpowerClick(row, col);
                 else this.handlePlacementClick(row, col);
@@ -402,7 +394,6 @@
                 }, 600);
             }
 
-            // --- Superpower Logic ---
             activateSuperpower(powerName) { if (this.placementState !== 'AWAITING_ROLL' || this.usedSuperpowers.size >= 2 || this.usedSuperpowers.has(powerName)) return; if (this.activeSuperpower === powerName) this.cancelSuperpower(); else { this.activeSuperpower = powerName; this.superpowerState = {}; this.updateSuperpowerUI(); } }
             cancelSuperpower() { this.activeSuperpower = null; this.superpowerState = {}; document.querySelectorAll('.pulsing-cell').forEach(c => c.classList.remove('pulsing-cell')); this.updateSuperpowerUI(); }
             consumeSuperpower(powerName) { this.usedSuperpowers.add(powerName); this.cancelSuperpower(); this.calculateTotalScore(); this.updateSuperpowerUI(); }
@@ -414,36 +405,123 @@
                     case this.SUPERPOWERS.ROTATE: if (!piece) return; const order = ['TL', 'TR', 'BR', 'BL']; piece.quadrant = order[(order.indexOf(piece.quadrant) + 1) % 4]; this.renderCell(row, col); this.consumeSuperpower(this.SUPERPOWERS.ROTATE); break;
                     case this.SUPERPOWERS.MOVE: if (!this.superpowerState.source) { if (!piece) return; this.superpowerState.source = { row, col }; this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`).classList.add('pulsing-cell'); } else { if (piece) return; const srcIdx = this.superpowerState.source.row * this.GRID_SIZE + this.superpowerState.source.col; this.gridState[index] = this.gridState[srcIdx]; this.gridState[srcIdx] = null; this.renderCell(this.superpowerState.source.row, this.superpowerState.source.col); this.renderCell(row, col); this.consumeSuperpower(this.SUPERPOWERS.MOVE); } break;
                     case this.SUPERPOWERS.SWAP: if (!this.superpowerState.source) { if (!piece) return; this.superpowerState.source = { row, col }; this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`).classList.add('pulsing-cell'); } else { if (!piece || Math.abs(this.superpowerState.source.row - row) + Math.abs(this.superpowerState.source.col - col) !== 1) return; const srcIdx = this.superpowerState.source.row * this.GRID_SIZE + this.superpowerState.source.col; const temp = this.gridState[srcIdx]; this.gridState[srcIdx] = this.gridState[index]; this.gridState[index] = temp; this.renderCell(this.superpowerState.source.row, this.superpowerState.source.col); this.renderCell(row, col); this.consumeSuperpower(this.SUPERPOWERS.SWAP); } break;
-                    case this.SUPERPOWERS.EXCHANGE: if (!piece) return; this.superpowerState.source = { row, col }; this.DOMElements.exchangeOptions.innerHTML = ''; const allAlos = this.SYMBOLS.flatMap(s => this.QUADRANTS.map(q => ({ symbol: s, quadrant: q }))); allAlos.forEach(alo => { const option = document.createElement('div'); option.className = 'w-16 h-16 bg-white/50 rounded-lg p-1 cursor-pointer hover:bg-white/90'; const img = document.createElement('img'); img.src = `${this.IMAGE_PATH}${alo.symbol}_${alo.quadrant}.svg`; option.appendChild(img); if (alo.symbol === piece.symbol && alo.quadrant === piece.quadrant) { option.classList.add('opacity-30', 'cursor-not-allowed'); } else { option.onclick = () => { this.gridState[this.superpowerState.source.row * this.GRID_SIZE + this.superpowerState.source.col] = alo; this.renderCell(this.superpowerState.source.row, this.superpowerState.source.col); this.DOMElements.exchangeModal.classList.add('hidden'); this.consumeSuperpower(this.SUPERPOWERS.EXCHANGE); }; } this.DOMElements.exchangeOptions.appendChild(option); }); this.DOMElements.exchangeModal.classList.remove('hidden'); break;
+                    case this.SUPERPOWERS.EXCHANGE: if (!piece) return; this.superpowerState.source = { row, col }; this.DOMElements.exchangeOptions.innerHTML = ''; const allAlos = this.SYMBOLS.flatMap(s => this.QUADRANTS.map(q => ({ symbol: s, quadrant: q }))); allAlos.forEach(alo => { const option = document.createElement('div'); option.className = 'w-16 h-16 bg-white/50 rounded-lg p-1 cursor-pointer hover:bg-white/90'; const img = document.createElement('img'); img.src = `${this.IMAGE_PATH}${alo.symbol.toLowerCase()}_${alo.quadrant}.svg`; option.appendChild(img); if (alo.symbol === piece.symbol && alo.quadrant === piece.quadrant) { option.classList.add('opacity-30', 'cursor-not-allowed'); } else { option.onclick = () => { this.gridState[this.superpowerState.source.row * this.GRID_SIZE + this.superpowerState.source.col] = alo; this.renderCell(this.superpowerState.source.row, this.superpowerState.source.col); this.DOMElements.exchangeModal.classList.add('hidden'); this.consumeSuperpower(this.SUPERPOWERS.EXCHANGE); }; } this.DOMElements.exchangeOptions.appendChild(option); }); this.DOMElements.exchangeModal.classList.remove('hidden'); break;
                 }
             }
 
-            calculateTotalScore() { /* ... full scoring logic from previous turn ... */ }
-            // --- UI & Utility Functions ---
-            updateScoreUI(breakdown) { /* ... */ }
-            updateSuperpowerUI() { /* ... */ }
-            placePiece(row, col, rollIndex) { /* ... */ }
-            renderCell(row, col) { /* ... */ }
-            generateRandomAlo() { /* ... */ }
-            isGameOver() { /* ... */ }
-            showGameOver() { /* ... */ }
-            updateProgressBar() { /* ... */ }
-            updateDiceDisplay() { /* ... */ }
+            calculateTotalScore() {
+                let scoreBreakdown = { perfectShape: 0, halfBaked: 0, almostThere: 0, sequence: 0, lineMaster: 0, diamondHeist: 0 };
+                const scoredPieces = new Set();
+
+                // Pass 1: Perfect Shapes
+                for (let r = 0; r < this.GRID_SIZE - 1; r++) { for (let c = 0; c < this.GRID_SIZE - 1; c++) {
+                    const indices = [r*this.GRID_SIZE+c, r*this.GRID_SIZE+c+1, (r+1)*this.GRID_SIZE+c, (r+1)*this.GRID_SIZE+c+1];
+                    if (indices.some(i => scoredPieces.has(i))) continue;
+                    const tl = this.gridState[indices[0]], tr = this.gridState[indices[1]], bl = this.gridState[indices[2]], br = this.gridState[indices[3]];
+                    if (tl?.quadrant === 'TL' && tr?.quadrant === 'TR' && bl?.quadrant === 'BL' && br?.quadrant === 'BR') {
+                        const symbols = [tl.symbol, tr.symbol, bl.symbol, br.symbol];
+                        scoreBreakdown.perfectShape += (new Set(symbols).size === 1) ? 40 : 20;
+                        indices.forEach(i => scoredPieces.add(i));
+                    }
+                }}
+
+                // Pass 2: Almost There
+                for (let r = 0; r < this.GRID_SIZE - 1; r++) { for (let c = 0; c < this.GRID_SIZE - 1; c++) {
+                    const indices = [r*this.GRID_SIZE+c, r*this.GRID_SIZE+c+1, (r+1)*this.GRID_SIZE+c, (r+1)*this.GRID_SIZE+c+1];
+                    const availableIndices = indices.filter(i => !scoredPieces.has(i));
+                    const availablePieces = availableIndices.map(i => this.gridState[i]).filter(Boolean);
+                    if (availablePieces.length !== 3) continue;
+
+                    const quadrants = new Set(availablePieces.map(p => p.quadrant));
+                    if (quadrants.size === 3) {
+                        const isAlmostThere = (quadrants.has('TL') && quadrants.has('TR') && quadrants.has('BL')) || (quadrants.has('TL') && quadrants.has('TR') && quadrants.has('BR')) || (quadrants.has('TL') && quadrants.has('BL') && quadrants.has('BR')) || (quadrants.has('TR') && quadrants.has('BL') && quadrants.has('BR'));
+                        if (isAlmostThere) {
+                            scoreBreakdown.almostThere += (new Set(availablePieces.map(p => p.symbol)).size === 1) ? 20 : 15;
+                            availableIndices.forEach(i => scoredPieces.add(i));
+                        }
+                    }
+                }}
+
+                // Pass 3: Half Baked
+                for (let r = 0; r < this.GRID_SIZE; r++) { for (let c = 0; c < this.GRID_SIZE; c++) {
+                    const p1_idx = r * this.GRID_SIZE + c;
+                    if (!this.gridState[p1_idx] || scoredPieces.has(p1_idx)) continue;
+                    
+                    const p2_idx_h = r * this.GRID_SIZE + c + 1;
+                    if (c < this.GRID_SIZE - 1 && this.gridState[p2_idx_h] && !scoredPieces.has(p2_idx_h)) {
+                        const q1 = this.gridState[p1_idx].quadrant, q2 = this.gridState[p2_idx_h].quadrant;
+                        if ((q1 === 'TL' && q2 === 'TR') || (q1 === 'TR' && q2 === 'TL') || (q1 === 'BL' && q2 === 'BR') || (q1 === 'BR' && q2 === 'BL')) {
+                            scoreBreakdown.halfBaked += (this.gridState[p1_idx].symbol === this.gridState[p2_idx_h].symbol) ? 10 : 5;
+                            scoredPieces.add(p1_idx); scoredPieces.add(p2_idx_h); continue;
+                        }
+                    }
+                    
+                    const p2_idx_v = (r + 1) * this.GRID_SIZE + c;
+                    if (r < this.GRID_SIZE - 1 && this.gridState[p2_idx_v] && !scoredPieces.has(p2_idx_v)) {
+                        const q1 = this.gridState[p1_idx].quadrant, q2 = this.gridState[p2_idx_v].quadrant;
+                        if ((q1 === 'TL' && q2 === 'BL') || (q1 === 'BL' && q2 === 'TL') || (q1 === 'TR' && q2 === 'BR') || (q1 === 'BR' && q2 === 'TR')) {
+                            scoreBreakdown.halfBaked += (this.gridState[p1_idx].symbol === this.gridState[p2_idx_v].symbol) ? 10 : 5;
+                            scoredPieces.add(p1_idx); scoredPieces.add(p2_idx_v);
+                        }
+                    }
+                }}
+
+                // Pass 4: Diamond Heist
+                for (let r = 0; r < this.GRID_SIZE - 1; r++) { for (let c = 0; c < this.GRID_SIZE - 1; c++) {
+                    const tl = this.gridState[r*this.GRID_SIZE+c], tr = this.gridState[r*this.GRID_SIZE+c+1], bl = this.gridState[(r+1)*this.GRID_SIZE+c], br = this.gridState[(r+1)*this.GRID_SIZE+c+1];
+                    if (tl?.quadrant === 'BR' && tr?.quadrant === 'BL' && bl?.quadrant === 'TR' && br?.quadrant === 'TL') { scoreBreakdown.diamondHeist -= 10; }
+                }}
+
+                // Sequence and Line Master (independent)
+                const visited = Array(this.GRID_SIZE * this.GRID_SIZE).fill(false); for (let i = 0; i < this.GRID_SIZE * this.GRID_SIZE; i++) { if (this.gridState[i] && !visited[i]) { const blob = [], queue = [i]; visited[i] = true; const symbol = this.gridState[i].symbol; while (queue.length > 0) { const currentIdx = queue.shift(); blob.push(currentIdx); const r = Math.floor(currentIdx / this.GRID_SIZE), c = currentIdx % this.GRID_SIZE; [[r-1,c], [r+1,c], [r,c-1], [r,c+1]].forEach(([nr, nc]) => { const neighborIdx = nr * this.GRID_SIZE + nc; if (nr >= 0 && nr < this.GRID_SIZE && nc >= 0 && nc < this.GRID_SIZE && this.gridState[neighborIdx]?.symbol === symbol && !visited[neighborIdx]) { visited[neighborIdx] = true; queue.push(neighborIdx); } }); } if (blob.length > 1) scoreBreakdown.sequence += blob.length; } }
+                for (let r = 0; r < this.GRID_SIZE; r++) { const firstPiece = this.gridState[r * this.GRID_SIZE]; if (firstPiece && this.gridState.slice(r * this.GRID_SIZE, (r + 1) * this.GRID_SIZE).every(p => p?.symbol === firstPiece.symbol)) scoreBreakdown.lineMaster += 10; }
+                for (let c = 0; c < this.GRID_SIZE; c++) { const firstPiece = this.gridState[c]; if (firstPiece) { let isLineMaster = true; for (let r = 1; r < this.GRID_SIZE; r++) { if (this.gridState[r * this.GRID_SIZE + c]?.symbol !== firstPiece.symbol) { isLineMaster = false; break; } } if (isLineMaster) scoreBreakdown.lineMaster += 10; } }
+
+                this.score = Object.values(scoreBreakdown).reduce((a, b) => a + b, 0);
+                this.updateScoreUI(scoreBreakdown);
+            }
+
+            updateScoreUI(breakdown) {
+                this.DOMElements.totalScore.textContent = this.score;
+                this.DOMElements.scorePerfectShape.textContent = breakdown.perfectShape;
+                this.DOMElements.scoreHalfBaked.textContent = breakdown.halfBaked;
+                this.DOMElements.scoreAlmostThere.textContent = breakdown.almostThere;
+                this.DOMElements.scoreSequence.textContent = breakdown.sequence;
+                this.DOMElements.scoreLineMaster.textContent = breakdown.lineMaster;
+                this.DOMElements.scoreDiamondHeist.textContent = breakdown.diamondHeist;
+                if (this.score > this.highScore) {
+                    this.highScore = this.score;
+                    localStorage.setItem(`matchaloHighScore_${this.config.id}`, this.highScore);
+                }
+                this.DOMElements.highScore.textContent = this.highScore;
+            }
+
+            updateSuperpowerUI() {
+                const canUsePower = this.placementState === 'AWAITING_ROLL' && this.usedSuperpowers.size < 2;
+                [this.DOMElements.rotateBtn, this.DOMElements.swapBtn, this.DOMElements.exchangeBtn, this.DOMElements.moveBtn].forEach(btn => {
+                    const powerName = btn.id.replace('-btn', '');
+                    const isUsed = this.usedSuperpowers.has(powerName);
+                    btn.disabled = !canUsePower || isUsed;
+                    btn.classList.toggle('opacity-50', !canUsePower || isUsed);
+                    btn.querySelector('.superpower-used-overlay').classList.toggle('hidden', !isUsed);
+                    btn.classList.toggle('superpower-btn--active', this.activeSuperpower === powerName);
+                });
+                this.DOMElements.spCharge1.classList.toggle('opacity-30', this.usedSuperpowers.size >= 1);
+                this.DOMElements.spCharge2.classList.toggle('opacity-30', this.usedSuperpowers.size >= 2);
+            }
+
+            placePiece(row, col, rollIndex) { this.gridState[row * this.GRID_SIZE + col] = this.currentRoll[rollIndex]; this.renderCell(row, col); }
+            renderCell(row, col) { const index = row * this.GRID_SIZE + col, cell = this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`), piece = this.gridState[index]; cell.innerHTML = ''; if (piece) { cell.classList.remove('empty'); const img = document.createElement('img'); img.src = `${this.IMAGE_PATH}${piece.symbol.toLowerCase()}_${piece.quadrant}.svg`; cell.appendChild(img); } else { cell.classList.add('empty'); } }
+            generateRandomAlo() { const symbol = this.SYMBOLS[Math.floor(Math.random() * this.SYMBOLS.length)], quadrant = this.QUADRANTS[Math.floor(Math.random() * this.QUADRANTS.length)]; return { symbol, quadrant }; }
+            isGameOver() { if (!this.gridState.includes(null)) return true; for (let r = 0; r < this.GRID_SIZE; r++) { for (let c = 0; c < this.GRID_SIZE; c++) { if (!this.gridState[r * this.GRID_SIZE + c]) { if ((c < this.GRID_SIZE - 1 && !this.gridState[r * this.GRID_SIZE + c + 1]) || (r < this.GRID_SIZE - 1 && !this.gridState[(r + 1) * this.GRID_SIZE + c])) return false; } } } return true; }
+            showGameOver() { this.DOMElements.finalScore.textContent = this.score; this.DOMElements.gameOverModal.classList.remove('hidden'); this.DOMElements.rollDiceBtn.disabled = true; this.DOMElements.gameBoard.querySelectorAll('.grid-cell.empty').forEach(cell => cell.classList.remove('empty')); }
+            updateProgressBar() { const filled = this.gridState.filter(c => c !== null).length; this.DOMElements.progressBarFill.style.width = `${(filled / (this.GRID_SIZE * this.GRID_SIZE)) * 100}%`; }
+            updateDiceDisplay() { [this.DOMElements.dice1El, this.DOMElements.dice2El].forEach((el, i) => { el.innerHTML = ''; if (this.currentRoll[i]) { const piece = this.currentRoll[i], img = document.createElement('img'); img.src = `${this.IMAGE_PATH}${piece.symbol.toLowerCase()}_${piece.quadrant}.svg`; el.appendChild(img); } else { el.textContent = '?'; } }); }
         }
 
-        // --- Simplified function stubs for brevity. The full logic is included below. ---
-        Game.prototype.calculateTotalScore = function() { let scoreBreakdown = { circle: 0, semiCircle: 0, almostCircle: 0, sequence: 0, lineMaster: 0, diamondHeist: 0 }; const scoredPieces = new Set(); for (let r = 0; r < this.GRID_SIZE - 1; r++) { for (let c = 0; c < this.GRID_SIZE - 1; c++) { const indices = [r*this.GRID_SIZE+c, r*this.GRID_SIZE+c+1, (r+1)*this.GRID_SIZE+c, (r+1)*this.GRID_SIZE+c+1]; if (indices.some(i => scoredPieces.has(i))) continue; const pieces = indices.map(i => this.gridState[i]); if (pieces.some(p => !p)) continue; const quadrants = new Set(pieces.map(p => p.quadrant)); if (quadrants.size === 4 && quadrants.has('TL') && quadrants.has('TR') && quadrants.has('BL') && quadrants.has('BR')) { const symbols = pieces.map(p => p.symbol); scoreBreakdown.circle += (new Set(symbols).size === 1) ? 40 : 20; indices.forEach(i => scoredPieces.add(i)); } } } for (let r = 0; r < this.GRID_SIZE - 1; r++) { for (let c = 0; c < this.GRID_SIZE - 1; c++) { const indices = [r*this.GRID_SIZE+c, r*this.GRID_SIZE+c+1, (r+1)*this.GRID_SIZE+c, (r+1)*this.GRID_SIZE+c+1]; const availablePieces = indices.map(i => this.gridState[i]).filter((p, idx) => p && !scoredPieces.has(indices[idx])); const availableIndices = indices.filter((i, idx) => this.gridState[i] && !scoredPieces.has(i)); if (availablePieces.length === 3) { const quadrants = new Set(availablePieces.map(p => p.quadrant)); const validSets = [ new Set(['TL', 'TR', 'BL']), new Set(['TL', 'TR', 'BR']), new Set(['TL', 'BL', 'BR']), new Set(['TR', 'BL', 'BR']) ]; for (const validSet of validSets) { if (quadrants.size === 3 && [...validSet].every(q => quadrants.has(q))) { const symbols = availablePieces.map(p => p.symbol); scoreBreakdown.almostCircle += (new Set(symbols).size === 1) ? 20 : 15; availableIndices.forEach(i => scoredPieces.add(i)); break; } } } } } for (let r = 0; r < this.GRID_SIZE; r++) { for (let c = 0; c < this.GRID_SIZE; c++) { const p1_idx = r * this.GRID_SIZE + c; const p1 = this.gridState[p1_idx]; if (!p1 || scoredPieces.has(p1_idx)) continue; if (c < this.GRID_SIZE - 1) { const p2_idx = r * this.GRID_SIZE + c + 1; const p2 = this.gridState[p2_idx]; if (p2 && !scoredPieces.has(p2_idx)) { const q1 = p1.quadrant, q2 = p2.quadrant; if ((q1 === 'TL' && q2 === 'TR') || (q1 === 'TR' && q2 === 'TL') || (q1 === 'BL' && q2 === 'BR') || (q1 === 'BR' && q2 === 'BL')) { scoreBreakdown.semiCircle += (p1.symbol === p2.symbol) ? 10 : 5; scoredPieces.add(p1_idx); scoredPieces.add(p2_idx); continue; } } } if (r < this.GRID_SIZE - 1) { const p2_idx = (r + 1) * this.GRID_SIZE + c; const p2 = this.gridState[p2_idx]; if (p2 && !scoredPieces.has(p2_idx)) { const q1 = p1.quadrant, q2 = p2.quadrant; if ((q1 === 'TL' && q2 === 'BL') || (q1 === 'BL' && q2 === 'TL') || (q1 === 'TR' && q2 === 'BR') || (q1 === 'BR' && q2 === 'TR')) { scoreBreakdown.semiCircle += (p1.symbol === p2.symbol) ? 10 : 5; scoredPieces.add(p1_idx); scoredPieces.add(p2_idx); } } } } } for (let r = 0; r < this.GRID_SIZE - 1; r++) { for (let c = 0; c < this.GRID_SIZE - 1; c++) { const tl = this.gridState[r*this.GRID_SIZE+c], tr = this.gridState[r*this.GRID_SIZE+c+1], bl = this.gridState[(r+1)*this.GRID_SIZE+c], br = this.gridState[(r+1)*this.GRID_SIZE+c+1]; if (tl && tr && bl && br) { if (tl.quadrant === 'BR' && tr.quadrant === 'BL' && bl.quadrant === 'TR' && br.quadrant === 'TL') { scoreBreakdown.diamondHeist -= 10; } } } } const visited = Array(this.GRID_SIZE * this.GRID_SIZE).fill(false); for (let i = 0; i < this.GRID_SIZE * this.GRID_SIZE; i++) { if (this.gridState[i] && !visited[i]) { const blob = []; const queue = [i]; visited[i] = true; const symbol = this.gridState[i].symbol; while (queue.length > 0) { const currentIdx = queue.shift(); blob.push(currentIdx); const r = Math.floor(currentIdx / this.GRID_SIZE), c = currentIdx % this.GRID_SIZE; [[r-1,c], [r+1,c], [r,c-1], [r,c+1]].forEach(([nr, nc]) => { const neighborIdx = nr * this.GRID_SIZE + nc; if (nr >= 0 && nr < this.GRID_SIZE && nc >= 0 && nc < this.GRID_SIZE && this.gridState[neighborIdx]?.symbol === symbol && !visited[neighborIdx]) { visited[neighborIdx] = true; queue.push(neighborIdx); } }); } if (blob.length > 1) scoreBreakdown.sequence += blob.length; } } for (let r = 0; r < this.GRID_SIZE; r++) { const firstPiece = this.gridState[r * this.GRID_SIZE]; if (firstPiece && this.gridState.slice(r * this.GRID_SIZE, (r + 1) * this.GRID_SIZE).every(p => p?.symbol === firstPiece.symbol)) scoreBreakdown.lineMaster += 10; } for (let c = 0; c < this.GRID_SIZE; c++) { const firstPiece = this.gridState[c]; if (firstPiece) { let isLineMaster = true; for (let r = 1; r < this.GRID_SIZE; r++) { if (this.gridState[r * this.GRID_SIZE + c]?.symbol !== firstPiece.symbol) { isLineMaster = false; break; } } if (isLineMaster) scoreBreakdown.lineMaster += 10; } } this.score = Object.values(scoreBreakdown).reduce((a, b) => a + b, 0); this.updateScoreUI(scoreBreakdown); };
-        Game.prototype.updateScoreUI = function(breakdown) { this.DOMElements.totalScore.textContent = this.score; this.DOMElements.scoreCircle.textContent = breakdown.circle; this.DOMElements.scoreSemiCircle.textContent = breakdown.semiCircle; this.DOMElements.scoreAlmostCircle.textContent = breakdown.almostCircle; this.DOMElements.scoreSequence.textContent = breakdown.sequence; this.DOMElements.scoreLineMaster.textContent = breakdown.lineMaster; this.DOMElements.scoreDiamondHeist.textContent = breakdown.diamondHeist; if (this.score > this.highScore) { this.highScore = this.score; localStorage.setItem(`matchaloHighScore_${this.config.id}`, this.highScore); } this.DOMElements.highScore.textContent = this.highScore; };
-        Game.prototype.updateSuperpowerUI = function() { const canUsePower = this.placementState === 'AWAITING_ROLL' && this.usedSuperpowers.size < 2; [this.DOMElements.rotateBtn, this.DOMElements.swapBtn, this.DOMElements.exchangeBtn, this.DOMElements.moveBtn].forEach(btn => { const powerName = btn.id.replace('-btn', ''); const isUsed = this.usedSuperpowers.has(powerName); btn.disabled = !canUsePower || isUsed; btn.classList.toggle('opacity-50', !canUsePower || isUsed); btn.querySelector('.superpower-used-overlay').classList.toggle('hidden', !isUsed); btn.classList.toggle('superpower-btn--active', this.activeSuperpower === powerName); }); this.DOMElements.spCharge1.classList.toggle('opacity-30', this.usedSuperpowers.size >= 1); this.DOMElements.spCharge2.classList.toggle('opacity-30', this.usedSuperpowers.size >= 2); };
-        Game.prototype.placePiece = function(row, col, rollIndex) { this.gridState[row * this.GRID_SIZE + col] = this.currentRoll[rollIndex]; this.renderCell(row, col); };
-        Game.prototype.renderCell = function(row, col) { const index = row * this.GRID_SIZE + col, cell = this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`), piece = this.gridState[index]; cell.innerHTML = ''; if (piece) { cell.classList.remove('empty'); const img = document.createElement('img'); img.src = `${this.IMAGE_PATH}${piece.symbol}_${piece.quadrant}.svg`; cell.appendChild(img); } else { cell.classList.add('empty'); } };
-        Game.prototype.generateRandomAlo = function() { const symbol = this.SYMBOLS[Math.floor(Math.random() * this.SYMBOLS.length)], quadrant = this.QUADRANTS[Math.floor(Math.random() * this.QUADRANTS.length)]; return { symbol, quadrant }; };
-        Game.prototype.isGameOver = function() { if (!this.gridState.includes(null)) return true; for (let r = 0; r < this.GRID_SIZE; r++) { for (let c = 0; c < this.GRID_SIZE; c++) { if (!this.gridState[r * this.GRID_SIZE + c]) { if ((c < this.GRID_SIZE - 1 && !this.gridState[r * this.GRID_SIZE + c + 1]) || (r < this.GRID_SIZE - 1 && !this.gridState[(r + 1) * this.GRID_SIZE + c])) return false; } } } return true; };
-        Game.prototype.showGameOver = function() { this.DOMElements.finalScore.textContent = this.score; this.DOMElements.gameOverModal.classList.remove('hidden'); this.DOMElements.rollDiceBtn.disabled = true; this.DOMElements.gameBoard.querySelectorAll('.grid-cell.empty').forEach(cell => cell.classList.remove('empty')); };
-        Game.prototype.updateProgressBar = function() { const filled = this.gridState.filter(c => c !== null).length; this.DOMElements.progressBarFill.style.width = `${(filled / (this.GRID_SIZE * this.GRID_SIZE)) * 100}%`; };
-        Game.prototype.updateDiceDisplay = function() { [this.DOMElements.dice1El, this.DOMElements.dice2El].forEach((el, i) => { el.innerHTML = ''; if (this.currentRoll[i]) { const piece = this.currentRoll[i], img = document.createElement('img'); img.src = `${this.IMAGE_PATH}${piece.symbol.toLowerCase()}_${piece.quadrant}.svg`; el.appendChild(img); } else { el.textContent = '?'; } }); };
-
-        gameManager.init();
+        document.addEventListener('DOMContentLoaded', () => {
+            gameManager.init();
+        });
     </script>
 </body>
 </html>
