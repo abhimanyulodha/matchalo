@@ -5,13 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MATCHALO</title>
     
-    <!-- Tailwind CSS Framework -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts: Quicksand -->
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- CSS STYLES & Theme -->
     <style>
         :root {
             --bg: linear-gradient(135deg, #f5f7fa 0%, #e8e4f1 100%);
@@ -50,8 +47,8 @@
         .dice-tumble { animation: dice-tumble 0.6s var(--ease-bounce); }
         .modal-overlay { background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); }
         .edition-selected { background-color: var(--accent-light) !important; font-weight: 700; color: var(--accent); }
-        /* Added for stacked text alignment */
         .score-item h3 { min-height: 2.25rem; display: flex; align-items: center; justify-content: center; line-height: 1.2; }
+        .debug-tooltip { position: absolute; bottom: 105%; left: 50%; transform: translateX(-50%); background-color: black; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; white-space: nowrap; z-index: 10; pointer-events: none; opacity: 0; transition: opacity 0.2s ease-in-out; }
     </style>
 </head>
 <body class="p-2 lg:p-4 flex items-center justify-center min-h-screen">
@@ -104,14 +101,8 @@
                 
                 <div class="p-4 rounded-2xl border flex-1" style="border-color: var(--faint-border); background: rgba(255,255,255,0.5);">
                     <div class="grid grid-cols-2 gap-4 text-center">
-                        <div>
-                            <h3 class="text-xs font-semibold uppercase tracking-wider mb-1" style="color: var(--text-secondary);">Total Score</h3>
-                            <div id="total-score" class="text-3xl font-bold" style="color: var(--accent);">0</div>
-                        </div>
-                        <div>
-                            <h3 class="text-xs font-semibold uppercase tracking-wider mb-1" style="color: var(--text-secondary);">High Score</h3>
-                            <div id="high-score" class="text-3xl font-bold text-amber-500">0</div>
-                        </div>
+                        <div><h3 class="text-xs font-semibold uppercase tracking-wider mb-1" style="color: var(--text-secondary);">Total Score</h3><div id="total-score" class="text-3xl font-bold" style="color: var(--accent);">0</div></div>
+                        <div><h3 class="text-xs font-semibold uppercase tracking-wider mb-1" style="color: var(--text-secondary);">High Score</h3><div id="high-score" class="text-3xl font-bold text-amber-500">0</div></div>
                     </div>
                     <hr class="border-t my-3">
                     <div class="grid grid-cols-3 gap-y-3 text-center">
@@ -127,17 +118,14 @@
         </div>
     </main>
 
-    <!-- Modals -->
     <div id="game-over-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden"><div class="modal-content w-full max-w-sm glass-card rounded-2xl p-8 text-center relative"><button id="close-modal-btn" class="absolute top-4 right-4 w-8 h-8 rounded-full text-xl flex items-center justify-center font-bold text-gray-500 hover:bg-gray-200/50">×</button><h2 class="text-2xl font-bold mb-4" style="color: var(--accent);">Game Over</h2><p class="mb-6" style="color: var(--text-secondary);">You can no longer make a move.</p><p class="text-sm" style="color: var(--text-secondary);">Final Score</p><div id="final-score" class="text-6xl font-bold my-2" style="color: var(--accent);">0</div><button id="restart-modal-btn" class="themed-button primary w-full py-2.5 px-4 text-white text-sm mt-4">Play Again</button></div></div>
     <div id="exchange-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden"><div class="modal-content w-full max-w-md glass-card rounded-2xl p-6 text-center relative"><button id="close-exchange-modal-btn" class="absolute top-2 right-2 w-8 h-8 rounded-full text-xl flex items-center justify-center font-bold text-gray-500 hover:bg-gray-200/50">×</button><h2 class="text-xl font-bold mb-4" style="color: var(--accent);">Exchange Alo</h2><div id="exchange-options" class="grid grid-cols-4 gap-2"></div></div></div>
     <div id="help-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden"><div class="modal-content w-full max-w-lg glass-card rounded-2xl p-6 relative"><div class="flex justify-between items-start mb-4"><div class="flex-grow"><h2 class="text-3xl font-bold" style="color: var(--accent);">How to Play Matchalo</h2><p class="text-sm mt-2 font-bold" style="color: var(--text-secondary);">A fun and simple block based artwork game from Abhimanyu Lodha</p></div><button id="close-help-modal-btn" class="w-10 h-10 rounded-full text-xl flex items-center justify-center font-bold flex-shrink-0">×</button></div><div id="help-modal-content" class="space-y-4 text-sm max-h-[60vh] overflow-y-auto pr-2" style="color: var(--text-secondary)"></div></div></div>
     <div id="edition-select-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden"><div class="modal-content w-full max-w-sm glass-card rounded-2xl p-6 relative"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold" style="color: var(--accent);">Select Edition</h2><button id="close-edition-select-modal-btn" class="w-10 h-10 rounded-full text-xl flex items-center justify-center font-bold">×</button></div><div id="edition-options" class="flex flex-col gap-3 max-h-64 overflow-y-auto"></div></div></div>
     
-    <!-- JAVASCRIPT LOGIC -->
     <script>
         const gameManager = {
-            currentGame: null,
-            activeEditionId: 'circles',
+            currentGame: null, activeEditionId: 'circles',
             editionConfigs: {
                 circles: { id: 'circles', name: 'Circles', symbols: ['navy', 'red', 'blue', 'grey'] },
                 rings: { id: 'rings', name: 'Rings', symbols: ['ringa', 'ringb', 'ringc', 'ringd'] }
@@ -154,8 +142,9 @@
             init() {
                 this.SYMBOLS = this.config.symbols; this.gridState = Array(this.GRID_SIZE * this.GRID_SIZE).fill(null); this.currentRoll = []; this.firstPieceLocation = null; this.placementState = 'AWAITING_ROLL'; this.score = 0; this.highScore = localStorage.getItem(`matchaloHighScore_${this.config.id}`) || 0; this.lastClick = { time: 0, row: -1, col: -1 }; this.usedSuperpowers = new Set(); this.activeSuperpower = null; this.superpowerState = {};
                 this.DOMElements.gameBoard.innerHTML = '';
-                for (let i = 0; i < this.GRID_SIZE * this.GRID_SIZE; i++) { const cell = document.createElement('div'); cell.className = 'grid-cell empty relative'; cell.dataset.index = i; const row = Math.floor(i / this.GRID_SIZE), col = i % this.GRID_SIZE; cell.dataset.row = row; cell.dataset.col = col; cell.addEventListener('click', () => this.onCellClick(row, col)); this.DOMElements.gameBoard.appendChild(cell); }
-                this.populateHelpModal(); this.calculateTotalScore(); this.updateProgressBar(); this.updateDiceDisplay(); this.updateSuperpowerUI(); this.DOMElements.gameOverModal.classList.add('hidden'); this.DOMElements.rollDiceBtn.disabled = false;
+                for (let i = 0; i < this.GRID_SIZE * this.GRID_SIZE; i++) { const cell = document.createElement('div'); cell.className = 'grid-cell empty relative'; cell.dataset.index = i; const row = Math.floor(i / this.GRID_SIZE), col = i % this.GRID_SIZE; cell.dataset.row = row; cell.dataset.col = col; const tooltip = document.createElement('div'); tooltip.className = 'debug-tooltip'; cell.appendChild(tooltip); cell.addEventListener('click', () => this.onCellClick(row, col)); cell.addEventListener('mouseenter', () => { const piece = this.gridState[i]; if (piece) { tooltip.textContent = `S: ${piece.symbol}, Q: ${piece.quadrant}`; tooltip.style.opacity = 1; } }); cell.addEventListener('mouseleave', () => { tooltip.style.opacity = 0; }); this.DOMElements.gameBoard.appendChild(cell); }
+                this.populateHelpModal(); this.calculateTotalScore(); this.updateProgressBar(); this.updateDiceDisplay(); this.updateSuperpowerUI();
+                this.DOMElements.gameOverModal.classList.add('hidden'); this.DOMElements.rollDiceBtn.disabled = false;
                 const oldResetBtn = this.DOMElements.resetBtn; const newResetBtn = oldResetBtn.cloneNode(true); oldResetBtn.parentNode.replaceChild(newResetBtn, oldResetBtn); this.DOMElements.resetBtn = newResetBtn;
                 this.DOMElements.rollDiceBtn.onclick = () => this.handleRollDice();
                 this.DOMElements.resetBtn.onclick = () => gameManager.switchEdition(gameManager.activeEditionId);
