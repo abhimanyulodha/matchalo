@@ -333,34 +333,53 @@
                 let scoreBreakdown = { circle: 0, semiCircle: 0, almostCircle: 0, sequence: 0, lineMaster: 0, diamondHeist: 0 };
                 const visited = Array(GRID_SIZE * GRID_SIZE).fill(false);
 
-                // Circle, Semi-circle, Almost-circle, Diamond Heist logic
+                // --- NEW & CORRECTED PATTERN MATCHING LOGIC ---
                 for (let r = 0; r < GRID_SIZE - 1; r++) {
                     for (let c = 0; c < GRID_SIZE - 1; c++) {
-                        const tl = gridState[r * GRID_SIZE + c], tr = gridState[r * GRID_SIZE + c + 1], bl = gridState[(r + 1) * GRID_SIZE + c], br = gridState[(r + 1) * GRID_SIZE + c + 1];
+                        const tl = gridState[r * GRID_SIZE + c];
+                        const tr = gridState[r * GRID_SIZE + c + 1];
+                        const bl = gridState[(r + 1) * GRID_SIZE + c];
+                        const br = gridState[(r + 1) * GRID_SIZE + c + 1];
+                        
                         const pieces = [tl, tr, bl, br].filter(Boolean);
+                        const quadrants = new Set(pieces.map(p => p.quadrant));
+                        const symbols = pieces.map(p => p.symbol);
+                        
                         if (pieces.length < 2) continue;
-                        if (tl?.quadrant === 'TL' && tr?.quadrant === 'TR' && bl?.quadrant === 'BL' && br?.quadrant === 'BR') {
-                            scoreBreakdown.circle += (new Set(pieces.map(p => p.symbol)).size === 1) ? 40 : 20;
-                        } else if (tl?.quadrant === 'BR' && tr?.quadrant === 'BL' && bl?.quadrant === 'TR' && br?.quadrant === 'TL') {
-                            scoreBreakdown.diamondHeist -= 10;
-                        } else {
-                            if (pieces.length === 3) {
-                                const quadrants = new Set(pieces.map(p => p.quadrant));
-                                if ( (quadrants.has('TL') && quadrants.has('TR') && quadrants.has('BL')) || (quadrants.has('TL') && quadrants.has('TR') && quadrants.has('BR')) || (quadrants.has('TL') && quadrants.has('BL') && quadrants.has('BR')) || (quadrants.has('TR') && quadrants.has('BL') && quadrants.has('BR')) ) {
-                                     scoreBreakdown.almostCircle += (new Set(pieces.map(p => p.symbol)).size === 1 ? 20 : 15);
-                                }
+
+                        // Check patterns in order of precedence to prevent double counting
+                        if (pieces.length === 4) {
+                            // Check for Full Circle
+                            if (quadrants.has('TL') && quadrants.has('TR') && quadrants.has('BL') && quadrants.has('BR')) {
+                                const isSameColor = new Set(symbols).size === 1;
+                                scoreBreakdown.circle += isSameColor ? 40 : 20;
                             }
-                            if (pieces.length === 2) {
-                                if (tl?.quadrant === 'TL' && tr?.quadrant === 'TR') scoreBreakdown.semiCircle += (tl.symbol === tr.symbol ? 10 : 5);
-                                if (bl?.quadrant === 'BL' && br?.quadrant === 'BR') scoreBreakdown.semiCircle += (bl.symbol === br.symbol ? 10 : 5);
-                                if (tl?.quadrant === 'TL' && bl?.quadrant === 'BL') scoreBreakdown.semiCircle += (tl.symbol === bl.symbol ? 10 : 5);
-                                if (tr?.quadrant === 'TR' && br?.quadrant === 'BR') scoreBreakdown.semiCircle += (tr.symbol === br.symbol ? 10 : 5);
+                            // Check for Diamond Heist
+                            else if (quadrants.has('TL') && quadrants.has('TR') && quadrants.has('BL') && quadrants.has('BR') &&
+                                    tl.quadrant === 'BR' && tr.quadrant === 'BL' && bl.quadrant === 'TR' && br.quadrant === 'TL') {
+                                scoreBreakdown.diamondHeist -= 10;
+                            }
+                        } else if (pieces.length === 3) {
+                            // Check for Almost Circle (any 3 of 4 quadrants)
+                            const isSameColor = new Set(symbols).size === 1;
+                            scoreBreakdown.almostCircle += isSameColor ? 20 : 15;
+                        } else if (pieces.length === 2) {
+                            // Check for Semi Circle (valid adjacent pairs)
+                            const q1 = pieces[0].quadrant;
+                            const q2 = pieces[1].quadrant;
+                            
+                            const isHorizontalPair = (q1 === 'TL' && q2 === 'TR') || (q1 === 'TR' && q2 === 'TL') || (q1 === 'BL' && q2 === 'BR') || (q1 === 'BR' && q2 === 'BL');
+                            const isVerticalPair = (q1 === 'TL' && q2 === 'BL') || (q1 === 'BL' && q2 === 'TL') || (q1 === 'TR' && q2 === 'BR') || (q1 === 'BR' && q2 === 'TR');
+
+                            if (isHorizontalPair || isVerticalPair) {
+                                const isSameColor = pieces[0].symbol === pieces[1].symbol;
+                                scoreBreakdown.semiCircle += isSameColor ? 10 : 5;
                             }
                         }
                     }
                 }
 
-                // Sequence logic
+                // --- Sequence and Line Master logic (unchanged) ---
                 for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
                     if (gridState[i] && !visited[i]) {
                         const blob = []; const queue = [i]; visited[i] = true;
@@ -379,7 +398,6 @@
                     }
                 }
                 
-                // Line Master logic
                 for (let r = 0; r < GRID_SIZE; r++) { const firstPiece = gridState[r * GRID_SIZE]; if (firstPiece && gridState.slice(r * GRID_SIZE, (r + 1) * GRID_SIZE).every(p => p?.symbol === firstPiece.symbol)) scoreBreakdown.lineMaster += 10; }
                 for (let c = 0; c < GRID_SIZE; c++) { const firstPiece = gridState[c]; if (firstPiece) { let isLineMaster = true; for (let r = 1; r < GRID_SIZE; r++) { if (gridState[r * GRID_SIZE + c]?.symbol !== firstPiece.symbol) { isLineMaster = false; break; } } if (isLineMaster) scoreBreakdown.lineMaster += 10; } }
 
