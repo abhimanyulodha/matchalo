@@ -5,13 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MATCHALO</title>
     
-    <!-- Tailwind CSS Framework -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts: Quicksand -->
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- CSS STYLES & Theme -->
     <style>
         :root {
             --bg: linear-gradient(135deg, #f5f7fa 0%, #e8e4f1 100%);
@@ -21,6 +18,7 @@
             --accent: #6a11cb;
             --accent-light: rgba(106, 17, 203, 0.1);
             --accent-gradient: linear-gradient(135deg, #2575fc 0%, #6a11cb 100%);
+            --accent-gradient-shaded: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%);
             --glass-border: rgba(255, 255, 255, 0.2);
             --faint-border: rgba(0, 0, 0, 0.08);
             --grid-line-color: rgba(106, 17, 203, 0.1);
@@ -30,48 +28,23 @@
             --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        body {
-            font-family: 'Quicksand', sans-serif;
-            font-weight: 500;
-            background: var(--bg);
-            color: var(--text);
-        }
-        
-        .glass-card {
-            background: var(--card);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            box-shadow: var(--shadow-soft), 0 0 0 1px var(--glass-border), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-            border: none !important;
-        }
-
+        body { font-family: 'Quicksand', sans-serif; font-weight: 500; background: var(--bg); color: var(--text); }
+        .glass-card { background: var(--card); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); box-shadow: var(--shadow-soft), 0 0 0 1px var(--glass-border), inset 0 1px 0 rgba(255, 255, 255, 0.3); border: none !important; }
         .themed-button { font-weight: 600; border-radius: 12px; transition: all 0.3s var(--ease-smooth); border: none; }
         .themed-button.primary { background: var(--accent-gradient); }
-        .themed-button.secondary { background-color: rgba(255,255,255,0.8); color: var(--text); border: 1px solid var(--faint-border); }
+        .themed-button.secondary { background: var(--accent-light); color: var(--accent); }
         .themed-button.tertiary { background: none; color: var(--text-secondary); }
-        .themed-button.accent-light { background: var(--accent-light); color: var(--accent); }
+        #select-edition-btn { background: var(--accent-gradient-shaded); }
         .themed-button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: var(--shadow-medium); }
-        
         .progress-bar-container { background: var(--accent-light); }
         .progress-bar-fill { background: var(--accent-gradient); }
-
-        .grid-cell.empty {
-            box-shadow: inset 0 0 0 1px var(--grid-line-color);
-        }
-
+        .grid-cell.empty { box-shadow: inset 0 0 0 1px var(--grid-line-color); }
         hr { border-color: var(--faint-border); }
-        
-        .superpower-btn--active {
-            background-color: var(--accent-light) !important;
-            box-shadow: 0 0 0 2px var(--accent);
-        }
-
+        .superpower-btn--active { background-color: var(--accent-light) !important; box-shadow: 0 0 0 2px var(--accent); }
         .pulsing-cell { animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(106, 17, 203, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(106, 17, 203, 0); } 100% { box-shadow: 0 0 0 0 rgba(106, 17, 203, 0); } }
-
         @keyframes dice-tumble { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(-180deg) scale(1.1); } 100% { transform: rotate(-360deg) scale(1); } }
         .dice-tumble { animation: dice-tumble 0.6s var(--ease-bounce); }
-
         .modal-overlay { background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); }
         .edition-selected { background-color: var(--accent-light) !important; font-weight: 700; color: var(--accent); }
     </style>
@@ -79,23 +52,21 @@
 <body class="p-2 lg:p-4 flex items-center justify-center min-h-screen">
     <main id="game-container" class="w-full max-w-5xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6 items-center lg:items-stretch">
         
-        <!-- Left Panel: Game Board -->
         <div class="w-full lg:w-2/3">
             <div class="p-4 lg:p-6 h-full glass-card rounded-2xl">
                 <div id="game-board" class="grid grid-cols-8 grid-rows-8 w-full aspect-square bg-white rounded-lg"></div>
             </div>
         </div>
 
-        <!-- Right Panel: Controls & Scoring -->
         <div class="w-full lg:w-1/3">
             <div class="h-full p-4 lg:p-6 glass-card rounded-2xl flex flex-col gap-y-3">
                 
                 <div class="p-4 rounded-2xl border" style="border-color: var(--faint-border); background: rgba(255,255,255,0.5);">
-                    <div class="flex items-center gap-3">
-                        <button id="roll-dice-btn" class="w-16 h-16 text-4xl flex items-center justify-center rounded-xl bg-white/80 border border-gray-200/50 shadow-sm transition-all duration-300 hover:scale-110 hover:shadow-lg focus:outline-none">🎲</button>
-                        <div class="flex-1 grid grid-cols-2 gap-2">
-                            <div id="dice-1" class="w-16 h-16 bg-white/60 rounded-lg flex items-center justify-center text-4xl text-gray-400 border border-gray-200/50 shadow-inner mx-auto">?</div>
-                            <div id="dice-2" class="w-16 h-16 bg-white/60 rounded-lg flex items-center justify-center text-4xl text-gray-400 border border-gray-200/50 shadow-inner mx-auto">?</div>
+                    <div class="flex justify-center items-center gap-4">
+                        <button id="roll-dice-btn" class="text-6xl transition-transform hover:scale-110 focus:outline-none">🎲</button>
+                        <div class="flex-1 grid grid-cols-2 gap-3">
+                            <div id="dice-1" class="w-full aspect-square bg-white/60 rounded-lg flex items-center justify-center text-4xl text-gray-400 border border-gray-200/50 shadow-inner">?</div>
+                            <div id="dice-2" class="w-full aspect-square bg-white/60 rounded-lg flex items-center justify-center text-4xl text-gray-400 border border-gray-200/50 shadow-inner">?</div>
                         </div>
                     </div>
                     <h3 class="text-xs font-semibold uppercase tracking-wider text-center mt-4 mb-2" style="color: var(--text-secondary);">
@@ -117,12 +88,15 @@
 
                 <div class="p-4 rounded-2xl border" style="border-color: var(--faint-border); background: rgba(255,255,255,0.5);">
                     <div class="flex justify-center items-center gap-3">
-                        <button id="help-btn" class="themed-button accent-light text-xs flex-1 py-2">Help</button>
+                        <button id="help-btn" class="themed-button secondary text-xs flex-1 py-2">Help</button>
                         <button id="reset-btn" class="themed-button primary text-xs flex-1 py-2 text-white">New Game</button>
-                        <button id="badges-btn" class="themed-button accent-light text-xs flex-1 py-2">Badges</button>
+                        <button id="badges-btn" class="themed-button secondary text-xs flex-1 py-2">Badges</button>
                     </div>
                     <div class="text-center mt-3">
-                        <button id="select-edition-btn" class="themed-button tertiary w-full text-sm py-2">Edition: Circles</button>
+                        <button id="select-edition-btn" class="w-full py-2 px-4 themed-button text-white text-sm flex items-center justify-center gap-2">
+                            Select Game Edition
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
                     </div>
                 </div>
                 
@@ -138,26 +112,24 @@
                         </div>
                     </div>
                     <hr class="border-t my-3">
-                    <div class="grid grid-cols-3 gap-y-2 text-center">
-                        <div class="score-item"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Perfect Shape</h3><div id="score-perfect-shape" class="text-lg font-bold">0</div></div>
-                        <div class="score-item"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Half Baked</h3><div id="score-half-baked" class="text-lg font-bold">0</div></div>
+                    <div class="grid grid-cols-3 gap-y-3 text-center">
+                        <div class="score-item border-r" style="border-color: var(--faint-border);"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Perfect Shape</h3><div id="score-perfect-shape" class="text-lg font-bold">0</div></div>
+                        <div class="score-item border-r" style="border-color: var(--faint-border);"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Half Baked</h3><div id="score-half-baked" class="text-lg font-bold">0</div></div>
                         <div class="score-item"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Almost There</h3><div id="score-almost-there" class="text-lg font-bold">0</div></div>
-                        <div class="score-item"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Sequence</h3><div id="score-sequence" class="text-lg font-bold">0</div></div>
-                        <div class="score-item"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Line Master</h3><div id="score-line-master" class="text-lg font-bold">0</div></div>
-                        <div class="score-item"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Diamond Heist</h3><div id="score-diamond-heist" class="text-lg font-bold text-red-600">0</div></div>
+                        <div class="score-item border-r pt-2 border-t" style="border-color: var(--faint-border);"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Sequence</h3><div id="score-sequence" class="text-lg font-bold">0</div></div>
+                        <div class="score-item border-r pt-2 border-t" style="border-color: var(--faint-border);"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Line Master</h3><div id="score-line-master" class="text-lg font-bold">0</div></div>
+                        <div class="score-item pt-2 border-t" style="border-color: var(--faint-border);"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Diamond Heist</h3><div id="score-diamond-heist" class="text-lg font-bold text-red-600">0</div></div>
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Modals -->
     <div id="game-over-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden"><div class="modal-content w-full max-w-sm glass-card rounded-2xl p-8 text-center relative"><button id="close-modal-btn" class="absolute top-4 right-4 w-8 h-8 rounded-full text-xl flex items-center justify-center font-bold text-gray-500 hover:bg-gray-200/50">×</button><h2 class="text-2xl font-bold mb-4" style="color: var(--accent);">Game Over</h2><p class="mb-6" style="color: var(--text-secondary);">You can no longer make a move.</p><p class="text-sm" style="color: var(--text-secondary);">Final Score</p><div id="final-score" class="text-6xl font-bold my-2" style="color: var(--accent);">0</div><button id="restart-modal-btn" class="themed-button primary w-full py-2.5 px-4 text-white text-sm mt-4">Play Again</button></div></div>
     <div id="exchange-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden"><div class="modal-content w-full max-w-md glass-card rounded-2xl p-6 text-center relative"><button id="close-exchange-modal-btn" class="absolute top-2 right-2 w-8 h-8 rounded-full text-xl flex items-center justify-center font-bold text-gray-500 hover:bg-gray-200/50">×</button><h2 class="text-xl font-bold mb-4" style="color: var(--accent);">Exchange Alo</h2><div id="exchange-options" class="grid grid-cols-4 gap-2"></div></div></div>
     <div id="help-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden"><div class="modal-content w-full max-w-lg glass-card rounded-2xl p-6 relative"><div class="flex justify-between items-start mb-4"><div class="flex-grow"><h2 class="text-3xl font-bold" style="color: var(--accent);">How to Play Matchalo</h2><p class="text-sm mt-2 font-bold" style="color: var(--text-secondary);">A fun and simple block based artwork game from Abhimanyu Lodha</p></div><button id="close-help-modal-btn" class="w-10 h-10 rounded-full text-xl flex items-center justify-center font-bold flex-shrink-0">×</button></div><div id="help-modal-content" class="space-y-4 text-sm max-h-[60vh] overflow-y-auto pr-2" style="color: var(--text-secondary)"></div></div></div>
     <div id="edition-select-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden"><div class="modal-content w-full max-w-sm glass-card rounded-2xl p-6 relative"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold" style="color: var(--accent);">Select Edition</h2><button id="close-edition-select-modal-btn" class="w-10 h-10 rounded-full text-xl flex items-center justify-center font-bold">×</button></div><div id="edition-options" class="flex flex-col gap-3 max-h-64 overflow-y-auto"></div></div></div>
     
-    <!-- JAVASCRIPT LOGIC -->
     <script>
         const gameManager = {
             currentGame: null,
@@ -166,127 +138,29 @@
                 circles: { id: 'circles', name: 'Circles', symbols: ['navy', 'red', 'blue', 'grey'] },
                 rings: { id: 'rings', name: 'Rings', symbols: ['ringa', 'ringb', 'ringc', 'ringd'] }
             },
-
-            init() {
-                this.switchEdition(this.activeEditionId);
-                this.populateEditionModal();
-                this.attachGlobalListeners();
-            },
-
-            switchEdition(editionId) {
-                this.activeEditionId = editionId;
-                const config = this.editionConfigs[editionId];
-                this.currentGame = new Game(config);
-                document.getElementById('select-edition-btn').textContent = `Edition: ${config.name}`;
-            },
-            
-            populateEditionModal() {
-                const container = document.getElementById('edition-options');
-                container.innerHTML = '';
-                Object.values(this.editionConfigs).forEach(config => {
-                    const button = document.createElement('button');
-                    button.className = 'w-full text-left p-3 rounded-lg font-semibold flex justify-between items-center transition-colors hover:bg-gray-200/50';
-                    if (config.id === this.activeEditionId) button.classList.add('edition-selected');
-                    button.textContent = config.name;
-                    button.addEventListener('click', () => {
-                        this.switchEdition(config.id);
-                        document.getElementById('edition-select-modal').classList.add('hidden');
-                        this.populateEditionModal();
-                    });
-                    container.appendChild(button);
-                });
-            },
-            
-            attachGlobalListeners() {
-                document.getElementById('help-btn').addEventListener('click', () => document.getElementById('help-modal').classList.remove('hidden'));
-                document.getElementById('close-help-modal-btn').addEventListener('click', () => document.getElementById('help-modal').classList.add('hidden'));
-                document.getElementById('select-edition-btn').addEventListener('click', () => document.getElementById('edition-select-modal').classList.remove('hidden'));
-                document.getElementById('close-edition-select-modal-btn').addEventListener('click', () => document.getElementById('edition-select-modal').classList.add('hidden'));
-            }
+            init() { this.switchEdition(this.activeEditionId); this.populateEditionModal(); this.attachGlobalListeners(); },
+            switchEdition(editionId) { this.activeEditionId = editionId; const config = this.editionConfigs[editionId]; this.currentGame = new Game(config); document.getElementById('select-edition-btn').innerHTML = `Edition: ${config.name} <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`; },
+            populateEditionModal() { const container = document.getElementById('edition-options'); container.innerHTML = ''; Object.values(this.editionConfigs).forEach(config => { const button = document.createElement('button'); button.className = 'w-full text-left p-3 rounded-lg font-semibold flex justify-between items-center transition-colors hover:bg-gray-200/50'; if (config.id === this.activeEditionId) button.classList.add('edition-selected'); button.textContent = config.name; button.addEventListener('click', () => { this.switchEdition(config.id); document.getElementById('edition-select-modal').classList.add('hidden'); this.populateEditionModal(); }); container.appendChild(button); }); },
+            attachGlobalListeners() { document.getElementById('help-btn').addEventListener('click', () => document.getElementById('help-modal').classList.remove('hidden')); document.getElementById('close-help-modal-btn').addEventListener('click', () => document.getElementById('help-modal').classList.add('hidden')); document.getElementById('select-edition-btn').addEventListener('click', () => document.getElementById('edition-select-modal').classList.remove('hidden')); document.getElementById('close-edition-select-modal-btn').addEventListener('click', () => document.getElementById('edition-select-modal').classList.add('hidden')); }
         };
 
         class Game {
-            constructor(config) {
-                this.config = config;
-                this.DOMElements = this.getDOMElements();
-                this.GRID_SIZE = 8;
-                this.QUADRANTS = ['TL', 'TR', 'BL', 'BR'];
-                this.IMAGE_PATH = 'images/';
-                this.SUPERPOWERS = { ROTATE: 'rotate', SWAP: 'swap', EXCHANGE: 'exchange', MOVE: 'move' };
-                this.init();
-            }
-
-            getDOMElements() {
-                return {
-                    gameBoard: document.getElementById('game-board'),
-                    rollDiceBtn: document.getElementById('roll-dice-btn'),
-                    resetBtn: document.getElementById('reset-btn'),
-                    dice1El: document.getElementById('dice-1'),
-                    dice2El: document.getElementById('dice-2'),
-                    progressBarFill: document.getElementById('progress-bar-fill'),
-                    totalScore: document.getElementById('total-score'),
-                    highScore: document.getElementById('high-score'),
-                    scorePerfectShape: document.getElementById('score-perfect-shape'),
-                    scoreHalfBaked: document.getElementById('score-half-baked'),
-                    scoreAlmostThere: document.getElementById('score-almost-there'),
-                    scoreSequence: document.getElementById('score-sequence'),
-                    scoreLineMaster: document.getElementById('score-line-master'),
-                    scoreDiamondHeist: document.getElementById('score-diamond-heist'),
-                    gameOverModal: document.getElementById('game-over-modal'),
-                    finalScore: document.getElementById('final-score'),
-                    restartModalBtn: document.getElementById('restart-modal-btn'),
-                    closeModalBtn: document.getElementById('close-modal-btn'),
-                    spCharge1: document.getElementById('sp-charge-1'),
-                    spCharge2: document.getElementById('sp-charge-2'),
-                    rotateBtn: document.getElementById('rotate-btn'),
-                    swapBtn: document.getElementById('swap-btn'),
-                    exchangeBtn: document.getElementById('exchange-btn'),
-                    moveBtn: document.getElementById('move-btn'),
-                    exchangeModal: document.getElementById('exchange-modal'),
-                    exchangeOptions: document.getElementById('exchange-options'),
-                    closeExchangeModalBtn: document.getElementById('close-exchange-modal-btn'),
-                    helpModalContent: document.getElementById('help-modal-content'),
-                };
-            }
-
+            constructor(config) { this.config = config; this.DOMElements = this.getDOMElements(); this.GRID_SIZE = 8; this.QUADRANTS = ['TL', 'TR', 'BL', 'BR']; this.IMAGE_PATH = 'images/'; this.SUPERPOWERS = { ROTATE: 'rotate', SWAP: 'swap', EXCHANGE: 'exchange', MOVE: 'move' }; this.init(); }
+            getDOMElements() { return { gameBoard: document.getElementById('game-board'), rollDiceBtn: document.getElementById('roll-dice-btn'), resetBtn: document.getElementById('reset-btn'), dice1El: document.getElementById('dice-1'), dice2El: document.getElementById('dice-2'), progressBarFill: document.getElementById('progress-bar-fill'), totalScore: document.getElementById('total-score'), highScore: document.getElementById('high-score'), scorePerfectShape: document.getElementById('score-perfect-shape'), scoreHalfBaked: document.getElementById('score-half-baked'), scoreAlmostThere: document.getElementById('score-almost-there'), scoreSequence: document.getElementById('score-sequence'), scoreLineMaster: document.getElementById('score-line-master'), scoreDiamondHeist: document.getElementById('score-diamond-heist'), gameOverModal: document.getElementById('game-over-modal'), finalScore: document.getElementById('final-score'), restartModalBtn: document.getElementById('restart-modal-btn'), closeModalBtn: document.getElementById('close-modal-btn'), spCharge1: document.getElementById('sp-charge-1'), spCharge2: document.getElementById('sp-charge-2'), rotateBtn: document.getElementById('rotate-btn'), swapBtn: document.getElementById('swap-btn'), exchangeBtn: document.getElementById('exchange-btn'), moveBtn: document.getElementById('move-btn'), exchangeModal: document.getElementById('exchange-modal'), exchangeOptions: document.getElementById('exchange-options'), closeExchangeModalBtn: document.getElementById('close-exchange-modal-btn'), helpModalContent: document.getElementById('help-modal-content'), }; }
             init() {
-                this.SYMBOLS = this.config.symbols;
-                this.gridState = Array(this.GRID_SIZE * this.GRID_SIZE).fill(null);
-                this.currentRoll = [];
-                this.firstPieceLocation = null;
-                this.placementState = 'AWAITING_ROLL';
-                this.score = 0;
-                this.highScore = localStorage.getItem(`matchaloHighScore_${this.config.id}`) || 0;
-                this.lastClick = { time: 0, row: -1, col: -1 };
-                this.usedSuperpowers = new Set();
-                this.activeSuperpower = null;
-                this.superpowerState = {};
-
+                this.SYMBOLS = this.config.symbols; this.gridState = Array(this.GRID_SIZE * this.GRID_SIZE).fill(null); this.currentRoll = []; this.firstPieceLocation = null; this.placementState = 'AWAITING_ROLL'; this.score = 0; this.highScore = localStorage.getItem(`matchaloHighScore_${this.config.id}`) || 0; this.lastClick = { time: 0, row: -1, col: -1 }; this.usedSuperpowers = new Set(); this.activeSuperpower = null; this.superpowerState = {};
                 this.DOMElements.gameBoard.innerHTML = '';
                 for (let i = 0; i < this.GRID_SIZE * this.GRID_SIZE; i++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'grid-cell empty relative';
-                    cell.dataset.index = i;
-                    const row = Math.floor(i / this.GRID_SIZE), col = i % this.GRID_SIZE;
-                    cell.dataset.row = row; cell.dataset.col = col;
+                    const cell = document.createElement('div'); cell.className = 'grid-cell empty relative'; cell.dataset.index = i; const row = Math.floor(i / this.GRID_SIZE), col = i % this.GRID_SIZE; cell.dataset.row = row; cell.dataset.col = col;
+                    const tooltip = document.createElement('div'); tooltip.className = 'debug-tooltip'; cell.appendChild(tooltip);
                     cell.addEventListener('click', () => this.onCellClick(row, col));
+                    cell.addEventListener('mouseenter', () => { const piece = this.gridState[i]; if (piece) { tooltip.textContent = `S: ${piece.symbol}, Q: ${piece.quadrant}`; tooltip.style.opacity = 1; } });
+                    cell.addEventListener('mouseleave', () => { tooltip.style.opacity = 0; });
                     this.DOMElements.gameBoard.appendChild(cell);
                 }
-                
-                this.populateHelpModal();
-                this.calculateTotalScore();
-                this.updateProgressBar();
-                this.updateDiceDisplay();
-                this.updateSuperpowerUI();
-                this.DOMElements.gameOverModal.classList.add('hidden');
-                this.DOMElements.rollDiceBtn.disabled = false;
-                
-                // Event listener setup
-                const oldResetBtn = this.DOMElements.resetBtn;
-                const newResetBtn = oldResetBtn.cloneNode(true);
-                oldResetBtn.parentNode.replaceChild(newResetBtn, oldResetBtn);
-                this.DOMElements.resetBtn = newResetBtn;
-                
+                this.populateHelpModal(); this.calculateTotalScore(); this.updateProgressBar(); this.updateDiceDisplay(); this.updateSuperpowerUI();
+                this.DOMElements.gameOverModal.classList.add('hidden'); this.DOMElements.rollDiceBtn.disabled = false;
+                const oldResetBtn = this.DOMElements.resetBtn; const newResetBtn = oldResetBtn.cloneNode(true); oldResetBtn.parentNode.replaceChild(newResetBtn, oldResetBtn); this.DOMElements.resetBtn = newResetBtn;
                 this.DOMElements.rollDiceBtn.onclick = () => this.handleRollDice();
                 this.DOMElements.resetBtn.onclick = () => gameManager.switchEdition(gameManager.activeEditionId);
                 this.DOMElements.restartModalBtn.onclick = () => gameManager.switchEdition(gameManager.activeEditionId);
@@ -297,219 +171,19 @@
                 this.DOMElements.moveBtn.onclick = () => this.activateSuperpower(this.SUPERPOWERS.MOVE);
                 if(this.DOMElements.closeExchangeModalBtn) this.DOMElements.closeExchangeModalBtn.onclick = () => this.DOMElements.exchangeModal.classList.add('hidden');
             }
-            
-            populateHelpModal() {
-                this.DOMElements.helpModalContent.innerHTML = `
-                    <h3 class="font-bold text-lg" style="color: var(--accent);">🎯 The Goal</h3>
-                    <p>Fill the 8x8 grid by placing pairs of 'Alos' (quadrant pieces). Score points by forming valuable patterns and sequences.</p>
-                    
-                    <h3 class="font-bold text-lg mt-4" style="color: var(--accent);">🕹️ How to Play</h3>
-                    <ol class="list-decimal list-inside space-y-1">
-                        <li><b>Roll the Dice:</b> Click the '🎲' icon to get two random Alos.</li>
-                        <li><b>Place Your Pair:</b> Place the first Alo on any empty square. Place the second in an empty square directly next to it (not diagonally).</li>
-                        <li><b>Mistake?</b> Before placing the second Alo, you can double-click the first one to pick it up and move it.</li>
-                    </ol>
-
-                    <h3 class="font-bold text-lg mt-4" style="color: var(--accent);">✨ Superpowers</h3>
-                    <p>You can use any **two different** superpowers once per game, only between turns.</p>
-                    <ul class="list-disc list-inside space-y-1">
-                        <li><b>Rotate:</b> Click an Alo on the board to rotate it 90° clockwise.</li>
-                        <li><b>Swap:</b> Click two adjacent Alos on the board to swap their positions.</li>
-                        <li><b>Exchange:</b> Click an Alo, then choose a new one from a selection to replace it.</li>
-                        <li><b>Move:</b> Click an Alo, then click any empty square to move it there.</li>
-                    </ul>
-
-                    <h3 class="font-bold text-lg mt-4" style="color: var(--accent);">📈 Scoring</h3>
-                    <ul class="list-disc list-inside space-y-1">
-                        <li><b>Perfect Shape (4 pcs):</b> 40 pts (same color), 20 pts (different colors)</li>
-                        <li><b>Almost There (3 pcs):</b> 20 pts (same color), 15 pts (different colors)</li>
-                        <li><b>Half Baked (2 pcs):</b> 10 pts (same color), 5 pts (different colors)</li>
-                        <li><b>Sequence:</b> 1 pt for each Alo in a group of 2 or more same-colored, touching Alos.</li>
-                        <li><b>Line Master:</b> 10 pts for a full row or column of the same color.</li>
-                        <li><b>Diamond Heist (Penalty):</b> -10 pts for creating a diamond-shaped empty space with four Alos.</li>
-                    </ul>
-                `;
-            }
-
-            onCellClick(row, col) {
-                const now = new Date().getTime();
-                if (now - this.lastClick.time < 300 && this.lastClick.row === row && this.lastClick.col === col) { this.handleDoubleClick(row, col); this.lastClick = { time: 0, row: -1, col: -1 }; return; }
-                this.lastClick = { time: now, row, col };
-                if (this.activeSuperpower) this.handleSuperpowerClick(row, col);
-                else this.handlePlacementClick(row, col);
-            }
-
-            handleDoubleClick(row, col) {
-                if (this.placementState === 'AWAITING_SECOND_PLACEMENT' && this.firstPieceLocation.row === row && this.firstPieceLocation.col === col) {
-                    this.gridState[row * this.GRID_SIZE + col] = null;
-                    this.renderCell(row, col);
-                    this.firstPieceLocation = null;
-                    this.placementState = 'AWAITING_FIRST_PLACEMENT';
-                }
-            }
-
-            handlePlacementClick(row, col) {
-                const index = row * this.GRID_SIZE + col;
-                if (this.placementState === 'AWAITING_FIRST_PLACEMENT' && !this.gridState[index]) {
-                    this.placePiece(row, col, 0);
-                    this.firstPieceLocation = { row, col };
-                    this.placementState = 'AWAITING_SECOND_PLACEMENT';
-                } else if (this.placementState === 'AWAITING_SECOND_PLACEMENT') {
-                    const isAdjacent = Math.abs(this.firstPieceLocation.row - row) + Math.abs(this.firstPieceLocation.col - col) === 1;
-                    if (isAdjacent && !this.gridState[index]) {
-                        this.placePiece(row, col, 1);
-                        this.endTurn();
-                    }
-                }
-            }
-            
-            endTurn() {
-                this.firstPieceLocation = null;
-                this.placementState = 'AWAITING_ROLL';
-                this.currentRoll = [];
-                this.DOMElements.rollDiceBtn.disabled = false;
-                this.calculateTotalScore();
-                this.updateProgressBar();
-                this.updateDiceDisplay();
-                this.updateSuperpowerUI();
-                if (this.isGameOver()) this.showGameOver();
-            }
-
-            handleRollDice() {
-                if (this.activeSuperpower) this.cancelSuperpower();
-                if (this.placementState !== 'AWAITING_ROLL') return;
-                this.DOMElements.rollDiceBtn.disabled = true;
-                this.DOMElements.dice1El.classList.add('dice-tumble');
-                this.DOMElements.dice2El.classList.add('dice-tumble');
-                setTimeout(() => {
-                    const piece1 = this.generateRandomAlo();
-                    let piece2 = this.generateRandomAlo();
-                    while (piece2.quadrant === piece1.quadrant) { piece2 = this.generateRandomAlo(); }
-                    this.currentRoll = [piece1, piece2];
-                    this.placementState = 'AWAITING_FIRST_PLACEMENT';
-                    this.updateDiceDisplay();
-                    this.updateSuperpowerUI();
-                    this.DOMElements.dice1El.classList.remove('dice-tumble');
-                    this.DOMElements.dice2El.classList.remove('dice-tumble');
-                }, 600);
-            }
-
+            populateHelpModal() { this.DOMElements.helpModalContent.innerHTML = `<h3 class="font-bold text-lg" style="color: var(--accent);">🎯 The Goal</h3><p>Fill the 8x8 grid by placing pairs of 'Alos' (quadrant pieces). Score points by forming valuable patterns and sequences.</p><h3 class="font-bold text-lg mt-4" style="color: var(--accent);">🕹️ How to Play</h3><ol class="list-decimal list-inside space-y-1"><li><b>Roll the Dice:</b> Click the '🎲' icon to get two random Alos.</li><li><b>Place Your Pair:</b> Place the first Alo on any empty square. Place the second in an empty square directly next to it (not diagonally).</li><li><b>Mistake?</b> Before placing the second Alo, you can double-click the first one to pick it up and move it.</li></ol><h3 class="font-bold text-lg mt-4" style="color: var(--accent);">✨ Superpowers</h3><p>You can use any <strong>two different</strong> superpowers once per game, only between turns.</p><ul class="list-disc list-inside space-y-1"><li><b>Rotate:</b> Click an Alo on the board to rotate it 90° clockwise.</li><li><b>Swap:</b> Click two adjacent Alos on the board to swap their positions.</li><li><b>Exchange:</b> Click an Alo, then choose a new one from a selection to replace it.</li><li><b>Move:</b> Click an Alo, then click any empty square to move it there.</li></ul><h3 class="font-bold text-lg mt-4" style="color: var(--accent);">📈 Scoring</h3><ul class="list-disc list-inside space-y-1"><li><b>Perfect Shape (4 pcs):</b> 40 pts (same color), 20 pts (different colors)</li><li><b>Almost There (3 pcs):</b> 20 pts (same color), 15 pts (different colors)</li><li><b>Half Baked (2 pcs):</b> 10 pts (same color), 5 pts (different colors)</li><li><b>Sequence:</b> 1 pt for each Alo in a group of 2 or more same-colored, touching Alos.</li><li><b>Line Master:</b> 10 pts for a full row or column of the same color.</li><li><b>Diamond Heist (Penalty):</b> -10 pts for creating a diamond-shaped empty space with four Alos.</li></ul>`; }
+            onCellClick(row, col) { const now = new Date().getTime(); if (now - this.lastClick.time < 300 && this.lastClick.row === row && this.lastClick.col === col) { this.handleDoubleClick(row, col); this.lastClick = { time: 0, row: -1, col: -1 }; return; } this.lastClick = { time: now, row, col }; if (this.activeSuperpower) this.handleSuperpowerClick(row, col); else this.handlePlacementClick(row, col); }
+            handleDoubleClick(row, col) { if (this.placementState === 'AWAITING_SECOND_PLACEMENT' && this.firstPieceLocation.row === row && this.firstPieceLocation.col === col) { this.gridState[row * this.GRID_SIZE + col] = null; this.renderCell(row, col); this.firstPieceLocation = null; this.placementState = 'AWAITING_FIRST_PLACEMENT'; } }
+            handlePlacementClick(row, col) { const index = row * this.GRID_SIZE + col; if (this.placementState === 'AWAITING_FIRST_PLACEMENT' && !this.gridState[index]) { this.placePiece(row, col, 0); this.firstPieceLocation = { row, col }; this.placementState = 'AWAITING_SECOND_PLACEMENT'; } else if (this.placementState === 'AWAITING_SECOND_PLACEMENT') { const isAdjacent = Math.abs(this.firstPieceLocation.row - row) + Math.abs(this.firstPieceLocation.col - col) === 1; if (isAdjacent && !this.gridState[index]) { this.placePiece(row, col, 1); this.endTurn(); } } }
+            endTurn() { this.firstPieceLocation = null; this.placementState = 'AWAITING_ROLL'; this.currentRoll = []; this.DOMElements.rollDiceBtn.disabled = false; this.calculateTotalScore(); this.updateProgressBar(); this.updateDiceDisplay(); this.updateSuperpowerUI(); if (this.isGameOver()) this.showGameOver(); }
+            handleRollDice() { if (this.activeSuperpower) this.cancelSuperpower(); if (this.placementState !== 'AWAITING_ROLL') return; this.DOMElements.rollDiceBtn.disabled = true; this.DOMElements.dice1El.classList.add('dice-tumble'); this.DOMElements.dice2El.classList.add('dice-tumble'); setTimeout(() => { const piece1 = this.generateRandomAlo(); let piece2 = this.generateRandomAlo(); while (piece2.quadrant === piece1.quadrant) { piece2 = this.generateRandomAlo(); } this.currentRoll = [piece1, piece2]; this.placementState = 'AWAITING_FIRST_PLACEMENT'; this.updateDiceDisplay(); this.updateSuperpowerUI(); this.DOMElements.dice1El.classList.remove('dice-tumble'); this.DOMElements.dice2El.classList.remove('dice-tumble'); }, 600); }
             activateSuperpower(powerName) { if (this.placementState !== 'AWAITING_ROLL' || this.usedSuperpowers.size >= 2 || this.usedSuperpowers.has(powerName)) return; if (this.activeSuperpower === powerName) this.cancelSuperpower(); else { this.activeSuperpower = powerName; this.superpowerState = {}; this.updateSuperpowerUI(); } }
             cancelSuperpower() { this.activeSuperpower = null; this.superpowerState = {}; document.querySelectorAll('.pulsing-cell').forEach(c => c.classList.remove('pulsing-cell')); this.updateSuperpowerUI(); }
             consumeSuperpower(powerName) { this.usedSuperpowers.add(powerName); this.cancelSuperpower(); this.calculateTotalScore(); this.updateSuperpowerUI(); }
-
-            handleSuperpowerClick(row, col) {
-                const index = row * this.GRID_SIZE + col;
-                const piece = this.gridState[index];
-                switch (this.activeSuperpower) {
-                    case this.SUPERPOWERS.ROTATE: if (!piece) return; const order = ['TL', 'TR', 'BR', 'BL']; piece.quadrant = order[(order.indexOf(piece.quadrant) + 1) % 4]; this.renderCell(row, col); this.consumeSuperpower(this.SUPERPOWERS.ROTATE); break;
-                    case this.SUPERPOWERS.MOVE: if (!this.superpowerState.source) { if (!piece) return; this.superpowerState.source = { row, col }; this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`).classList.add('pulsing-cell'); } else { if (piece) return; const srcIdx = this.superpowerState.source.row * this.GRID_SIZE + this.superpowerState.source.col; this.gridState[index] = this.gridState[srcIdx]; this.gridState[srcIdx] = null; this.renderCell(this.superpowerState.source.row, this.superpowerState.source.col); this.renderCell(row, col); this.consumeSuperpower(this.SUPERPOWERS.MOVE); } break;
-                    case this.SUPERPOWERS.SWAP: if (!this.superpowerState.source) { if (!piece) return; this.superpowerState.source = { row, col }; this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`).classList.add('pulsing-cell'); } else { if (!piece || Math.abs(this.superpowerState.source.row - row) + Math.abs(this.superpowerState.source.col - col) !== 1) return; const srcIdx = this.superpowerState.source.row * this.GRID_SIZE + this.superpowerState.source.col; const temp = this.gridState[srcIdx]; this.gridState[srcIdx] = this.gridState[index]; this.gridState[index] = temp; this.renderCell(this.superpowerState.source.row, this.superpowerState.source.col); this.renderCell(row, col); this.consumeSuperpower(this.SUPERPOWERS.SWAP); } break;
-                    case this.SUPERPOWERS.EXCHANGE: if (!piece) return; this.superpowerState.source = { row, col }; this.DOMElements.exchangeOptions.innerHTML = ''; const allAlos = this.SYMBOLS.flatMap(s => this.QUADRANTS.map(q => ({ symbol: s, quadrant: q }))); allAlos.forEach(alo => { const option = document.createElement('div'); option.className = 'w-16 h-16 bg-white/50 rounded-lg p-1 cursor-pointer hover:bg-white/90'; const img = document.createElement('img'); img.src = `${this.IMAGE_PATH}${alo.symbol.toLowerCase()}_${alo.quadrant}.svg`; option.appendChild(img); if (alo.symbol === piece.symbol && alo.quadrant === piece.quadrant) { option.classList.add('opacity-30', 'cursor-not-allowed'); } else { option.onclick = () => { this.gridState[this.superpowerState.source.row * this.GRID_SIZE + this.superpowerState.source.col] = alo; this.renderCell(this.superpowerState.source.row, this.superpowerState.source.col); this.DOMElements.exchangeModal.classList.add('hidden'); this.consumeSuperpower(this.SUPERPOWERS.EXCHANGE); }; } this.DOMElements.exchangeOptions.appendChild(option); }); this.DOMElements.exchangeModal.classList.remove('hidden'); break;
-                }
-            }
-
-            calculateTotalScore() {
-                let scoreBreakdown = { perfectShape: 0, halfBaked: 0, almostThere: 0, sequence: 0, lineMaster: 0, diamondHeist: 0 };
-                const scoredPieces = new Set();
-
-                // Pass 1: Perfect Shapes
-                for (let r = 0; r < this.GRID_SIZE - 1; r++) { for (let c = 0; c < this.GRID_SIZE - 1; c++) {
-                    const indices = [r*this.GRID_SIZE+c, r*this.GRID_SIZE+c+1, (r+1)*this.GRID_SIZE+c, (r+1)*this.GRID_SIZE+c+1];
-                    if (indices.some(i => scoredPieces.has(i))) continue;
-                    const tl = this.gridState[indices[0]], tr = this.gridState[indices[1]], bl = this.gridState[indices[2]], br = this.gridState[indices[3]];
-                    if (tl?.quadrant === 'TL' && tr?.quadrant === 'TR' && bl?.quadrant === 'BL' && br?.quadrant === 'BR') {
-                        const symbols = [tl.symbol, tr.symbol, bl.symbol, br.symbol];
-                        scoreBreakdown.perfectShape += (new Set(symbols).size === 1) ? 40 : 20;
-                        indices.forEach(i => scoredPieces.add(i));
-                    }
-                }}
-
-                // Pass 2: Almost There
-                for (let r = 0; r < this.GRID_SIZE - 1; r++) { for (let c = 0; c < this.GRID_SIZE - 1; c++) {
-                    const indices = [r*this.GRID_SIZE+c, r*this.GRID_SIZE+c+1, (r+1)*this.GRID_SIZE+c, (r+1)*this.GRID_SIZE+c+1];
-                    const availableIndices = indices.filter(i => !scoredPieces.has(i));
-                    const availablePieces = availableIndices.map(i => this.gridState[i]).filter(Boolean);
-                    if (availablePieces.length !== 3) continue;
-
-                    const quadrants = new Set(availablePieces.map(p => p.quadrant));
-                    if (quadrants.size === 3) {
-                        const isAlmostThere = (quadrants.has('TL') && quadrants.has('TR') && quadrants.has('BL')) || (quadrants.has('TL') && quadrants.has('TR') && quadrants.has('BR')) || (quadrants.has('TL') && quadrants.has('BL') && quadrants.has('BR')) || (quadrants.has('TR') && quadrants.has('BL') && quadrants.has('BR'));
-                        if (isAlmostThere) {
-                            scoreBreakdown.almostThere += (new Set(availablePieces.map(p => p.symbol)).size === 1) ? 20 : 15;
-                            availableIndices.forEach(i => scoredPieces.add(i));
-                        }
-                    }
-                }}
-
-                // Pass 3: Half Baked
-                for (let r = 0; r < this.GRID_SIZE; r++) { for (let c = 0; c < this.GRID_SIZE; c++) {
-                    const p1_idx = r * this.GRID_SIZE + c;
-                    if (!this.gridState[p1_idx] || scoredPieces.has(p1_idx)) continue;
-                    
-                    const p2_idx_h = r * this.GRID_SIZE + c + 1;
-                    if (c < this.GRID_SIZE - 1 && this.gridState[p2_idx_h] && !scoredPieces.has(p2_idx_h)) {
-                        const q1 = this.gridState[p1_idx].quadrant, q2 = this.gridState[p2_idx_h].quadrant;
-                        if ((q1 === 'TL' && q2 === 'TR') || (q1 === 'TR' && q2 === 'TL') || (q1 === 'BL' && q2 === 'BR') || (q1 === 'BR' && q2 === 'BL')) {
-                            scoreBreakdown.halfBaked += (this.gridState[p1_idx].symbol === this.gridState[p2_idx_h].symbol) ? 10 : 5;
-                            scoredPieces.add(p1_idx); scoredPieces.add(p2_idx_h); continue;
-                        }
-                    }
-                    
-                    const p2_idx_v = (r + 1) * this.GRID_SIZE + c;
-                    if (r < this.GRID_SIZE - 1 && this.gridState[p2_idx_v] && !scoredPieces.has(p2_idx_v)) {
-                        const q1 = this.gridState[p1_idx].quadrant, q2 = this.gridState[p2_idx_v].quadrant;
-                        if ((q1 === 'TL' && q2 === 'BL') || (q1 === 'BL' && q2 === 'TL') || (q1 === 'TR' && q2 === 'BR') || (q1 === 'BR' && q2 === 'TR')) {
-                            scoreBreakdown.halfBaked += (this.gridState[p1_idx].symbol === this.gridState[p2_idx_v].symbol) ? 10 : 5;
-                            scoredPieces.add(p1_idx); scoredPieces.add(p2_idx_v);
-                        }
-                    }
-                }}
-
-                // Pass 4: Diamond Heist
-                for (let r = 0; r < this.GRID_SIZE - 1; r++) { for (let c = 0; c < this.GRID_SIZE - 1; c++) {
-                    const tl = this.gridState[r*this.GRID_SIZE+c], tr = this.gridState[r*this.GRID_SIZE+c+1], bl = this.gridState[(r+1)*this.GRID_SIZE+c], br = this.gridState[(r+1)*this.GRID_SIZE+c+1];
-                    if (tl?.quadrant === 'BR' && tr?.quadrant === 'BL' && bl?.quadrant === 'TR' && br?.quadrant === 'TL') { scoreBreakdown.diamondHeist -= 10; }
-                }}
-
-                // Sequence and Line Master (independent)
-                const visited = Array(this.GRID_SIZE * this.GRID_SIZE).fill(false); for (let i = 0; i < this.GRID_SIZE * this.GRID_SIZE; i++) { if (this.gridState[i] && !visited[i]) { const blob = [], queue = [i]; visited[i] = true; const symbol = this.gridState[i].symbol; while (queue.length > 0) { const currentIdx = queue.shift(); blob.push(currentIdx); const r = Math.floor(currentIdx / this.GRID_SIZE), c = currentIdx % this.GRID_SIZE; [[r-1,c], [r+1,c], [r,c-1], [r,c+1]].forEach(([nr, nc]) => { const neighborIdx = nr * this.GRID_SIZE + nc; if (nr >= 0 && nr < this.GRID_SIZE && nc >= 0 && nc < this.GRID_SIZE && this.gridState[neighborIdx]?.symbol === symbol && !visited[neighborIdx]) { visited[neighborIdx] = true; queue.push(neighborIdx); } }); } if (blob.length > 1) scoreBreakdown.sequence += blob.length; } }
-                for (let r = 0; r < this.GRID_SIZE; r++) { const firstPiece = this.gridState[r * this.GRID_SIZE]; if (firstPiece && this.gridState.slice(r * this.GRID_SIZE, (r + 1) * this.GRID_SIZE).every(p => p?.symbol === firstPiece.symbol)) scoreBreakdown.lineMaster += 10; }
-                for (let c = 0; c < this.GRID_SIZE; c++) { const firstPiece = this.gridState[c]; if (firstPiece) { let isLineMaster = true; for (let r = 1; r < this.GRID_SIZE; r++) { if (this.gridState[r * this.GRID_SIZE + c]?.symbol !== firstPiece.symbol) { isLineMaster = false; break; } } if (isLineMaster) scoreBreakdown.lineMaster += 10; } }
-
-                this.score = Object.values(scoreBreakdown).reduce((a, b) => a + b, 0);
-                this.updateScoreUI(scoreBreakdown);
-            }
-
-            updateScoreUI(breakdown) {
-                this.DOMElements.totalScore.textContent = this.score;
-                this.DOMElements.scorePerfectShape.textContent = breakdown.perfectShape;
-                this.DOMElements.scoreHalfBaked.textContent = breakdown.halfBaked;
-                this.DOMElements.scoreAlmostThere.textContent = breakdown.almostThere;
-                this.DOMElements.scoreSequence.textContent = breakdown.sequence;
-                this.DOMElements.scoreLineMaster.textContent = breakdown.lineMaster;
-                this.DOMElements.scoreDiamondHeist.textContent = breakdown.diamondHeist;
-                if (this.score > this.highScore) {
-                    this.highScore = this.score;
-                    localStorage.setItem(`matchaloHighScore_${this.config.id}`, this.highScore);
-                }
-                this.DOMElements.highScore.textContent = this.highScore;
-            }
-
-            updateSuperpowerUI() {
-                const canUsePower = this.placementState === 'AWAITING_ROLL' && this.usedSuperpowers.size < 2;
-                [this.DOMElements.rotateBtn, this.DOMElements.swapBtn, this.DOMElements.exchangeBtn, this.DOMElements.moveBtn].forEach(btn => {
-                    const powerName = btn.id.replace('-btn', '');
-                    const isUsed = this.usedSuperpowers.has(powerName);
-                    btn.disabled = !canUsePower || isUsed;
-                    btn.classList.toggle('opacity-50', !canUsePower || isUsed);
-                    btn.querySelector('.superpower-used-overlay').classList.toggle('hidden', !isUsed);
-                    btn.classList.toggle('superpower-btn--active', this.activeSuperpower === powerName);
-                });
-                this.DOMElements.spCharge1.classList.toggle('opacity-30', this.usedSuperpowers.size >= 1);
-                this.DOMElements.spCharge2.classList.toggle('opacity-30', this.usedSuperpowers.size >= 2);
-            }
-
+            handleSuperpowerClick(row, col) { const index = row * this.GRID_SIZE + col; const piece = this.gridState[index]; switch (this.activeSuperpower) { case this.SUPERPOWERS.ROTATE: if (!piece) return; const order = ['TL', 'TR', 'BR', 'BL']; piece.quadrant = order[(order.indexOf(piece.quadrant) + 1) % 4]; this.renderCell(row, col); this.consumeSuperpower(this.SUPERPOWERS.ROTATE); break; case this.SUPERPOWERS.MOVE: if (!this.superpowerState.source) { if (!piece) return; this.superpowerState.source = { row, col }; this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`).classList.add('pulsing-cell'); } else { if (piece) return; const srcIdx = this.superpowerState.source.row * this.GRID_SIZE + this.superpowerState.source.col; this.gridState[index] = this.gridState[srcIdx]; this.gridState[srcIdx] = null; this.renderCell(this.superpowerState.source.row, this.superpowerState.source.col); this.renderCell(row, col); this.consumeSuperpower(this.SUPERPOWERS.MOVE); } break; case this.SUPERPOWERS.SWAP: if (!this.superpowerState.source) { if (!piece) return; this.superpowerState.source = { row, col }; this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`).classList.add('pulsing-cell'); } else { if (!piece || Math.abs(this.superpowerState.source.row - row) + Math.abs(this.superpowerState.source.col - col) !== 1) return; const srcIdx = this.superpowerState.source.row * this.GRID_SIZE + this.superpowerState.source.col; const temp = this.gridState[srcIdx]; this.gridState[srcIdx] = this.gridState[index]; this.gridState[index] = temp; this.renderCell(this.superpowerState.source.row, this.superpowerState.source.col); this.renderCell(row, col); this.consumeSuperpower(this.SUPERPOWERS.SWAP); } break; case this.SUPERPOWERS.EXCHANGE: if (!piece) return; this.superpowerState.source = { row, col }; this.DOMElements.exchangeOptions.innerHTML = ''; const allAlos = this.SYMBOLS.flatMap(s => this.QUADRANTS.map(q => ({ symbol: s, quadrant: q }))); allAlos.forEach(alo => { const option = document.createElement('div'); option.className = 'w-16 h-16 bg-white/50 rounded-lg p-1 cursor-pointer hover:bg-white/90'; const img = document.createElement('img'); img.src = `${this.IMAGE_PATH}${alo.symbol.toLowerCase()}_${alo.quadrant}.svg`; option.appendChild(img); if (alo.symbol === piece.symbol && alo.quadrant === piece.quadrant) { option.classList.add('opacity-30', 'cursor-not-allowed'); } else { option.onclick = () => { this.gridState[this.superpowerState.source.row * this.GRID_SIZE + this.superpowerState.source.col] = alo; this.renderCell(this.superpowerState.source.row, this.superpowerState.source.col); this.DOMElements.exchangeModal.classList.add('hidden'); this.consumeSuperpower(this.SUPERPOWERS.EXCHANGE); }; } this.DOMElements.exchangeOptions.appendChild(option); }); this.DOMElements.exchangeModal.classList.remove('hidden'); break; } }
+            calculateTotalScore() { let scoreBreakdown = { perfectShape: 0, halfBaked: 0, almostThere: 0, sequence: 0, lineMaster: 0, diamondHeist: 0 }; const scoredPieces = new Set(); for (let r = 0; r < this.GRID_SIZE - 1; r++) { for (let c = 0; c < this.GRID_SIZE - 1; c++) { const indices = [r*this.GRID_SIZE+c, r*this.GRID_SIZE+c+1, (r+1)*this.GRID_SIZE+c, (r+1)*this.GRID_SIZE+c+1]; if (indices.some(i => scoredPieces.has(i))) continue; const tl = this.gridState[indices[0]], tr = this.gridState[indices[1]], bl = this.gridState[indices[2]], br = this.gridState[indices[3]]; if (tl?.quadrant === 'TL' && tr?.quadrant === 'TR' && bl?.quadrant === 'BL' && br?.quadrant === 'BR') { const symbols = [tl.symbol, tr.symbol, bl.symbol, br.symbol]; scoreBreakdown.perfectShape += (new Set(symbols).size === 1) ? 40 : 20; indices.forEach(i => scoredPieces.add(i)); } } } for (let r = 0; r < this.GRID_SIZE - 1; r++) { for (let c = 0; c < this.GRID_SIZE - 1; c++) { const indices = [r*this.GRID_SIZE+c, r*this.GRID_SIZE+c+1, (r+1)*this.GRID_SIZE+c, (r+1)*this.GRID_SIZE+c+1]; const availableIndices = indices.filter(i => this.gridState[i] && !scoredPieces.has(i)); const availablePieces = availableIndices.map(i => this.gridState[i]); if (availablePieces.length !== 3) continue; const quadrants = new Set(availablePieces.map(p => p.quadrant)); if (quadrants.size === 3) { const isAlmostThere = (quadrants.has('TL') && quadrants.has('TR') && quadrants.has('BL')) || (quadrants.has('TL') && quadrants.has('TR') && quadrants.has('BR')) || (quadrants.has('TL') && quadrants.has('BL') && quadrants.has('BR')) || (quadrants.has('TR') && quadrants.has('BL') && quadrants.has('BR')); if (isAlmostThere) { scoreBreakdown.almostThere += (new Set(availablePieces.map(p => p.symbol)).size === 1) ? 20 : 15; availableIndices.forEach(i => scoredPieces.add(i)); } } } } for (let r = 0; r < this.GRID_SIZE; r++) { for (let c = 0; c < this.GRID_SIZE; c++) { const p1_idx = r * this.GRID_SIZE + c; if (!this.gridState[p1_idx] || scoredPieces.has(p1_idx)) continue; const p2_idx_h = r * this.GRID_SIZE + c + 1; if (c < this.GRID_SIZE - 1 && this.gridState[p2_idx_h] && !scoredPieces.has(p2_idx_h)) { const q1 = this.gridState[p1_idx].quadrant, q2 = this.gridState[p2_idx_h].quadrant; if ((q1 === 'TL' && q2 === 'TR') || (q1 === 'TR' && q2 === 'TL') || (q1 === 'BL' && q2 === 'BR') || (q1 === 'BR' && q2 === 'BL')) { scoreBreakdown.halfBaked += (this.gridState[p1_idx].symbol === this.gridState[p2_idx_h].symbol) ? 10 : 5; scoredPieces.add(p1_idx); scoredPieces.add(p2_idx_h); continue; } } const p2_idx_v = (r + 1) * this.GRID_SIZE + c; if (r < this.GRID_SIZE - 1 && this.gridState[p2_idx_v] && !scoredPieces.has(p2_idx_v)) { const q1 = this.gridState[p1_idx].quadrant, q2 = this.gridState[p2_idx_v].quadrant; if ((q1 === 'TL' && q2 === 'BL') || (q1 === 'BL' && q2 === 'TL') || (q1 === 'TR' && q2 === 'BR') || (q1 === 'BR' && q2 === 'TR')) { scoreBreakdown.halfBaked += (this.gridState[p1_idx].symbol === this.gridState[p2_idx_v].symbol) ? 10 : 5; scoredPieces.add(p1_idx); scoredPieces.add(p2_idx_v); } } } } for (let r = 0; r < this.GRID_SIZE - 1; r++) { for (let c = 0; c < this.GRID_SIZE - 1; c++) { const tl = this.gridState[r*this.GRID_SIZE+c], tr = this.gridState[r*this.GRID_SIZE+c+1], bl = this.gridState[(r+1)*this.GRID_SIZE+c], br = this.gridState[(r+1)*this.GRID_SIZE+c+1]; if (tl?.quadrant === 'BR' && tr?.quadrant === 'BL' && bl?.quadrant === 'TR' && br?.quadrant === 'TL') { scoreBreakdown.diamondHeist -= 10; } } } const visited = Array(this.GRID_SIZE * this.GRID_SIZE).fill(false); for (let i = 0; i < this.GRID_SIZE * this.GRID_SIZE; i++) { if (this.gridState[i] && !visited[i]) { const blob = [], queue = [i]; visited[i] = true; const symbol = this.gridState[i].symbol; while (queue.length > 0) { const currentIdx = queue.shift(); blob.push(currentIdx); const r = Math.floor(currentIdx / this.GRID_SIZE), c = currentIdx % this.GRID_SIZE; [[r-1,c], [r+1,c], [r,c-1], [r,c+1]].forEach(([nr, nc]) => { const neighborIdx = nr * this.GRID_SIZE + nc; if (nr >= 0 && nr < this.GRID_SIZE && nc >= 0 && nc < this.GRID_SIZE && this.gridState[neighborIdx]?.symbol === symbol && !visited[neighborIdx]) { visited[neighborIdx] = true; queue.push(neighborIdx); } }); } if (blob.length > 1) scoreBreakdown.sequence += blob.length; } } for (let r = 0; r < this.GRID_SIZE; r++) { const firstPiece = this.gridState[r * this.GRID_SIZE]; if (firstPiece && this.gridState.slice(r * this.GRID_SIZE, (r + 1) * this.GRID_SIZE).every(p => p?.symbol === firstPiece.symbol)) scoreBreakdown.lineMaster += 10; } for (let c = 0; c < this.GRID_SIZE; c++) { const firstPiece = this.gridState[c]; if (firstPiece) { let isLineMaster = true; for (let r = 1; r < this.GRID_SIZE; r++) { if (this.gridState[r * this.GRID_SIZE + c]?.symbol !== firstPiece.symbol) { isLineMaster = false; break; } } if (isLineMaster) scoreBreakdown.lineMaster += 10; } } this.score = Object.values(scoreBreakdown).reduce((a, b) => a + b, 0); this.updateScoreUI(scoreBreakdown); }
+            updateScoreUI(breakdown) { this.DOMElements.totalScore.textContent = this.score; this.DOMElements.scorePerfectShape.textContent = breakdown.perfectShape; this.DOMElements.scoreHalfBaked.textContent = breakdown.halfBaked; this.DOMElements.scoreAlmostThere.textContent = breakdown.almostThere; this.DOMElements.scoreSequence.textContent = breakdown.sequence; this.DOMElements.scoreLineMaster.textContent = breakdown.lineMaster; this.DOMElements.scoreDiamondHeist.textContent = breakdown.diamondHeist; if (this.score > this.highScore) { this.highScore = this.score; localStorage.setItem(`matchaloHighScore_${this.config.id}`, this.highScore); } this.DOMElements.highScore.textContent = this.highScore; }
+            updateSuperpowerUI() { const canUsePower = this.placementState === 'AWAITING_ROLL' && this.usedSuperpowers.size < 2; [this.DOMElements.rotateBtn, this.DOMElements.swapBtn, this.DOMElements.exchangeBtn, this.DOMElements.moveBtn].forEach(btn => { const powerName = btn.id.replace('-btn', ''); const isUsed = this.usedSuperpowers.has(powerName); btn.disabled = !canUsePower || isUsed; btn.classList.toggle('opacity-50', !canUsePower || isUsed); btn.querySelector('.superpower-used-overlay').classList.toggle('hidden', !isUsed); btn.classList.toggle('superpower-btn--active', this.activeSuperpower === powerName); }); this.DOMElements.spCharge1.classList.toggle('opacity-30', this.usedSuperpowers.size >= 1); this.DOMElements.spCharge2.classList.toggle('opacity-30', this.usedSuperpowers.size >= 2); }
             placePiece(row, col, rollIndex) { this.gridState[row * this.GRID_SIZE + col] = this.currentRoll[rollIndex]; this.renderCell(row, col); }
             renderCell(row, col) { const index = row * this.GRID_SIZE + col, cell = this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`), piece = this.gridState[index]; cell.innerHTML = ''; if (piece) { cell.classList.remove('empty'); const img = document.createElement('img'); img.src = `${this.IMAGE_PATH}${piece.symbol.toLowerCase()}_${piece.quadrant}.svg`; cell.appendChild(img); } else { cell.classList.add('empty'); } }
             generateRandomAlo() { const symbol = this.SYMBOLS[Math.floor(Math.random() * this.SYMBOLS.length)], quadrant = this.QUADRANTS[Math.floor(Math.random() * this.QUADRANTS.length)]; return { symbol, quadrant }; }
@@ -519,9 +193,7 @@
             updateDiceDisplay() { [this.DOMElements.dice1El, this.DOMElements.dice2El].forEach((el, i) => { el.innerHTML = ''; if (this.currentRoll[i]) { const piece = this.currentRoll[i], img = document.createElement('img'); img.src = `${this.IMAGE_PATH}${piece.symbol.toLowerCase()}_${piece.quadrant}.svg`; el.appendChild(img); } else { el.textContent = '?'; } }); }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            gameManager.init();
-        });
+        document.addEventListener('DOMContentLoaded', () => { gameManager.init(); });
     </script>
 </body>
 </html>
