@@ -8,13 +8,16 @@
     
     <style>
         :root {
-            --bg-gradient: linear-gradient(135deg, #EADBFD 0%, #B8A2D6 100%);
-            --card-bg: rgba(255, 255, 255, 0.4);
-            --text-primary: #4A235A;
-            --text-secondary: #6A357A;
-            --accent-color: #F7B733;
-            --border-color: rgba(255, 255, 255, 0.3);
-            --shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --card-bg: rgba(255, 255, 255, 0.75);
+            --text-primary: #3d4a5d;
+            --text-secondary: #7f8c9d;
+            --accent-color: #6a11cb;
+            --accent-gradient: linear-gradient(135deg, #2575fc 0%, #6a11cb 100%);
+            --accent-highlight: #f7b733;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --grid-line-color: rgba(0, 0, 0, 0.05);
+            --shadow-soft: 0 8px 32px 0 rgba(106, 17, 203, 0.15);
             --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -35,9 +38,9 @@
         #game-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 2rem;
+            gap: 1.5rem;
             width: 100%;
-            max-width: 1200px;
+            max-width: 1100px;
             justify-content: center;
             align-items: stretch;
         }
@@ -49,25 +52,24 @@
 
         #game-board-panel {
             flex: 2;
-            max-width: 600px;
+            max-width: 550px;
             min-width: 300px;
         }
 
         #control-panel {
             flex: 1;
-            min-width: 280px;
-            max-width: 350px;
+            min-width: 320px;
+            max-width: 380px;
         }
 
         .game-board-wrapper {
             background: var(--card-bg);
             border-radius: 16px;
-            padding: 0; 
+            padding: 1rem; 
             box-shadow: var(--shadow-soft);
             border: 1px solid var(--border-color);
             width: 100%;
             box-sizing: border-box;
-            overflow: hidden;
         }
 
         #game-board {
@@ -76,8 +78,9 @@
             grid-template-rows: repeat(8, 1fr);
             width: 100%;
             aspect-ratio: 1;
-            background-color: #ffffff;
+            background-color: transparent;
             border-radius: 0;
+            overflow: hidden;
         }
 
         .grid-cell {
@@ -90,8 +93,12 @@
             overflow: hidden;
         }
 
+        .grid-cell.empty {
+            box-shadow: inset 0 0 0 1px var(--grid-line-color);
+        }
+        
         .grid-cell.empty:hover {
-            background-color: rgba(184, 162, 214, 0.2);
+            background-color: rgba(106, 17, 203, 0.05);
             cursor: pointer;
         }
 
@@ -99,7 +106,6 @@
             width: 100%; 
             height: 100%; 
             display: block; 
-            transform: scale(1.03); 
         }
         
         #right-panel-card {
@@ -108,41 +114,53 @@
             width: 100%;
             height: 100%;
             box-sizing: border-box;
-            padding: 1.5rem;
+            gap: 1rem;
         }
 
         .glass-card {
             background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
             border-radius: 16px;
             box-shadow: var(--shadow-soft);
             border: 1px solid var(--border-color);
+            padding: 1rem;
         }
         
-        .card-section { margin-bottom: 1.5rem; }
-        .card-section:last-child { margin-bottom: 0; }
-        .panel-title { margin: 0 0 1rem 0; font-weight: 700; text-align: center; opacity: 0.9; }
-        .score-value { font-size: 3rem; font-weight: 700; text-align: center; color: var(--text-primary); text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        #status-message { text-align: center; font-size: 1.1rem; min-height: 44px; }
-        .progress-bar-container { height: 10px; background-color: rgba(0, 0, 0, 0.1); border-radius: 5px; overflow: hidden; }
-        #progress-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #F7B733 0%, #FC4A1A 100%); border-radius: 5px; transition: width 0.5s var(--ease-smooth); }
-        #dice-container { display: flex; justify-content: space-around; align-items: center; gap: 0.5rem; }
-        .dice-roll-button { font-size: 2.5rem; background: none; border: none; cursor: pointer; padding: 0; transition: transform 0.2s ease; }
-        .dice-roll-button:hover { transform: scale(1.1); }
+        .panel-title { margin: 0 0 1rem 0; font-weight: 700; text-align: center; color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Container 1: Superpowers */
+        #superpowers-container { display: flex; align-items: center; gap: 1rem; }
+        .dice-roll-button { font-size: 2.5rem; background-color: #fff; border: 1px solid var(--border-color); cursor: pointer; padding: 0.5rem; border-radius: 12px; line-height: 1; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: all 0.2s ease; }
+        .dice-roll-button:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
         .dice-roll-button:disabled { cursor: not-allowed; opacity: 0.5; }
-        .dice-slot { width: 80px; height: 80px; background-color: rgba(255,255,255,0.5); border-radius: 8px; display: flex; justify-content: center; align-items: center; border: 1px solid var(--border-color); box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
+        #dice-displays { flex-grow: 1; display: flex; gap: 0.5rem; }
+        .dice-slot { width: 100%; aspect-ratio: 1; background-color: rgba(255,255,255,0.8); border-radius: 8px; display: flex; justify-content: center; align-items: center; border: 1px solid var(--border-color); box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
         .dice-slot img { width: 100%; height: 100%; }
-        .placeholder-text { font-size: 2.5rem; color: var(--text-secondary); opacity: 0.5; }
-        .controls { display: flex; flex-direction: column; gap: 1rem; margin-top: auto;}
-        .themed-button { padding: 0.75rem 1rem; font-size: 1rem; font-weight: 700; font-family: 'Quicksand', sans-serif; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s var(--ease-smooth); }
-        .themed-button.secondary { background-color: transparent; border: 2px solid var(--text-primary); color: var(--text-primary); }
-        .themed-button:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        .themed-button:disabled { background-color: #888; cursor: not-allowed; transform: none; box-shadow: none; }
-        .valid-placement-hint { background-color: rgba(247, 183, 51, 0.4) !important; cursor: pointer; }
-        .shape-complete-flash { animation: flash 1s ease-out; }
-        @keyframes flash { 0% { background-color: #ffffff; } 50% { background-color: var(--accent-color); } 100% { background-color: #ffffff; } }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .superpowers-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; flex-grow: 1.5; }
+        .superpower-btn { background: none; border: none; font-family: 'Quicksand', sans-serif; text-align: center; font-size: 0.7rem; color: var(--text-secondary); opacity: 0.6; cursor: not-allowed; }
+        
+        /* Container 2: Progress Bar */
+        .progress-bar-container { height: 8px; background-color: rgba(0, 0, 0, 0.05); border-radius: 4px; overflow: hidden; }
+        #progress-bar-fill { height: 100%; width: 0%; background: var(--accent-gradient); border-radius: 4px; transition: width 0.5s var(--ease-smooth); }
+
+        /* Container 3: Buttons */
+        #buttons-container { display: flex; flex-direction: column; gap: 0.5rem; }
+        #main-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+        .themed-button { padding: 0.75rem 0.5rem; font-size: 0.8rem; font-weight: 700; font-family: 'Quicksand', sans-serif; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s var(--ease-smooth); }
+        .themed-button.primary { background: var(--accent-gradient); color: #fff; }
+        .themed-button.secondary { background-color: rgba(255,255,255,0.6); color: var(--text-primary); border: 1px solid var(--border-color); }
+        .themed-button.tertiary { background: none; color: var(--text-secondary); }
+        .themed-button:hover { transform: translateY(-2px); box-shadow: var(--shadow-soft); }
+
+        /* Container 4: Scoring */
+        #scoring-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+        .score-item { text-align: center; }
+        .score-item h3 { margin: 0 0 0.25rem 0; font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+        .score-item .score-value { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); line-height: 1; }
+        .score-item .score-value.highlight { color: var(--accent-highlight); }
+        .score-item .score-value.penalty { color: #E53935; }
+
+        /* Modal Styles */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(5px); }
         .modal-content { position: relative; background: var(--bg-gradient); padding: 2rem; border-radius: 12px; text-align: center; box-shadow: var(--shadow-soft); border: 1px solid var(--border-color); }
         .hidden { display: none; }
         .close-button { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 2rem; color: var(--text-primary); cursor: pointer; opacity: 0.7; line-height: 1; }
@@ -153,42 +171,78 @@
     <main id="game-container">
         <div class="panel" id="game-board-panel">
             <div class="game-board-wrapper">
-                <div id="game-board">
-                    </div>
+                <div id="game-board"></div>
             </div>
         </div>
 
         <div class="panel" id="control-panel">
-            <div class="glass-card" id="right-panel-card">
-                <div class="card-section">
-                    <h2 class="panel-title">Score</h2>
-                    <div id="score-display" class="score-value">0</div>
-                </div>
-
-                <div class="card-section">
-                    <h2 class="panel-title">Your ALO Pieces</h2>
-                    <div id="dice-container">
+            <div id="right-panel-card">
+                <div class="glass-card">
+                    <div id="superpowers-container">
                         <button id="roll-dice-btn" class="dice-roll-button">🎲</button>
-                        <div id="dice-1" class="dice-slot"><div class="placeholder-text">?</div></div>
-                        <div id="dice-2" class="dice-slot"><div class="placeholder-text">?</div></div>
+                        <div id="dice-displays">
+                            <div id="dice-1" class="dice-slot"></div>
+                            <div id="dice-2" class="dice-slot"></div>
+                        </div>
+                        <div class="superpowers-grid">
+                            <button class="superpower-btn">Rotate</button>
+                            <button class="superpower-btn">Flip</button>
+                            <button class="superpower-btn">Exchange</button>
+                            <button class="superpower-btn">Swap</button>
+                        </div>
                     </div>
                 </div>
-                
-                <div class="card-section">
-                     <div class="progress-bar-container">
+
+                <div class="glass-card">
+                    <div class="progress-bar-container">
                         <div id="progress-bar-fill"></div>
                     </div>
                 </div>
 
-                <div class="card-section">
-                    <h2 class="panel-title">Status</h2>
-                    <p id="status-message">Click the Dice Icon to begin!</p>
+                <div class="glass-card" id="buttons-container">
+                    <div id="main-buttons">
+                        <button class="themed-button secondary">Help</button>
+                        <button id="reset-btn" class="themed-button primary">New Game</button>
+                        <button class="themed-button secondary">Badges</button>
+                    </div>
+                    <button class="themed-button tertiary">Edition: Circles</button>
                 </div>
 
-                <div class="card-section" style="flex-grow: 1;"></div>
-
-                <div class="card-section controls">
-                    <button id="reset-btn" class="themed-button secondary">Reset</button>
+                <div class="glass-card" style="flex-grow: 1;">
+                    <div id="scoring-grid">
+                        <div class="score-item">
+                            <h3>Total Score</h3>
+                            <div id="total-score" class="score-value" style="font-size: 2rem;">0</div>
+                        </div>
+                        <div class="score-item">
+                            <h3>High Score</h3>
+                            <div id="high-score" class="score-value highlight" style="font-size: 2rem;">0</div>
+                        </div>
+                        <div class="score-item">
+                            <h3>Circle</h3>
+                            <div id="score-circle" class="score-value">0</div>
+                        </div>
+                        <div class="score-item">
+                            <h3>Semi Circle</h3>
+                            <div id="score-semi-circle" class="score-value">0</div>
+                        </div>
+                        <div class="score-item">
+                            <h3>Almost Circle</h3>
+                            <div id="score-almost-circle" class="score-value">0</div>
+                        </div>
+                        <div class="score-item">
+                            <h3>Sequence</h3>
+                            <div id="score-sequence" class="score-value">0</div>
+                        </div>
+                        <div class="score-item">
+                            <h3>Line Master</h3>
+                            <div id="score-line-master" class="score-value">0</div>
+                        </div>
+                        <div class="score-item">
+                            <h3>Diamond Heist</h3>
+                            <div id="score-diamond-heist" class="score-value penalty">0</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -200,38 +254,53 @@
             <h2>Game Over!</h2>
             <p>You can no longer make a move.</p>
             <p>Final Score: <span id="final-score">0</span></p>
-            <button id="restart-modal-btn" class="themed-button">Play Again</button>
+            <button id="restart-modal-btn" class="themed-button primary">Play Again</button>
         </div>
     </div>
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const gameBoard = document.getElementById('game-board');
-            const rollDiceBtn = document.getElementById('roll-dice-btn');
-            const resetBtn = document.getElementById('reset-btn');
-            const dice1El = document.getElementById('dice-1');
-            const dice2El = document.getElementById('dice-2');
-            const scoreDisplay = document.getElementById('score-display');
-            const statusMessage = document.getElementById('status-message');
-            const gameOverModal = document.getElementById('game-over-modal');
-            const finalScoreEl = document.getElementById('final-score');
-            const restartModalBtn = document.getElementById('restart-modal-btn');
-            const closeModalBtn = document.getElementById('close-modal-btn');
+            // Element Cache
+            const DOMElements = {
+                gameBoard: document.getElementById('game-board'),
+                rollDiceBtn: document.getElementById('roll-dice-btn'),
+                resetBtn: document.getElementById('reset-btn'),
+                dice1El: document.getElementById('dice-1'),
+                dice2El: document.getElementById('dice-2'),
+                progressBarFill: document.getElementById('progress-bar-fill'),
+                // Score Displays
+                totalScore: document.getElementById('total-score'),
+                highScore: document.getElementById('high-score'),
+                scoreCircle: document.getElementById('score-circle'),
+                scoreSemiCircle: document.getElementById('score-semi-circle'),
+                scoreAlmostCircle: document.getElementById('score-almost-circle'),
+                scoreSequence: document.getElementById('score-sequence'),
+                scoreLineMaster: document.getElementById('score-line-master'),
+                scoreDiamondHeist: document.getElementById('score-diamond-heist'),
+                // Modal
+                gameOverModal: document.getElementById('game-over-modal'),
+                finalScore: document.getElementById('final-score'),
+                restartModalBtn: document.getElementById('restart-modal-btn'),
+                closeModalBtn: document.getElementById('close-modal-btn'),
+            };
             
+            // Constants
             const GRID_SIZE = 8;
             const SYMBOLS = ['navy', 'red', 'blue', 'grey'];
             const QUADRANTS = ['TL', 'TR', 'BL', 'BR'];
             const IMAGE_PATH = 'images/';
 
+            // Game State
             let gridState = [];
             let currentRoll = [];
             let placementState = 'AWAITING_ROLL';
             let firstPieceLocation = null;
             let score = 0;
+            let highScore = 0;
             let lastClick = { time: 0, row: -1, col: -1 };
 
             function init() {
-                gameBoard.innerHTML = '';
+                DOMElements.gameBoard.innerHTML = '';
                 gridState = Array(GRID_SIZE * GRID_SIZE).fill(null);
                 
                 for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
@@ -243,23 +312,25 @@
                     cell.dataset.row = row;
                     cell.dataset.col = col;
                     cell.addEventListener('click', () => onCellClick(row, col));
-                    gameBoard.appendChild(cell);
+                    DOMElements.gameBoard.appendChild(cell);
                 }
 
                 score = 0;
+                highScore = localStorage.getItem('matchaloHighScore') || 0;
                 currentRoll = [];
                 firstPieceLocation = null;
                 placementState = 'AWAITING_ROLL';
                 
-                updateScore();
+                calculateTotalScore(); // Will reset UI scores to 0
                 updateDiceDisplay();
                 updateProgressBar();
-                updateStatus();
-                gameOverModal.classList.add('hidden');
-                rollDiceBtn.disabled = false;
+                DOMElements.gameOverModal.classList.add('hidden');
+                DOMElements.rollDiceBtn.disabled = false;
             }
 
             function onCellClick(row, col) {
+                // ... (placement logic is complex, simplified for brevity but would be here)
+                // This is the core turn flow
                 const index = row * GRID_SIZE + col;
                 const now = new Date().getTime();
 
@@ -274,24 +345,20 @@
                     placePiece(row, col, 0);
                     firstPieceLocation = { row, col };
                     placementState = 'AWAITING_SECOND_PLACEMENT';
-                    updateStatus();
                     highlightValidSecondPlacements();
                 } else if (placementState === 'AWAITING_SECOND_PLACEMENT') {
                     const isAdjacent = Math.abs(firstPieceLocation.row - row) + Math.abs(firstPieceLocation.col - col) === 1;
                     if (isAdjacent && !gridState[index]) {
                         placePiece(row, col, 1);
                         clearHighlights();
-
-                        checkForCompletedShapes(firstPieceLocation.row, firstPieceLocation.col);
-                        checkForCompletedShapes(row, col);
                         
+                        calculateTotalScore();
                         updateProgressBar();
 
                         firstPieceLocation = null;
                         placementState = 'AWAITING_ROLL';
                         currentRoll = [];
                         updateDiceDisplay();
-                        updateStatus();
 
                         if (isGameOver()) {
                             showGameOver();
@@ -299,17 +366,14 @@
                     }
                 }
             }
-
+            
             function handleDoubleClick(row, col) {
-                if (placementState === 'AWAITING_SECOND_PLACEMENT' &&
-                    firstPieceLocation.row === row && firstPieceLocation.col === col) {
+                if (placementState === 'AWAITING_SECOND_PLACEMENT' && firstPieceLocation.row === row && firstPieceLocation.col === col) {
                     const index = row * GRID_SIZE + col;
                     gridState[index] = null;
                     renderCell(row, col);
-                    
                     firstPieceLocation = null;
                     placementState = 'AWAITING_FIRST_PLACEMENT';
-                    updateStatus();
                     clearHighlights();
                 }
             }
@@ -320,62 +384,190 @@
                 gridState[index] = piece;
                 renderCell(row, col);
             }
-            
+
+            function renderCell(row, col) {
+                const index = row * GRID_SIZE + col;
+                const cell = DOMElements.gameBoard.querySelector(`[data-index='${index}']`);
+                const piece = gridState[index];
+                cell.innerHTML = '';
+                if (piece) {
+                    cell.classList.remove('empty');
+                    const img = document.createElement('img');
+                    img.src = `${IMAGE_PATH}${piece.symbol.toLowerCase()}_${piece.quadrant}.svg`;
+                    img.alt = `${piece.symbol} ${piece.quadrant}`;
+                    cell.appendChild(img);
+                } else {
+                    cell.classList.add('empty');
+                }
+            }
+
             function handleRollDice() {
                 if (placementState !== 'AWAITING_ROLL') return;
-
                 const piece1 = generateRandomAlo();
                 let piece2 = generateRandomAlo();
-
                 while (piece2.quadrant === piece1.quadrant) {
                     piece2 = generateRandomAlo();
                 }
-                
                 currentRoll = [piece1, piece2];
-                
                 placementState = 'AWAITING_FIRST_PLACEMENT';
-                rollDiceBtn.disabled = true;
+                DOMElements.rollDiceBtn.disabled = true;
                 updateDiceDisplay();
-                updateStatus();
             }
-            
+
             function generateRandomAlo() {
                 const symbol = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
                 const quadrant = QUADRANTS[Math.floor(Math.random() * QUADRANTS.length)];
                 return { symbol, quadrant };
             }
             
-            function checkForCompletedShapes(r, c) {
-                if (r > 0 && c > 0) check2x2(r - 1, c - 1);
-                if (r > 0 && c < GRID_SIZE - 1) check2x2(r - 1, c);
-                if (r < GRID_SIZE - 1 && c > 0) check2x2(r, c - 1);
-                if (r < GRID_SIZE - 1 && c < GRID_SIZE - 1) check2x2(r, c);
+            // --- NEW SCORING ENGINE ---
+            function calculateTotalScore() {
+                let scoreBreakdown = {
+                    circle: 0, semiCircle: 0, almostCircle: 0,
+                    sequence: 0, lineMaster: 0, diamondHeist: 0
+                };
+                
+                const visited = Array(GRID_SIZE * GRID_SIZE).fill(false);
+
+                // 1. Circles, Semi-Circles, Almost-Circles, and Diamond Heist
+                for (let r = 0; r < GRID_SIZE - 1; r++) {
+                    for (let c = 0; c < GRID_SIZE - 1; c++) {
+                        const tl = gridState[r * GRID_SIZE + c];
+                        const tr = gridState[r * GRID_SIZE + c + 1];
+                        const bl = gridState[(r + 1) * GRID_SIZE + c];
+                        const br = gridState[(r + 1) * GRID_SIZE + c + 1];
+                        
+                        const pieces = [tl, tr, bl, br];
+                        const pieceCount = pieces.filter(p => p !== null).length;
+
+                        if (pieceCount >= 2) {
+                            // Check for full circle
+                            if (tl?.quadrant === 'TL' && tr?.quadrant === 'TR' && bl?.quadrant === 'BL' && br?.quadrant === 'BR') {
+                                const isSameColor = tl.symbol === tr.symbol && tl.symbol === bl.symbol && tl.symbol === br.symbol;
+                                scoreBreakdown.circle += isSameColor ? 40 : 20;
+                                continue; // Skip other checks for this block
+                            }
+
+                            // Check for Diamond Heist
+                            if (tl?.quadrant === 'BR' && tr?.quadrant === 'BL' && bl?.quadrant === 'TR' && br?.quadrant === 'TL') {
+                                scoreBreakdown.diamondHeist -= 10;
+                            }
+
+                            // Check for 3/4 circle
+                            const quadrants = pieces.map(p => p?.quadrant);
+                            if (pieceCount === 3 && ['TL', 'TR', 'BL', 'BR'].every(q => quadrants.includes(q) || !pieces[quadrants.indexOf(q)])) {
+                                const symbols = pieces.filter(Boolean).map(p => p.symbol);
+                                const isSameColor = new Set(symbols).size === 1;
+                                scoreBreakdown.almostCircle += isSameColor ? 20 : 15;
+                                continue;
+                            }
+                            
+                            // Check for semi-circles (horizontal and vertical)
+                            if (tl?.quadrant === 'TL' && tr?.quadrant === 'TR') scoreBreakdown.semiCircle += (tl.symbol === tr.symbol ? 10 : 5);
+                            if (bl?.quadrant === 'BL' && br?.quadrant === 'BR') scoreBreakdown.semiCircle += (bl.symbol === br.symbol ? 10 : 5);
+                            if (tl?.quadrant === 'TL' && bl?.quadrant === 'BL') scoreBreakdown.semiCircle += (tl.symbol === bl.symbol ? 10 : 5);
+                            if (tr?.quadrant === 'TR' && br?.quadrant === 'BR') scoreBreakdown.semiCircle += (tr.symbol === br.symbol ? 10 : 5);
+                        }
+                    }
+                }
+
+                // 2. Sequence Scoring (contiguous blocks)
+                for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
+                    if (gridState[i] && !visited[i]) {
+                        const blob = [];
+                        const queue = [i];
+                        visited[i] = true;
+                        const symbol = gridState[i].symbol;
+
+                        while (queue.length > 0) {
+                            const currentIdx = queue.shift();
+                            blob.push(currentIdx);
+                            
+                            const r = Math.floor(currentIdx / GRID_SIZE);
+                            const c = currentIdx % GRID_SIZE;
+                            const neighbors = [[r-1,c], [r+1,c], [r,c-1], [r,c+1]];
+
+                            for (const [nr, nc] of neighbors) {
+                                if (nr >= 0 && nr < GRID_SIZE && nc >= 0 && nc < GRID_SIZE) {
+                                    const neighborIdx = nr * GRID_SIZE + nc;
+                                    if (gridState[neighborIdx]?.symbol === symbol && !visited[neighborIdx]) {
+                                        visited[neighborIdx] = true;
+                                        queue.push(neighborIdx);
+                                    }
+                                }
+                            }
+                        }
+                        if (blob.length > 1) {
+                            scoreBreakdown.sequence += blob.length;
+                        }
+                    }
+                }
+                
+                // 3. Line Master
+                // Rows
+                for (let r = 0; r < GRID_SIZE; r++) {
+                    const firstPiece = gridState[r * GRID_SIZE];
+                    if (!firstPiece) continue;
+                    let isLineMaster = true;
+                    for (let c = 1; c < GRID_SIZE; c++) {
+                        const piece = gridState[r * GRID_SIZE + c];
+                        if (!piece || piece.symbol !== firstPiece.symbol) {
+                            isLineMaster = false;
+                            break;
+                        }
+                    }
+                    if (isLineMaster) scoreBreakdown.lineMaster += 10;
+                }
+                // Columns
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    const firstPiece = gridState[c];
+                    if (!firstPiece) continue;
+                    let isLineMaster = true;
+                    for (let r = 1; r < GRID_SIZE; r++) {
+                        const piece = gridState[r * GRID_SIZE + c];
+                        if (!piece || piece.symbol !== firstPiece.symbol) {
+                            isLineMaster = false;
+                            break;
+                        }
+                    }
+                    if (isLineMaster) scoreBreakdown.lineMaster += 10;
+                }
+
+                // Final Tally
+                score = Object.values(scoreBreakdown).reduce((a, b) => a + b, 0);
+                updateScoreUI(scoreBreakdown);
             }
             
-            function check2x2(topLeftRow, topLeftCol) {
-                const tl_idx = topLeftRow * GRID_SIZE + topLeftCol;
-                const tr_idx = tl_idx + 1;
-                const bl_idx = (topLeftRow + 1) * GRID_SIZE + topLeftCol;
-                const br_idx = bl_idx + 1;
-
-                const tl = gridState[tl_idx];
-                const tr = gridState[tr_idx];
-                const bl = gridState[bl_idx];
-                const br = gridState[br_idx];
+            function updateScoreUI(breakdown) {
+                DOMElements.totalScore.textContent = score;
+                DOMElements.scoreCircle.textContent = breakdown.circle;
+                DOMElements.scoreSemiCircle.textContent = breakdown.semiCircle;
+                DOMElements.scoreAlmostCircle.textContent = breakdown.almostCircle;
+                DOMElements.scoreSequence.textContent = breakdown.sequence;
+                DOMElements.scoreLineMaster.textContent = breakdown.lineMaster;
+                DOMElements.scoreDiamondHeist.textContent = breakdown.diamondHeist;
                 
-                if (!tl || !tr || !bl || !br) return;
-
-                if (
-                    tl.quadrant === 'TL' && tr.quadrant === 'TR' &&
-                    bl.quadrant === 'BL' && br.quadrant === 'BR' &&
-                    tl.symbol === tr.symbol && tl.symbol === bl.symbol && tl.symbol === br.symbol
-                ) {
-                    score += 5;
-                    updateScore();
-                    flashCells([tl_idx, tr_idx, bl_idx, br_idx]);
+                if (score > highScore) {
+                    highScore = score;
+                    localStorage.setItem('matchaloHighScore', highScore);
                 }
+                DOMElements.highScore.textContent = highScore;
             }
 
+            // --- Helper & UI Functions ---
+            function isGameOver() { /* ... unchanged ... */ return false; }
+            function showGameOver() {
+                DOMElements.finalScore.textContent = score;
+                DOMElements.gameOverModal.classList.remove('hidden');
+                DOMElements.rollDiceBtn.disabled = true;
+                DOMElements.gameBoard.querySelectorAll('.grid-cell.empty').forEach(cell => cell.classList.remove('empty'));
+            }
+            function highlightValidSecondPlacements() { /* ... unchanged ... */ }
+            function clearHighlights() { /* ... unchanged ... */ }
+            function updateProgressBar() { /* ... unchanged ... */ }
+            function updateDiceDisplay() { /* ... unchanged ... */ }
+            
+            // Re-implementing simplified helpers here for completeness
             function isGameOver() {
                 if (!gridState.includes(null)) return true;
                 for (let r = 0; r < GRID_SIZE; r++) {
@@ -389,76 +581,29 @@
                 }
                 return true;
             }
-
-            function showGameOver() {
-                finalScoreEl.textContent = score;
-                gameOverModal.classList.remove('hidden');
-                rollDiceBtn.disabled = true;
-            }
-
-            function flashCells(indices) {
-                indices.forEach(index => {
-                    const cell = gameBoard.querySelector(`[data-index='${index}']`);
-                    if (cell) {
-                        cell.classList.add('shape-complete-flash');
-                        setTimeout(() => cell.classList.remove('shape-complete-flash'), 1000);
-                    }
-                });
-            }
-
             function highlightValidSecondPlacements() {
                 const { row, col } = firstPieceLocation;
-                const neighbors = [
-                    { r: row - 1, c: col }, { r: row + 1, c: col },
-                    { r: row, c: col - 1 }, { r: row, c: col + 1 }
-                ];
+                const neighbors = [{ r: row - 1, c: col }, { r: row + 1, c: col }, { r: row, c: col - 1 }, { r: row, c: col + 1 }];
                 neighbors.forEach(n => {
                     if (n.r >= 0 && n.r < GRID_SIZE && n.c >= 0 && n.c < GRID_SIZE) {
                         const index = n.r * GRID_SIZE + n.c;
                         if (!gridState[index]) {
-                            const cell = gameBoard.querySelector(`[data-index='${index}']`);
-                            cell.classList.add('valid-placement-hint');
+                            DOMElements.gameBoard.querySelector(`[data-index='${index}']`).classList.add('valid-placement-hint');
                         }
                     }
                 });
             }
-
             function clearHighlights() {
-                document.querySelectorAll('.valid-placement-hint').forEach(cell => {
-                    cell.classList.remove('valid-placement-hint');
-                });
+                DOMElements.gameBoard.querySelectorAll('.valid-placement-hint').forEach(cell => cell.classList.remove('valid-placement-hint'));
             }
-
-            function renderCell(row, col) {
-                const index = row * GRID_SIZE + col;
-                const cell = gameBoard.querySelector(`[data-index='${index}']`);
-                const piece = gridState[index];
-                cell.innerHTML = '';
-                if (piece) {
-                    cell.classList.remove('empty');
-                    const img = document.createElement('img');
-                    img.src = `${IMAGE_PATH}${piece.symbol.toLowerCase()}_${piece.quadrant}.svg`;
-                    img.alt = `${piece.symbol} ${piece.quadrant}`;
-                    cell.appendChild(img);
-                } else {
-                    cell.classList.add('empty');
-                }
-            }
-            
             function updateProgressBar() {
-                const progressBarFill = document.getElementById('progress-bar-fill');
                 const totalCells = GRID_SIZE * GRID_SIZE;
                 const filledCells = gridState.filter(cell => cell !== null).length;
                 const percentage = (filledCells / totalCells) * 100;
-                progressBarFill.style.width = `${percentage}%`;
+                DOMElements.progressBarFill.style.width = `${percentage}%`;
             }
-
-            function updateScore() {
-                scoreDisplay.textContent = score;
-            }
-
             function updateDiceDisplay() {
-                const diceElements = [dice1El, dice2El];
+                const diceElements = [DOMElements.dice1El, DOMElements.dice2El];
                 diceElements.forEach((el, i) => {
                     el.innerHTML = '';
                     if (currentRoll[i]) {
@@ -467,32 +612,16 @@
                         img.src = `${IMAGE_PATH}${piece.symbol.toLowerCase()}_${piece.quadrant}.svg`;
                         img.alt = `${piece.symbol} ${piece.quadrant}`;
                         el.appendChild(img);
-                    } else {
-                        el.innerHTML = '<div class="placeholder-text">?</div>';
                     }
                 });
             }
 
-            function updateStatus() {
-                switch (placementState) {
-                    case 'AWAITING_ROLL':
-                        statusMessage.textContent = 'Click the Dice Icon to get new pieces.';
-                        rollDiceBtn.disabled = isGameOver();
-                        break;
-                    case 'AWAITING_FIRST_PLACEMENT':
-                        statusMessage.textContent = 'Place the first Alo piece.';
-                        break;
-                    case 'AWAITING_SECOND_PLACEMENT':
-                        statusMessage.textContent = 'Place the second Alo piece next to the first.';
-                        break;
-                }
-            }
-
-            rollDiceBtn.addEventListener('click', handleRollDice);
-            resetBtn.addEventListener('click', init);
-            restartModalBtn.addEventListener('click', init);
-            closeModalBtn.addEventListener('click', () => {
-                gameOverModal.classList.add('hidden');
+            // Event Listeners
+            DOMElements.rollDiceBtn.addEventListener('click', handleRollDice);
+            DOMElements.resetBtn.addEventListener('click', init);
+            DOMElements.restartModalBtn.addEventListener('click', init);
+            DOMElements.closeModalBtn.addEventListener('click', () => {
+                DOMElements.gameOverModal.classList.add('hidden');
             });
 
             init();
