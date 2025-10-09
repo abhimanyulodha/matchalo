@@ -4,263 +4,171 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MATCHALO</title>
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            --card-bg: rgba(255, 255, 255, 0.75);
-            --text-primary: #3d4a5d;
-            --text-secondary: #7f8c9d;
-            --accent-color: #6a11cb;
+            /* Adapted purple theme from previous MATCHALO version */
+            --bg: linear-gradient(135deg, #f5f7fa 0%, #e8e4f1 100%);
+            --card: rgba(255, 255, 255, 0.85);
+            --text: #4a0e69;
+            --text-secondary: #8a6aa0;
+            --accent: #6a11cb;
+            --accent-light: rgba(106, 17, 203, 0.1);
             --accent-gradient: linear-gradient(135deg, #2575fc 0%, #6a11cb 100%);
-            --accent-highlight: #f7b733;
-            --border-color: rgba(0, 0, 0, 0.08);
-            --grid-line-color: rgba(0, 0, 0, 0.05);
-            --shadow-soft: 0 8px 32px 0 rgba(106, 17, 203, 0.15);
+            --accent-gradient-shaded: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+            --highlighted-bg: rgba(106, 17, 203, 0.15);
+            --grid-line-color: rgba(106, 17, 203, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --faint-border: rgba(0, 0, 0, 0.08);
+            --shadow-soft: 0 4px 15px rgba(106, 17, 203, 0.08);
+            --shadow-medium: 0 8px 30px rgba(106, 17, 203, 0.1);
+            --shadow-strong: 0 15px 50px rgba(106, 17, 203, 0.12);
+            --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
             --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         body {
             font-family: 'Quicksand', sans-serif;
             font-weight: 500;
-            margin: 0;
-            padding: 1rem;
-            background: var(--bg-gradient);
-            color: var(--text-primary);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            box-sizing: border-box;
-        }
-
-        #game-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1.5rem;
-            width: 100%;
-            max-width: 1100px;
-            justify-content: center;
-            align-items: stretch;
-        }
-
-        .panel {
-            display: flex;
-            flex-direction: column;
-        }
-
-        #game-board-panel {
-            flex: 2;
-            max-width: 550px;
-            min-width: 300px;
-        }
-
-        #control-panel {
-            flex: 1;
-            min-width: 320px;
-            max-width: 380px;
-        }
-
-        .game-board-wrapper {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 1rem; 
-            box-shadow: var(--shadow-soft);
-            border: 1px solid var(--border-color);
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        #game-board {
-            display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            grid-template-rows: repeat(8, 1fr);
-            width: 100%;
-            aspect-ratio: 1;
-            background-color: transparent;
-            border-radius: 0;
-            overflow: hidden;
-        }
-
-        .grid-cell {
-            aspect-ratio: 1;
-            box-sizing: border-box;
-            transition: background-color 0.2s var(--ease-smooth);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        .grid-cell.empty {
-            box-shadow: inset 0 0 0 1px var(--grid-line-color);
+            background: var(--bg);
+            color: var(--text);
         }
         
-        .grid-cell.empty:hover {
-            background-color: rgba(106, 17, 203, 0.05);
-            cursor: pointer;
-        }
-
-        .grid-cell img { 
-            width: 100%; 
-            height: 100%; 
-            display: block; 
-        }
-        
-        #right-panel-card {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            height: 100%;
-            box-sizing: border-box;
-            gap: 1rem;
-        }
-
         .glass-card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            box-shadow: var(--shadow-soft);
-            border: 1px solid var(--border-color);
-            padding: 1rem;
+            background: var(--card);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            box-shadow: var(--shadow-soft), 0 0 0 1px var(--glass-border), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            border: none !important;
         }
-        
-        .panel-title { margin: 0 0 1rem 0; font-weight: 700; text-align: center; color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* Container 1: Superpowers */
-        #superpowers-container { display: flex; align-items: center; gap: 1rem; }
-        .dice-roll-button { font-size: 2.5rem; background-color: #fff; border: 1px solid var(--border-color); cursor: pointer; padding: 0.5rem; border-radius: 12px; line-height: 1; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: all 0.2s ease; }
-        .dice-roll-button:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
-        .dice-roll-button:disabled { cursor: not-allowed; opacity: 0.5; }
-        #dice-displays { flex-grow: 1; display: flex; gap: 0.5rem; }
-        .dice-slot { width: 100%; aspect-ratio: 1; background-color: rgba(255,255,255,0.8); border-radius: 8px; display: flex; justify-content: center; align-items: center; border: 1px solid var(--border-color); box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
-        .dice-slot img { width: 100%; height: 100%; }
-        .superpowers-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; flex-grow: 1.5; }
-        .superpower-btn { background: none; border: none; font-family: 'Quicksand', sans-serif; text-align: center; font-size: 0.7rem; color: var(--text-secondary); opacity: 0.6; cursor: not-allowed; }
-        
-        /* Container 2: Progress Bar */
-        .progress-bar-container { height: 8px; background-color: rgba(0, 0, 0, 0.05); border-radius: 4px; overflow: hidden; }
-        #progress-bar-fill { height: 100%; width: 0%; background: var(--accent-gradient); border-radius: 4px; transition: width 0.5s var(--ease-smooth); }
-
-        /* Container 3: Buttons */
-        #buttons-container { display: flex; flex-direction: column; gap: 0.5rem; }
-        #main-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
-        .themed-button { padding: 0.75rem 0.5rem; font-size: 0.8rem; font-weight: 700; font-family: 'Quicksand', sans-serif; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s var(--ease-smooth); }
-        .themed-button.primary { background: var(--accent-gradient); color: #fff; }
-        .themed-button.secondary { background-color: rgba(255,255,255,0.6); color: var(--text-primary); border: 1px solid var(--border-color); }
+        .themed-button.primary { background: var(--accent-gradient); }
+        .themed-button.secondary { background-color: rgba(255,255,255,0.6); color: var(--text); border: 1px solid var(--faint-border); }
         .themed-button.tertiary { background: none; color: var(--text-secondary); }
-        .themed-button:hover { transform: translateY(-2px); box-shadow: var(--shadow-soft); }
+        .themed-button:hover { transform: translateY(-2px); box-shadow: var(--shadow-medium); }
+        
+        .progress-bar-container { background: var(--accent-light); }
+        .progress-bar-fill { background: var(--accent-gradient); }
 
-        /* Container 4: Scoring */
-        #scoring-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-        .score-item { text-align: center; }
-        .score-item h3 { margin: 0 0 0.25rem 0; font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
-        .score-item .score-value { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); line-height: 1; }
-        .score-item .score-value.highlight { color: var(--accent-highlight); }
-        .score-item .score-value.penalty { color: #E53935; }
+        @keyframes dice-tumble {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(-180deg) scale(1.1); }
+            100% { transform: rotate(-360deg) scale(1); }
+        }
+        .dice-tumble { animation: dice-tumble 0.6s var(--ease-bounce); }
 
-        /* Modal Styles */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(5px); }
-        .modal-content { position: relative; background: var(--bg-gradient); padding: 2rem; border-radius: 12px; text-align: center; box-shadow: var(--shadow-soft); border: 1px solid var(--border-color); }
-        .hidden { display: none; }
-        .close-button { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 2rem; color: var(--text-primary); cursor: pointer; opacity: 0.7; line-height: 1; }
-        .close-button:hover { opacity: 1; }
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+        }
     </style>
 </head>
-<body>
-    <main id="game-container">
-        <div class="panel" id="game-board-panel">
-            <div class="game-board-wrapper">
-                <div id="game-board"></div>
+<body class="p-2 lg:p-4">
+    <main id="game-container" class="w-full max-w-6xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6 items-center lg:items-stretch pt-8 lg:pt-16">
+        
+        <div class="w-full lg:w-2/3">
+            <div id="game-board-container" class="p-4 lg:p-6 h-full glass-card rounded-2xl">
+                <div id="game-board" class="grid grid-cols-8 w-full aspect-square bg-white">
+                    </div>
             </div>
         </div>
 
-        <div class="panel" id="control-panel">
-            <div id="right-panel-card">
-                <div class="glass-card">
-                    <div id="superpowers-container">
-                        <button id="roll-dice-btn" class="dice-roll-button">🎲</button>
-                        <div id="dice-displays">
-                            <div id="dice-1" class="dice-slot"></div>
-                            <div id="dice-2" class="dice-slot"></div>
+        <div class="w-full lg:w-1/3">
+            <div id="right-panel-card" class="flex-1 flex flex-col gap-y-3 lg:gap-y-4">
+                
+                <div class="glass-card rounded-2xl p-4">
+                    <div class="flex items-center gap-4">
+                        <button id="roll-dice-btn" class="w-16 h-16 text-4xl flex items-center justify-center rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-400">🎲</button>
+                        <div class="flex-1 grid grid-cols-2 gap-2">
+                            <div id="dice-1" class="w-full aspect-square bg-white/60 rounded-lg flex items-center justify-center text-4xl text-gray-400 border border-gray-200/50 shadow-inner"></div>
+                            <div id="dice-2" class="w-full aspect-square bg-white/60 rounded-lg flex items-center justify-center text-4xl text-gray-400 border border-gray-200/50 shadow-inner"></div>
                         </div>
-                        <div class="superpowers-grid">
-                            <button class="superpower-btn">Rotate</button>
-                            <button class="superpower-btn">Flip</button>
-                            <button class="superpower-btn">Exchange</button>
-                            <button class="superpower-btn">Swap</button>
+                    </div>
+                    <h3 class="text-xs font-semibold uppercase tracking-wider text-center mt-4 mb-2" style="color: var(--text-secondary);">Alo Superpowers</h3>
+                    <div class="grid grid-cols-4 gap-1 text-center">
+                        <button class="superpower-btn themed-button tertiary text-xs p-1 opacity-50 cursor-not-allowed">Rotate</button>
+                        <button class="superpower-btn themed-button tertiary text-xs p-1 opacity-50 cursor-not-allowed">Flip</button>
+                        <button class="superpower-btn themed-button tertiary text-xs p-1 opacity-50 cursor-not-allowed">Exchange</button>
+                        <button class="superpower-btn themed-button tertiary text-xs p-1 opacity-50 cursor-not-allowed">Swap</button>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-xl p-3">
+                    <div class="relative w-full h-2.5 progress-bar-container rounded-full">
+                        <div id="progress-bar-fill" class="progress-bar-fill h-full rounded-full"></div>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-4">
+                    <div class="flex justify-center items-center gap-3">
+                        <button class="themed-button secondary text-xs flex-1">Help</button>
+                        <button id="reset-btn" class="themed-button primary text-xs flex-1 text-white">New Game</button>
+                        <button class="themed-button secondary text-xs flex-1">Badges</button>
+                    </div>
+                    <div class="text-center mt-3">
+                        <button class="themed-button tertiary w-full text-sm">Edition: Circles</button>
+                    </div>
+                </div>
+                
+                <div class="glass-card rounded-2xl p-4 flex-1">
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-3 text-center h-full">
+                        <div class="score-item">
+                            <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Total Score</h3>
+                            <div id="total-score" class="text-3xl font-bold" style="color: var(--accent);">0</div>
+                        </div>
+                        <div class="score-item">
+                            <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">High Score</h3>
+                            <div id="high-score" class="text-3xl font-bold text-amber-500">0</div>
+                        </div>
+                        <div class="score-item border-t border-gray-200/80 pt-2">
+                            <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Circle</h3>
+                            <div id="score-circle" class="text-xl font-bold">0</div>
+                        </div>
+                        <div class="score-item border-t border-gray-200/80 pt-2">
+                            <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Semi Circle</h3>
+                            <div id="score-semi-circle" class="text-xl font-bold">0</div>
+                        </div>
+                        <div class="score-item">
+                            <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Almost Circle</h3>
+                            <div id="score-almost-circle" class="text-xl font-bold">0</div>
+                        </div>
+                        <div class="score-item">
+                            <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Sequence</h3>
+                            <div id="score-sequence" class="text-xl font-bold">0</div>
+                        </div>
+                        <div class="score-item">
+                            <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Line Master</h3>
+                            <div id="score-line-master" class="text-xl font-bold">0</div>
+                        </div>
+                        <div class="score-item">
+                            <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Diamond Heist</h3>
+                            <div id="score-diamond-heist" class="text-xl font-bold text-red-600">0</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="glass-card">
-                    <div class="progress-bar-container">
-                        <div id="progress-bar-fill"></div>
-                    </div>
-                </div>
-
-                <div class="glass-card" id="buttons-container">
-                    <div id="main-buttons">
-                        <button class="themed-button secondary">Help</button>
-                        <button id="reset-btn" class="themed-button primary">New Game</button>
-                        <button class="themed-button secondary">Badges</button>
-                    </div>
-                    <button class="themed-button tertiary">Edition: Circles</button>
-                </div>
-
-                <div class="glass-card" style="flex-grow: 1;">
-                    <div id="scoring-grid">
-                        <div class="score-item">
-                            <h3>Total Score</h3>
-                            <div id="total-score" class="score-value" style="font-size: 2rem;">0</div>
-                        </div>
-                        <div class="score-item">
-                            <h3>High Score</h3>
-                            <div id="high-score" class="score-value highlight" style="font-size: 2rem;">0</div>
-                        </div>
-                        <div class="score-item">
-                            <h3>Circle</h3>
-                            <div id="score-circle" class="score-value">0</div>
-                        </div>
-                        <div class="score-item">
-                            <h3>Semi Circle</h3>
-                            <div id="score-semi-circle" class="score-value">0</div>
-                        </div>
-                        <div class="score-item">
-                            <h3>Almost Circle</h3>
-                            <div id="score-almost-circle" class="score-value">0</div>
-                        </div>
-                        <div class="score-item">
-                            <h3>Sequence</h3>
-                            <div id="score-sequence" class="score-value">0</div>
-                        </div>
-                        <div class="score-item">
-                            <h3>Line Master</h3>
-                            <div id="score-line-master" class="score-value">0</div>
-                        </div>
-                        <div class="score-item">
-                            <h3>Diamond Heist</h3>
-                            <div id="score-diamond-heist" class="score-value penalty">0</div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </main>
 
-    <div id="game-over-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <button id="close-modal-btn" class="close-button">&times;</button>
-            <h2>Game Over!</h2>
-            <p>You can no longer make a move.</p>
-            <p>Final Score: <span id="final-score">0</span></p>
-            <button id="restart-modal-btn" class="themed-button primary">Play Again</button>
+    <div id="game-over-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden">
+        <div class="modal-content w-full max-w-sm glass-card rounded-2xl p-8 text-center relative">
+            <button id="close-modal-btn" class="absolute top-4 right-4 w-8 h-8 rounded-full text-xl flex items-center justify-center font-bold text-gray-500 hover:bg-gray-200/50">×</button>
+            <h2 class="text-2xl font-bold mb-4" style="color: var(--accent);">Game Over</h2>
+            <p class="mb-6" style="color: var(--text-secondary);">You can no longer make a move.</p>
+            <p class="text-sm" style="color: var(--text-secondary);">Final Score</p>
+            <div id="final-score" class="text-6xl font-bold my-2" style="color: var(--accent);">0</div>
+            <button id="restart-modal-btn" class="themed-button primary w-full py-2.5 px-4 text-white text-sm mt-4">Play Again</button>
         </div>
     </div>
     
     <script>
+        // NOTE: This is the complex MATCHALO scoring logic wired up to the new Alloha-style UI.
         document.addEventListener('DOMContentLoaded', () => {
-            // Element Cache
             const DOMElements = {
                 gameBoard: document.getElementById('game-board'),
                 rollDiceBtn: document.getElementById('roll-dice-btn'),
@@ -268,7 +176,6 @@
                 dice1El: document.getElementById('dice-1'),
                 dice2El: document.getElementById('dice-2'),
                 progressBarFill: document.getElementById('progress-bar-fill'),
-                // Score Displays
                 totalScore: document.getElementById('total-score'),
                 highScore: document.getElementById('high-score'),
                 scoreCircle: document.getElementById('score-circle'),
@@ -277,20 +184,17 @@
                 scoreSequence: document.getElementById('score-sequence'),
                 scoreLineMaster: document.getElementById('score-line-master'),
                 scoreDiamondHeist: document.getElementById('score-diamond-heist'),
-                // Modal
                 gameOverModal: document.getElementById('game-over-modal'),
                 finalScore: document.getElementById('final-score'),
                 restartModalBtn: document.getElementById('restart-modal-btn'),
                 closeModalBtn: document.getElementById('close-modal-btn'),
             };
             
-            // Constants
             const GRID_SIZE = 8;
             const SYMBOLS = ['navy', 'red', 'blue', 'grey'];
             const QUADRANTS = ['TL', 'TR', 'BL', 'BR'];
             const IMAGE_PATH = 'images/';
 
-            // Game State
             let gridState = [];
             let currentRoll = [];
             let placementState = 'AWAITING_ROLL';
@@ -305,7 +209,7 @@
                 
                 for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
                     const cell = document.createElement('div');
-                    cell.classList.add('grid-cell', 'empty');
+                    cell.className = 'grid-cell empty'; // Tailwind is handled by parent, we just add state
                     cell.dataset.index = i;
                     const row = Math.floor(i / GRID_SIZE);
                     const col = i % GRID_SIZE;
@@ -321,7 +225,7 @@
                 firstPieceLocation = null;
                 placementState = 'AWAITING_ROLL';
                 
-                calculateTotalScore(); // Will reset UI scores to 0
+                calculateTotalScore();
                 updateDiceDisplay();
                 updateProgressBar();
                 DOMElements.gameOverModal.classList.add('hidden');
@@ -329,15 +233,12 @@
             }
 
             function onCellClick(row, col) {
-                // ... (placement logic is complex, simplified for brevity but would be here)
-                // This is the core turn flow
                 const index = row * GRID_SIZE + col;
                 const now = new Date().getTime();
 
                 if (now - lastClick.time < 300 && lastClick.row === row && lastClick.col === col) {
                     handleDoubleClick(row, col);
-                    lastClick = { time: 0, row: -1, col: -1 };
-                    return;
+                    lastClick = { time: 0, row: -1, col: -1 }; return;
                 }
                 lastClick = { time: now, row, col };
 
@@ -345,19 +246,17 @@
                     placePiece(row, col, 0);
                     firstPieceLocation = { row, col };
                     placementState = 'AWAITING_SECOND_PLACEMENT';
-                    highlightValidSecondPlacements();
                 } else if (placementState === 'AWAITING_SECOND_PLACEMENT') {
                     const isAdjacent = Math.abs(firstPieceLocation.row - row) + Math.abs(firstPieceLocation.col - col) === 1;
                     if (isAdjacent && !gridState[index]) {
                         placePiece(row, col, 1);
-                        clearHighlights();
-                        
                         calculateTotalScore();
                         updateProgressBar();
 
                         firstPieceLocation = null;
                         placementState = 'AWAITING_ROLL';
                         currentRoll = [];
+                        DOMElements.rollDiceBtn.disabled = false;
                         updateDiceDisplay();
 
                         if (isGameOver()) {
@@ -374,7 +273,6 @@
                     renderCell(row, col);
                     firstPieceLocation = null;
                     placementState = 'AWAITING_FIRST_PLACEMENT';
-                    clearHighlights();
                 }
             }
 
@@ -394,7 +292,6 @@
                     cell.classList.remove('empty');
                     const img = document.createElement('img');
                     img.src = `${IMAGE_PATH}${piece.symbol.toLowerCase()}_${piece.quadrant}.svg`;
-                    img.alt = `${piece.symbol} ${piece.quadrant}`;
                     cell.appendChild(img);
                 } else {
                     cell.classList.add('empty');
@@ -403,15 +300,23 @@
 
             function handleRollDice() {
                 if (placementState !== 'AWAITING_ROLL') return;
-                const piece1 = generateRandomAlo();
-                let piece2 = generateRandomAlo();
-                while (piece2.quadrant === piece1.quadrant) {
-                    piece2 = generateRandomAlo();
-                }
-                currentRoll = [piece1, piece2];
-                placementState = 'AWAITING_FIRST_PLACEMENT';
+                
                 DOMElements.rollDiceBtn.disabled = true;
-                updateDiceDisplay();
+                DOMElements.dice1El.classList.add('dice-tumble');
+                DOMElements.dice2El.classList.add('dice-tumble');
+                
+                setTimeout(() => {
+                    const piece1 = generateRandomAlo();
+                    let piece2 = generateRandomAlo();
+                    while (piece2.quadrant === piece1.quadrant && piece2.symbol === piece1.symbol) {
+                        piece2 = generateRandomAlo();
+                    }
+                    currentRoll = [piece1, piece2];
+                    placementState = 'AWAITING_FIRST_PLACEMENT';
+                    updateDiceDisplay();
+                    DOMElements.dice1El.classList.remove('dice-tumble');
+                    DOMElements.dice2El.classList.remove('dice-tumble');
+                }, 600);
             }
 
             function generateRandomAlo() {
@@ -420,16 +325,10 @@
                 return { symbol, quadrant };
             }
             
-            // --- NEW SCORING ENGINE ---
             function calculateTotalScore() {
-                let scoreBreakdown = {
-                    circle: 0, semiCircle: 0, almostCircle: 0,
-                    sequence: 0, lineMaster: 0, diamondHeist: 0
-                };
-                
+                let scoreBreakdown = { circle: 0, semiCircle: 0, almostCircle: 0, sequence: 0, lineMaster: 0, diamondHeist: 0 };
                 const visited = Array(GRID_SIZE * GRID_SIZE).fill(false);
 
-                // 1. Circles, Semi-Circles, Almost-Circles, and Diamond Heist
                 for (let r = 0; r < GRID_SIZE - 1; r++) {
                     for (let c = 0; c < GRID_SIZE - 1; c++) {
                         const tl = gridState[r * GRID_SIZE + c];
@@ -437,57 +336,40 @@
                         const bl = gridState[(r + 1) * GRID_SIZE + c];
                         const br = gridState[(r + 1) * GRID_SIZE + c + 1];
                         
-                        const pieces = [tl, tr, bl, br];
-                        const pieceCount = pieces.filter(p => p !== null).length;
+                        const pieces = [tl, tr, bl, br].filter(Boolean);
+                        if (pieces.length < 2) continue;
 
-                        if (pieceCount >= 2) {
-                            // Check for full circle
-                            if (tl?.quadrant === 'TL' && tr?.quadrant === 'TR' && bl?.quadrant === 'BL' && br?.quadrant === 'BR') {
-                                const isSameColor = tl.symbol === tr.symbol && tl.symbol === bl.symbol && tl.symbol === br.symbol;
-                                scoreBreakdown.circle += isSameColor ? 40 : 20;
-                                continue; // Skip other checks for this block
+                        if (tl?.quadrant === 'TL' && tr?.quadrant === 'TR' && bl?.quadrant === 'BL' && br?.quadrant === 'BR') {
+                            const isSameColor = tl.symbol === tr.symbol && tl.symbol === bl.symbol && tl.symbol === br.symbol;
+                            scoreBreakdown.circle += isSameColor ? 40 : 20;
+                        } else if (tl?.quadrant === 'BR' && tr?.quadrant === 'BL' && bl?.quadrant === 'TR' && br?.quadrant === 'TL') {
+                            scoreBreakdown.diamondHeist -= 10;
+                        } else {
+                            const quadrants = pieces.map(p => p.quadrant);
+                            if (pieces.length === 3 && ['TL', 'TR', 'BL', 'BR'].filter(q => quadrants.includes(q)).length === 3) {
+                                const symbols = pieces.map(p => p.symbol);
+                                scoreBreakdown.almostCircle += new Set(symbols).size === 1 ? 20 : 15;
+                            } else {
+                                if (tl?.quadrant === 'TL' && tr?.quadrant === 'TR') scoreBreakdown.semiCircle += (tl.symbol === tr.symbol ? 10 : 5);
+                                if (bl?.quadrant === 'BL' && br?.quadrant === 'BR') scoreBreakdown.semiCircle += (bl.symbol === br.symbol ? 10 : 5);
+                                if (tl?.quadrant === 'TL' && bl?.quadrant === 'BL') scoreBreakdown.semiCircle += (tl.symbol === bl.symbol ? 10 : 5);
+                                if (tr?.quadrant === 'TR' && br?.quadrant === 'BR') scoreBreakdown.semiCircle += (tr.symbol === br.symbol ? 10 : 5);
                             }
-
-                            // Check for Diamond Heist
-                            if (tl?.quadrant === 'BR' && tr?.quadrant === 'BL' && bl?.quadrant === 'TR' && br?.quadrant === 'TL') {
-                                scoreBreakdown.diamondHeist -= 10;
-                            }
-
-                            // Check for 3/4 circle
-                            const quadrants = pieces.map(p => p?.quadrant);
-                            if (pieceCount === 3 && ['TL', 'TR', 'BL', 'BR'].every(q => quadrants.includes(q) || !pieces[quadrants.indexOf(q)])) {
-                                const symbols = pieces.filter(Boolean).map(p => p.symbol);
-                                const isSameColor = new Set(symbols).size === 1;
-                                scoreBreakdown.almostCircle += isSameColor ? 20 : 15;
-                                continue;
-                            }
-                            
-                            // Check for semi-circles (horizontal and vertical)
-                            if (tl?.quadrant === 'TL' && tr?.quadrant === 'TR') scoreBreakdown.semiCircle += (tl.symbol === tr.symbol ? 10 : 5);
-                            if (bl?.quadrant === 'BL' && br?.quadrant === 'BR') scoreBreakdown.semiCircle += (bl.symbol === br.symbol ? 10 : 5);
-                            if (tl?.quadrant === 'TL' && bl?.quadrant === 'BL') scoreBreakdown.semiCircle += (tl.symbol === bl.symbol ? 10 : 5);
-                            if (tr?.quadrant === 'TR' && br?.quadrant === 'BR') scoreBreakdown.semiCircle += (tr.symbol === br.symbol ? 10 : 5);
                         }
                     }
                 }
 
-                // 2. Sequence Scoring (contiguous blocks)
                 for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
                     if (gridState[i] && !visited[i]) {
                         const blob = [];
                         const queue = [i];
                         visited[i] = true;
                         const symbol = gridState[i].symbol;
-
                         while (queue.length > 0) {
                             const currentIdx = queue.shift();
                             blob.push(currentIdx);
-                            
-                            const r = Math.floor(currentIdx / GRID_SIZE);
-                            const c = currentIdx % GRID_SIZE;
-                            const neighbors = [[r-1,c], [r+1,c], [r,c-1], [r,c+1]];
-
-                            for (const [nr, nc] of neighbors) {
+                            const r = Math.floor(currentIdx / GRID_SIZE), c = currentIdx % GRID_SIZE;
+                            [[r-1,c], [r+1,c], [r,c-1], [r,c+1]].forEach(([nr, nc]) => {
                                 if (nr >= 0 && nr < GRID_SIZE && nc >= 0 && nc < GRID_SIZE) {
                                     const neighborIdx = nr * GRID_SIZE + nc;
                                     if (gridState[neighborIdx]?.symbol === symbol && !visited[neighborIdx]) {
@@ -495,45 +377,27 @@
                                         queue.push(neighborIdx);
                                     }
                                 }
-                            }
+                            });
                         }
-                        if (blob.length > 1) {
-                            scoreBreakdown.sequence += blob.length;
-                        }
+                        if (blob.length > 1) scoreBreakdown.sequence += blob.length;
                     }
                 }
                 
-                // 3. Line Master
-                // Rows
                 for (let r = 0; r < GRID_SIZE; r++) {
                     const firstPiece = gridState[r * GRID_SIZE];
-                    if (!firstPiece) continue;
-                    let isLineMaster = true;
-                    for (let c = 1; c < GRID_SIZE; c++) {
-                        const piece = gridState[r * GRID_SIZE + c];
-                        if (!piece || piece.symbol !== firstPiece.symbol) {
-                            isLineMaster = false;
-                            break;
-                        }
-                    }
-                    if (isLineMaster) scoreBreakdown.lineMaster += 10;
+                    if (firstPiece && gridState.slice(r * GRID_SIZE, (r + 1) * GRID_SIZE).every(p => p?.symbol === firstPiece.symbol)) scoreBreakdown.lineMaster += 10;
                 }
-                // Columns
                 for (let c = 0; c < GRID_SIZE; c++) {
                     const firstPiece = gridState[c];
-                    if (!firstPiece) continue;
-                    let isLineMaster = true;
-                    for (let r = 1; r < GRID_SIZE; r++) {
-                        const piece = gridState[r * GRID_SIZE + c];
-                        if (!piece || piece.symbol !== firstPiece.symbol) {
-                            isLineMaster = false;
-                            break;
+                    if (firstPiece) {
+                        let isLineMaster = true;
+                        for (let r = 1; r < GRID_SIZE; r++) {
+                            if (gridState[r * GRID_SIZE + c]?.symbol !== firstPiece.symbol) { isLineMaster = false; break; }
                         }
+                        if (isLineMaster) scoreBreakdown.lineMaster += 10;
                     }
-                    if (isLineMaster) scoreBreakdown.lineMaster += 10;
                 }
 
-                // Final Tally
                 score = Object.values(scoreBreakdown).reduce((a, b) => a + b, 0);
                 updateScoreUI(scoreBreakdown);
             }
@@ -546,7 +410,6 @@
                 DOMElements.scoreSequence.textContent = breakdown.sequence;
                 DOMElements.scoreLineMaster.textContent = breakdown.lineMaster;
                 DOMElements.scoreDiamondHeist.textContent = breakdown.diamondHeist;
-                
                 if (score > highScore) {
                     highScore = score;
                     localStorage.setItem('matchaloHighScore', highScore);
@@ -554,75 +417,46 @@
                 DOMElements.highScore.textContent = highScore;
             }
 
-            // --- Helper & UI Functions ---
-            function isGameOver() { /* ... unchanged ... */ return false; }
-            function showGameOver() {
-                DOMElements.finalScore.textContent = score;
-                DOMElements.gameOverModal.classList.remove('hidden');
-                DOMElements.rollDiceBtn.disabled = true;
-                DOMElements.gameBoard.querySelectorAll('.grid-cell.empty').forEach(cell => cell.classList.remove('empty'));
-            }
-            function highlightValidSecondPlacements() { /* ... unchanged ... */ }
-            function clearHighlights() { /* ... unchanged ... */ }
-            function updateProgressBar() { /* ... unchanged ... */ }
-            function updateDiceDisplay() { /* ... unchanged ... */ }
-            
-            // Re-implementing simplified helpers here for completeness
             function isGameOver() {
                 if (!gridState.includes(null)) return true;
                 for (let r = 0; r < GRID_SIZE; r++) {
                     for (let c = 0; c < GRID_SIZE; c++) {
                         const idx = r * GRID_SIZE + c;
                         if (!gridState[idx]) {
-                            if (c < GRID_SIZE - 1 && !gridState[idx + 1]) return false;
-                            if (r < GRID_SIZE - 1 && !gridState[idx + GRID_SIZE]) return false;
+                            if ((c < GRID_SIZE - 1 && !gridState[idx + 1]) || (r < GRID_SIZE - 1 && !gridState[idx + GRID_SIZE])) return false;
                         }
                     }
                 }
                 return true;
             }
-            function highlightValidSecondPlacements() {
-                const { row, col } = firstPieceLocation;
-                const neighbors = [{ r: row - 1, c: col }, { r: row + 1, c: col }, { r: row, c: col - 1 }, { r: row, c: col + 1 }];
-                neighbors.forEach(n => {
-                    if (n.r >= 0 && n.r < GRID_SIZE && n.c >= 0 && n.c < GRID_SIZE) {
-                        const index = n.r * GRID_SIZE + n.c;
-                        if (!gridState[index]) {
-                            DOMElements.gameBoard.querySelector(`[data-index='${index}']`).classList.add('valid-placement-hint');
-                        }
-                    }
-                });
+
+            function showGameOver() {
+                DOMElements.finalScore.textContent = score;
+                DOMElements.gameOverModal.classList.remove('hidden');
+                DOMElements.rollDiceBtn.disabled = true;
+                DOMElements.gameBoard.querySelectorAll('.grid-cell.empty').forEach(cell => cell.classList.remove('empty'));
             }
-            function clearHighlights() {
-                DOMElements.gameBoard.querySelectorAll('.valid-placement-hint').forEach(cell => cell.classList.remove('valid-placement-hint'));
-            }
+
             function updateProgressBar() {
-                const totalCells = GRID_SIZE * GRID_SIZE;
                 const filledCells = gridState.filter(cell => cell !== null).length;
-                const percentage = (filledCells / totalCells) * 100;
-                DOMElements.progressBarFill.style.width = `${percentage}%`;
+                DOMElements.progressBarFill.style.width = `${(filledCells / (GRID_SIZE * GRID_SIZE)) * 100}%`;
             }
+
             function updateDiceDisplay() {
-                const diceElements = [DOMElements.dice1El, DOMElements.dice2El];
-                diceElements.forEach((el, i) => {
+                [DOMElements.dice1El, DOMElements.dice2El].forEach((el, i) => {
                     el.innerHTML = '';
                     if (currentRoll[i]) {
                         const piece = currentRoll[i];
                         const img = document.createElement('img');
                         img.src = `${IMAGE_PATH}${piece.symbol.toLowerCase()}_${piece.quadrant}.svg`;
-                        img.alt = `${piece.symbol} ${piece.quadrant}`;
                         el.appendChild(img);
                     }
                 });
             }
 
-            // Event Listeners
-            DOMElements.rollDiceBtn.addEventListener('click', handleRollDice);
             DOMElements.resetBtn.addEventListener('click', init);
             DOMElements.restartModalBtn.addEventListener('click', init);
-            DOMElements.closeModalBtn.addEventListener('click', () => {
-                DOMElements.gameOverModal.classList.add('hidden');
-            });
+            DOMElements.closeModalBtn.addEventListener('click', () => DOMElements.gameOverModal.classList.add('hidden'));
 
             init();
         });
