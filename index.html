@@ -462,51 +462,125 @@
 
             // --- Scoring Engine ---
             function calculateTotalScore() {
+                // 1. Reset scores and create state for this calculation
                 let scoreBreakdown = { circle: 0, semiCircle: 0, almostCircle: 0, sequence: 0, lineMaster: 0, diamondHeist: 0 };
-                // ... (Full, complex scoring logic from previous turn)
-                 const visited = Array(GRID_SIZE * GRID_SIZE).fill(false);
+                const scoredPieces = new Set(); // This Set is the key to preventing double counting
 
-                // Circle, Semi-circle, Almost-circle, Diamond Heist logic
+                // --- HIERARCHICAL PATTERN MATCHING ---
+
+                // PASS 1: Find and score FULL CIRCLES first.
                 for (let r = 0; r < GRID_SIZE - 1; r++) {
                     for (let c = 0; c < GRID_SIZE - 1; c++) {
-                        const tl = gridState[r * GRID_SIZE + c], tr = gridState[r * GRID_SIZE + c + 1], bl = gridState[(r + 1) * GRID_SIZE + c], br = gridState[(r + 1) * GRID_SIZE + c + 1];
-                        const pieces = [tl, tr, bl, br].filter(Boolean);
+                        const indices = [r*GRID_SIZE+c, r*GRID_SIZE+c+1, (r+1)*GRID_SIZE+c, (r+1)*GRID_SIZE+c+1];
+                        if (indices.some(i => scoredPieces.has(i))) continue;
+
+                        const pieces = indices.map(i => gridState[i]);
+                        if (pieces.some(p => !p)) continue; // Needs all 4 pieces to be a full circle
+
                         const quadrants = new Set(pieces.map(p => p.quadrant));
-                        const symbols = pieces.map(p => p.symbol);
-                        
-                        if (pieces.length < 2) continue;
-                        if (pieces.length === 4) {
-                            if (quadrants.has('TL') && quadrants.has('TR') && quadrants.has('BL') && quadrants.has('BR')) {
-                                if(tl.quadrant === 'TL' && tr.quadrant === 'TR' && bl.quadrant === 'BL' && br.quadrant === 'BR')
-                                    scoreBreakdown.circle += (new Set(symbols).size === 1) ? 40 : 20;
-                                else if (tl.quadrant === 'BR' && tr.quadrant === 'BL' && bl.quadrant === 'TR' && br.quadrant === 'TL')
-                                    scoreBreakdown.diamondHeist -= 10;
-                            }
-                        } else if (pieces.length === 3) {
-                            const validSets = [ new Set(['TL', 'TR', 'BL']), new Set(['TL', 'TR', 'BR']), new Set(['TL', 'BL', 'BR']), new Set(['TR', 'BL', 'BR'])];
-                            let isValidAlmostCircle = false;
-                            for (const validSet of validSets) {
-                                if (validSet.size === quadrants.size && [...validSet].every(q => quadrants.has(q))) {
-                                    isValidAlmostCircle = true; break;
-                                }
-                            }
-                            if (isValidAlmostCircle) scoreBreakdown.almostCircle += (new Set(symbols).size === 1 ? 20 : 15);
-                        } else if (pieces.length === 2) {
-                            const q1 = pieces[0].quadrant, q2 = pieces[1].quadrant;
-                            const isHorizontalPair = (q1 === 'TL' && q2 === 'TR') || (q1 === 'TR' && q2 === 'TL') || (q1 === 'BL' && q2 === 'BR') || (q1 === 'BR' && q2 === 'BL');
-                            const isVerticalPair = (q1 === 'TL' && q2 === 'BL') || (q1 === 'BL' && q2 === 'TL') || (q1 === 'TR' && q2 === 'BR') || (q1 === 'BR' && q2 === 'TR');
-                            if (isHorizontalPair || isVerticalPair) scoreBreakdown.semiCircle += (pieces[0].symbol === pieces[1].symbol ? 10 : 5);
+                        if (quadrants.size === 4 && quadrants.has('TL') && quadrants.has('TR') && quadrants.has('BL') && quadrants.has('BR')) {
+                            const symbols = pieces.map(p => p.symbol);
+                            scoreBreakdown.circle += (new Set(symbols).size === 1) ? 40 : 20;
+                            indices.forEach(i => scoredPieces.add(i)); // Lock these pieces from being scored again
                         }
                     }
                 }
 
-                // Sequence logic
-                for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) { if (gridState[i] && !visited[i]) { const blob = []; const queue = [i]; visited[i] = true; const symbol = gridState[i].symbol; while (queue.length > 0) { const currentIdx = queue.shift(); blob.push(currentIdx); const r = Math.floor(currentIdx / GRID_SIZE), c = currentIdx % GRID_SIZE; [[r-1,c], [r+1,c], [r,c-1], [r,c+1]].forEach(([nr, nc]) => { const neighborIdx = nr * GRID_SIZE + nc; if (nr >= 0 && nr < GRID_SIZE && nc >= 0 && nc < GRID_SIZE && gridState[neighborIdx]?.symbol === symbol && !visited[neighborIdx]) { visited[neighborIdx] = true; queue.push(neighborIdx); } }); } if (blob.length > 1) scoreBreakdown.sequence += blob.length; } }
+                // PASS 2: Find and score ALMOST CIRCLES on remaining pieces.
+                for (let r = 0; r < GRID_SIZE - 1; r++) {
+                    for (let c = 0; c < GRID_SIZE - 1; c++) {
+                        const indices = [r*GRID_SIZE+c, r*GRID_SIZE+c+1, (r+1)*GRID_SIZE+c, (r+1)*GRID_SIZE+c+1];
+                        const availablePieces = indices.map(i => gridState[i]).filter((p, idx) => p && !scoredPieces.has(indices[idx]));
+                        const availableIndices = indices.filter((i, idx) => gridState[i] && !scoredPieces.has(i));
+
+                        if (availablePieces.length === 3) {
+                            const quadrants = new Set(availablePieces.map(p => p.quadrant));
+                            const validSets = [ new Set(['TL', 'TR', 'BL']), new Set(['TL', 'TR', 'BR']), new Set(['TL', 'BL', 'BR']), new Set(['TR', 'BL', 'BR']) ];
+                            
+                            for (const validSet of validSets) {
+                                if (quadrants.size === 3 && [...validSet].every(q => quadrants.has(q))) {
+                                    const symbols = availablePieces.map(p => p.symbol);
+                                    scoreBreakdown.almostCircle += (new Set(symbols).size === 1) ? 20 : 15;
+                                    availableIndices.forEach(i => scoredPieces.add(i)); // Lock these pieces
+                                    break; 
+                                }
+                            }
+                        }
+                    }
+                }
                 
-                // Line Master logic
+                // PASS 3: Find and score SEMI CIRCLES on remaining pieces.
+                for (let r = 0; r < GRID_SIZE; r++) {
+                    for (let c = 0; c < GRID_SIZE; c++) {
+                        const p1_idx = r * GRID_SIZE + c;
+                        const p1 = gridState[p1_idx];
+                        if (!p1 || scoredPieces.has(p1_idx)) continue;
+
+                        // Check horizontal neighbor
+                        if (c < GRID_SIZE - 1) {
+                            const p2_idx = r * GRID_SIZE + c + 1;
+                            const p2 = gridState[p2_idx];
+                            if (p2 && !scoredPieces.has(p2_idx)) {
+                                const q1 = p1.quadrant, q2 = p2.quadrant;
+                                if ((q1 === 'TL' && q2 === 'TR') || (q1 === 'TR' && q2 === 'TL') || (q1 === 'BL' && q2 === 'BR') || (q1 === 'BR' && q2 === 'BL')) {
+                                    scoreBreakdown.semiCircle += (p1.symbol === p2.symbol) ? 10 : 5;
+                                    scoredPieces.add(p1_idx); scoredPieces.add(p2_idx);
+                                    continue; // Move to next piece once scored
+                                }
+                            }
+                        }
+
+                        // Check vertical neighbor
+                        if (r < GRID_SIZE - 1) {
+                            const p2_idx = (r + 1) * GRID_SIZE + c;
+                            const p2 = gridState[p2_idx];
+                            if (p2 && !scoredPieces.has(p2_idx)) {
+                                const q1 = p1.quadrant, q2 = p2.quadrant;
+                                if ((q1 === 'TL' && q2 === 'BL') || (q1 === 'BL' && q2 === 'TL') || (q1 === 'TR' && q2 === 'BR') || (q1 === 'BR' && q2 === 'TR')) {
+                                    scoreBreakdown.semiCircle += (p1.symbol === p2.symbol) ? 10 : 5;
+                                    scoredPieces.add(p1_idx); scoredPieces.add(p2_idx);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // PASS 4: Diamond Heist (a specific 4-piece pattern)
+                for (let r = 0; r < GRID_SIZE - 1; r++) {
+                    for (let c = 0; c < GRID_SIZE - 1; c++) {
+                        const tl = gridState[r*GRID_SIZE+c], tr = gridState[r*GRID_SIZE+c+1], bl = gridState[(r+1)*GRID_SIZE+c], br = gridState[(r+1)*GRID_SIZE+c+1];
+                        if (tl && tr && bl && br) {
+                            if (tl.quadrant === 'BR' && tr.quadrant === 'BL' && bl.quadrant === 'TR' && br.quadrant === 'TL') {
+                                scoreBreakdown.diamondHeist -= 10;
+                            }
+                        }
+                    }
+                }
+
+                // --- Sequence and Line Master logic (run independently) ---
+                const visited = Array(GRID_SIZE * GRID_SIZE).fill(false);
+                for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
+                    if (gridState[i] && !visited[i]) {
+                        const blob = []; const queue = [i]; visited[i] = true;
+                        const symbol = gridState[i].symbol;
+                        while (queue.length > 0) {
+                            const currentIdx = queue.shift(); blob.push(currentIdx);
+                            const r = Math.floor(currentIdx / GRID_SIZE), c = currentIdx % GRID_SIZE;
+                            [[r-1,c], [r+1,c], [r,c-1], [r,c+1]].forEach(([nr, nc]) => {
+                                const neighborIdx = nr * GRID_SIZE + nc;
+                                if (nr >= 0 && nr < GRID_SIZE && nc >= 0 && nc < GRID_SIZE && gridState[neighborIdx]?.symbol === symbol && !visited[neighborIdx]) {
+                                    visited[neighborIdx] = true; queue.push(neighborIdx);
+                                }
+                            });
+                        }
+                        if (blob.length > 1) scoreBreakdown.sequence += blob.length;
+                    }
+                }
+                
                 for (let r = 0; r < GRID_SIZE; r++) { const firstPiece = gridState[r * GRID_SIZE]; if (firstPiece && gridState.slice(r * GRID_SIZE, (r + 1) * GRID_SIZE).every(p => p?.symbol === firstPiece.symbol)) scoreBreakdown.lineMaster += 10; }
                 for (let c = 0; c < GRID_SIZE; c++) { const firstPiece = gridState[c]; if (firstPiece) { let isLineMaster = true; for (let r = 1; r < GRID_SIZE; r++) { if (gridState[r * GRID_SIZE + c]?.symbol !== firstPiece.symbol) { isLineMaster = false; break; } } if (isLineMaster) scoreBreakdown.lineMaster += 10; } }
 
+                // Final Tally
                 score = Object.values(scoreBreakdown).reduce((a, b) => a + b, 0);
                 updateScoreUI(scoreBreakdown);
             }
