@@ -46,7 +46,8 @@
         .themed-button.primary { background: var(--accent-gradient); }
         .themed-button.secondary { background-color: rgba(255,255,255,0.8); color: var(--text); border: 1px solid var(--faint-border); }
         .themed-button.tertiary { background: none; color: var(--text-secondary); }
-        .themed-button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: var(--shadow-medium); }
+        .themed-button.accent-light { background: var(--accent-light); color: var(--accent); }
+        .themed-button:hover:not(:disabled) { transform: translateY(-px); box-shadow: var(--shadow-medium); }
         
         .progress-bar-container { background: var(--accent-light); }
         .progress-bar-fill { background: var(--accent-gradient); }
@@ -62,24 +63,14 @@
             box-shadow: 0 0 0 2px var(--accent);
         }
 
-        .pulsing-cell {
-            animation: pulse 1.5s infinite;
-        }
+        .pulsing-cell { animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(106, 17, 203, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(106, 17, 203, 0); } 100% { box-shadow: 0 0 0 0 rgba(106, 17, 203, 0); } }
 
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(106, 17, 203, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(106, 17, 203, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(106, 17, 203, 0); }
-        }
-
-        @keyframes dice-tumble {
-            0% { transform: rotate(0deg) scale(1); }
-            50% { transform: rotate(-180deg) scale(1.1); }
-            100% { transform: rotate(-360deg) scale(1); }
-        }
+        @keyframes dice-tumble { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(-180deg) scale(1.1); } 100% { transform: rotate(-360deg) scale(1); } }
         .dice-tumble { animation: dice-tumble 0.6s var(--ease-bounce); }
 
         .modal-overlay { background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); }
+        .edition-selected { background-color: var(--accent-light) !important; font-weight: 700; color: var(--accent); }
     </style>
 </head>
 <body class="p-2 lg:p-4 flex items-center justify-center min-h-screen">
@@ -87,8 +78,7 @@
         
         <div class="w-full lg:w-2/3">
             <div class="p-4 lg:p-6 h-full glass-card rounded-2xl">
-                <div id="game-board" class="grid grid-cols-8 grid-rows-8 w-full aspect-square bg-white rounded-lg">
-                    </div>
+                <div id="game-board" class="grid grid-cols-8 grid-rows-8 w-full aspect-square bg-white rounded-lg"></div>
             </div>
         </div>
 
@@ -122,12 +112,12 @@
 
                 <div class="p-4 rounded-2xl border" style="border-color: var(--faint-border); background: rgba(255,255,255,0.5);">
                     <div class="flex justify-center items-center gap-3">
-                        <button class="themed-button secondary text-xs flex-1 py-2">Help</button>
+                        <button id="help-btn" class="themed-button accent-light text-xs flex-1 py-2">Help</button>
                         <button id="reset-btn" class="themed-button primary text-xs flex-1 py-2 text-white">New Game</button>
-                        <button class="themed-button secondary text-xs flex-1 py-2">Badges</button>
+                        <button id="badges-btn" class="themed-button accent-light text-xs flex-1 py-2">Badges</button>
                     </div>
                     <div class="text-center mt-3">
-                        <button class="themed-button tertiary w-full text-sm py-2">Edition: Circles</button>
+                        <button id="select-edition-btn" class="themed-button tertiary w-full text-sm py-2">Edition: Circles</button>
                     </div>
                 </div>
                 
@@ -144,501 +134,316 @@
                     </div>
                     <hr class="border-t my-3">
                     <div class="grid grid-cols-3 gap-y-2 text-center">
-                        <div class="score-item">
-                            <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Circle</h3>
-                            <div id="score-circle" class="text-lg font-bold">0</div>
-                        </div>
-                        <div class="score-item">
-                            <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Semi Circle</h3>
-                            <div id="score-semi-circle" class="text-lg font-bold">0</div>
-                        </div>
-                        <div class="score-item">
-                            <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Almost Circle</h3>
-                            <div id="score-almost-circle" class="text-lg font-bold">0</div>
-                        </div>
-                        <div class="score-item">
-                            <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Sequence</h3>
-                            <div id="score-sequence" class="text-lg font-bold">0</div>
-                        </div>
-                        <div class="score-item">
-                            <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Line Master</h3>
-                            <div id="score-line-master" class="text-lg font-bold">0</div>
-                        </div>
-                        <div class="score-item">
-                            <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Diamond Heist</h3>
-                            <div id="score-diamond-heist" class="text-lg font-bold text-red-600">0</div>
-                        </div>
+                        <div class="score-item"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Circle</h3><div id="score-circle" class="text-lg font-bold">0</div></div>
+                        <div class="score-item"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Semi Circle</h3><div id="score-semi-circle" class="text-lg font-bold">0</div></div>
+                        <div class="score-item"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Almost Circle</h3><div id="score-almost-circle" class="text-lg font-bold">0</div></div>
+                        <div class="score-item"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Sequence</h3><div id="score-sequence" class="text-lg font-bold">0</div></div>
+                        <div class="score-item"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Line Master</h3><div id="score-line-master" class="text-lg font-bold">0</div></div>
+                        <div class="score-item"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Diamond Heist</h3><div id="score-diamond-heist" class="text-lg font-bold text-red-600">0</div></div>
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <div id="game-over-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden">
-        <div class="modal-content w-full max-w-sm glass-card rounded-2xl p-8 text-center relative">
-            <button id="close-modal-btn" class="absolute top-4 right-4 w-8 h-8 rounded-full text-xl flex items-center justify-center font-bold text-gray-500 hover:bg-gray-200/50">×</button>
-            <h2 class="text-2xl font-bold mb-4" style="color: var(--accent);">Game Over</h2>
-            <p class="mb-6" style="color: var(--text-secondary);">You can no longer make a move.</p>
-            <p class="text-sm" style="color: var(--text-secondary);">Final Score</p>
-            <div id="final-score" class="text-6xl font-bold my-2" style="color: var(--accent);">0</div>
-            <button id="restart-modal-btn" class="themed-button primary w-full py-2.5 px-4 text-white text-sm mt-4">Play Again</button>
-        </div>
-    </div>
-    
-    <div id="exchange-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden">
-        <div class="modal-content w-full max-w-md glass-card rounded-2xl p-6 text-center relative">
-             <h2 class="text-xl font-bold mb-4" style="color: var(--accent);">Exchange Alo</h2>
-             <div id="exchange-options" class="grid grid-cols-4 gap-2">
-                 </div>
-        </div>
-    </div>
+    <div id="game-over-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden"><div class="modal-content w-full max-w-sm glass-card rounded-2xl p-8 text-center relative"><button id="close-modal-btn" class="absolute top-4 right-4 w-8 h-8 rounded-full text-xl flex items-center justify-center font-bold text-gray-500 hover:bg-gray-200/50">×</button><h2 class="text-2xl font-bold mb-4" style="color: var(--accent);">Game Over</h2><p class="mb-6" style="color: var(--text-secondary);">You can no longer make a move.</p><p class="text-sm" style="color: var(--text-secondary);">Final Score</p><div id="final-score" class="text-6xl font-bold my-2" style="color: var(--accent);">0</div><button id="restart-modal-btn" class="themed-button primary w-full py-2.5 px-4 text-white text-sm mt-4">Play Again</button></div></div>
+    <div id="exchange-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden"><div class="modal-content w-full max-w-md glass-card rounded-2xl p-6 text-center relative"><button id="close-exchange-modal-btn" class="absolute top-2 right-2 w-8 h-8 rounded-full text-xl flex items-center justify-center font-bold text-gray-500 hover:bg-gray-200/50">×</button><h2 class="text-xl font-bold mb-4" style="color: var(--accent);">Exchange Alo</h2><div id="exchange-options" class="grid grid-cols-4 gap-2"></div></div></div>
+    <div id="help-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden"><div class="modal-content w-full max-w-lg glass-card rounded-2xl p-6 relative"><div class="flex justify-between items-start mb-4"><div class="flex-grow"><h2 class="text-3xl font-bold" style="color: var(--accent);">How to Play Matchalo</h2><p class="text-sm mt-2 font-bold" style="color: var(--text-secondary);">A fun and simple block based artwork game from Abhimanyu Lodha</p></div><button id="close-help-modal-btn" class="w-10 h-10 rounded-full text-xl flex items-center justify-center font-bold flex-shrink-0">×</button></div><div id="help-modal-content" class="space-y-4 text-sm max-h-[60vh] overflow-y-auto pr-2" style="color: var(--text-secondary)"></div></div></div>
+    <div id="edition-select-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden"><div class="modal-content w-full max-w-sm glass-card rounded-2xl p-6 relative"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold" style="color: var(--accent);">Select Edition</h2><button id="close-edition-select-modal-btn" class="w-10 h-10 rounded-full text-xl flex items-center justify-center font-bold">×</button></div><div id="edition-options" class="flex flex-col gap-3 max-h-64 overflow-y-auto"></div></div></div>
     
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const DOMElements = {
-                gameBoard: document.getElementById('game-board'),
-                rollDiceBtn: document.getElementById('roll-dice-btn'),
-                resetBtn: document.getElementById('reset-btn'),
-                dice1El: document.getElementById('dice-1'),
-                dice2El: document.getElementById('dice-2'),
-                progressBarFill: document.getElementById('progress-bar-fill'),
-                totalScore: document.getElementById('total-score'),
-                highScore: document.getElementById('high-score'),
-                scoreCircle: document.getElementById('score-circle'),
-                scoreSemiCircle: document.getElementById('score-semi-circle'),
-                scoreAlmostCircle: document.getElementById('score-almost-circle'),
-                scoreSequence: document.getElementById('score-sequence'),
-                scoreLineMaster: document.getElementById('score-line-master'),
-                scoreDiamondHeist: document.getElementById('score-diamond-heist'),
-                gameOverModal: document.getElementById('game-over-modal'),
-                finalScore: document.getElementById('final-score'),
-                restartModalBtn: document.getElementById('restart-modal-btn'),
-                closeModalBtn: document.getElementById('close-modal-btn'),
-                spCharge1: document.getElementById('sp-charge-1'),
-                spCharge2: document.getElementById('sp-charge-2'),
-                rotateBtn: document.getElementById('rotate-btn'),
-                swapBtn: document.getElementById('swap-btn'),
-                exchangeBtn: document.getElementById('exchange-btn'),
-                moveBtn: document.getElementById('move-btn'),
-                exchangeModal: document.getElementById('exchange-modal'),
-                exchangeOptions: document.getElementById('exchange-options'),
-            };
+        const gameManager = {
+            currentGame: null,
+            activeEditionId: 'circles',
+            editionConfigs: {
+                circles: { id: 'circles', name: 'Circles', symbols: ['navy', 'red', 'blue', 'grey'] },
+                rings: { id: 'rings', name: 'Rings', symbols: ['ringa', 'ringb', 'ringc', 'ringd'] }
+            },
+
+            init() {
+                this.switchEdition(this.activeEditionId);
+                this.populateEditionModal();
+                this.attachGlobalListeners();
+            },
+
+            switchEdition(editionId) {
+                this.activeEditionId = editionId;
+                const config = this.editionConfigs[editionId];
+                if (this.currentGame) {
+                    // Clean up old game listeners if any
+                }
+                this.currentGame = new Game(config);
+                document.getElementById('select-edition-btn').textContent = `Edition: ${config.name}`;
+            },
             
-            const GRID_SIZE = 8;
-            const SYMBOLS = ['navy', 'red', 'blue', 'grey'];
-            const QUADRANTS = ['TL', 'TR', 'BL', 'BR'];
-            const IMAGE_PATH = 'images/';
-            const SUPERPOWERS = {
-                ROTATE: 'rotate', SWAP: 'swap', EXCHANGE: 'exchange', MOVE: 'move'
-            };
+            populateEditionModal() {
+                const container = document.getElementById('edition-options');
+                container.innerHTML = '';
+                Object.values(this.editionConfigs).forEach(config => {
+                    const button = document.createElement('button');
+                    button.className = 'w-full text-left p-3 rounded-lg font-semibold flex justify-between items-center transition-colors hover:bg-gray-200/50';
+                    if (config.id === this.activeEditionId) button.classList.add('edition-selected');
+                    button.textContent = config.name;
+                    button.addEventListener('click', () => {
+                        this.switchEdition(config.id);
+                        document.getElementById('edition-select-modal').classList.add('hidden');
+                        this.populateEditionModal(); // Re-populate to update selected style
+                    });
+                    container.appendChild(button);
+                });
+            },
+            
+            attachGlobalListeners() {
+                document.getElementById('help-btn').addEventListener('click', () => {
+                    document.getElementById('help-modal').classList.remove('hidden');
+                });
+                document.getElementById('close-help-modal-btn').addEventListener('click', () => {
+                    document.getElementById('help-modal').classList.add('hidden');
+                });
+                document.getElementById('select-edition-btn').addEventListener('click', () => {
+                    document.getElementById('edition-select-modal').classList.remove('hidden');
+                });
+                document.getElementById('close-edition-select-modal-btn').addEventListener('click', () => {
+                    document.getElementById('edition-select-modal').classList.add('hidden');
+                });
+            }
+        };
 
-            let gridState = [], currentRoll = [], placementState = 'AWAITING_ROLL', firstPieceLocation = null, score = 0, highScore = 0;
-            let lastClick = { time: 0, row: -1, col: -1 };
-            let usedSuperpowers = new Set(), activeSuperpower = null, superpowerState = {};
+        class Game {
+            constructor(config) {
+                this.config = config;
+                this.DOMElements = this.getDOMElements();
+                this.GRID_SIZE = 8;
+                this.QUADRANTS = ['TL', 'TR', 'BL', 'BR'];
+                this.IMAGE_PATH = 'images/';
+                this.SUPERPOWERS = { ROTATE: 'rotate', SWAP: 'swap', EXCHANGE: 'exchange', MOVE: 'move' };
+                this.init();
+            }
 
-            function init() {
-                // Reset game state
-                gridState = Array(GRID_SIZE * GRID_SIZE).fill(null);
-                currentRoll = [];
-                firstPieceLocation = null;
-                placementState = 'AWAITING_ROLL';
-                score = 0;
-                highScore = localStorage.getItem('matchaloHighScore') || 0;
-                
-                // Reset superpower state
-                usedSuperpowers = new Set();
-                activeSuperpower = null;
-                superpowerState = {};
+            getDOMElements() {
+                // Returns an object of all required DOM elements
+                return {
+                    gameBoard: document.getElementById('game-board'),
+                    rollDiceBtn: document.getElementById('roll-dice-btn'),
+                    resetBtn: document.getElementById('reset-btn'),
+                    dice1El: document.getElementById('dice-1'),
+                    dice2El: document.getElementById('dice-2'),
+                    progressBarFill: document.getElementById('progress-bar-fill'),
+                    totalScore: document.getElementById('total-score'),
+                    highScore: document.getElementById('high-score'),
+                    scoreCircle: document.getElementById('score-circle'),
+                    scoreSemiCircle: document.getElementById('score-semi-circle'),
+                    scoreAlmostCircle: document.getElementById('score-almost-circle'),
+                    scoreSequence: document.getElementById('score-sequence'),
+                    scoreLineMaster: document.getElementById('score-line-master'),
+                    scoreDiamondHeist: document.getElementById('score-diamond-heist'),
+                    gameOverModal: document.getElementById('game-over-modal'),
+                    finalScore: document.getElementById('final-score'),
+                    restartModalBtn: document.getElementById('restart-modal-btn'),
+                    closeModalBtn: document.getElementById('close-modal-btn'),
+                    spCharge1: document.getElementById('sp-charge-1'),
+                    spCharge2: document.getElementById('sp-charge-2'),
+                    rotateBtn: document.getElementById('rotate-btn'),
+                    swapBtn: document.getElementById('swap-btn'),
+                    exchangeBtn: document.getElementById('exchange-btn'),
+                    moveBtn: document.getElementById('move-btn'),
+                    exchangeModal: document.getElementById('exchange-modal'),
+                    exchangeOptions: document.getElementById('exchange-options'),
+                    closeExchangeModalBtn: document.getElementById('close-exchange-modal-btn'),
+                    helpModalContent: document.getElementById('help-modal-content'),
+                };
+            }
 
-                // Initialize UI
-                DOMElements.gameBoard.innerHTML = '';
-                for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
+            init() {
+                this.SYMBOLS = this.config.symbols;
+                this.gridState = Array(this.GRID_SIZE * this.GRID_SIZE).fill(null);
+                this.currentRoll = [];
+                this.firstPieceLocation = null;
+                this.placementState = 'AWAITING_ROLL';
+                this.score = 0;
+                this.highScore = localStorage.getItem(`matchaloHighScore_${this.config.id}`) || 0;
+                this.lastClick = { time: 0, row: -1, col: -1 };
+                this.usedSuperpowers = new Set();
+                this.activeSuperpower = null;
+                this.superpowerState = {};
+
+                this.DOMElements.gameBoard.innerHTML = '';
+                for (let i = 0; i < this.GRID_SIZE * this.GRID_SIZE; i++) {
                     const cell = document.createElement('div');
                     cell.className = 'grid-cell empty relative';
                     cell.dataset.index = i;
-                    const row = Math.floor(i / GRID_SIZE), col = i % GRID_SIZE;
+                    const row = Math.floor(i / this.GRID_SIZE), col = i % this.GRID_SIZE;
                     cell.dataset.row = row; cell.dataset.col = col;
-                    cell.addEventListener('click', () => onCellClick(row, col));
-                    DOMElements.gameBoard.appendChild(cell);
+                    cell.addEventListener('click', () => this.onCellClick(row, col));
+                    this.DOMElements.gameBoard.appendChild(cell);
                 }
                 
-                calculateTotalScore();
-                updateProgressBar();
-                updateDiceDisplay();
-                updateSuperpowerUI();
-                DOMElements.gameOverModal.classList.add('hidden');
-                DOMElements.rollDiceBtn.disabled = false;
+                this.populateHelpModal();
+                this.calculateTotalScore();
+                this.updateProgressBar();
+                this.updateDiceDisplay();
+                this.updateSuperpowerUI();
+                this.DOMElements.gameOverModal.classList.add('hidden');
+                this.DOMElements.rollDiceBtn.disabled = false;
+                
+                // Clear old listeners before adding new ones
+                const oldResetBtn = this.DOMElements.resetBtn;
+                const newResetBtn = oldResetBtn.cloneNode(true);
+                oldResetBtn.parentNode.replaceChild(newResetBtn, oldResetBtn);
+                this.DOMElements.resetBtn = newResetBtn;
+
+                this.DOMElements.rollDiceBtn.onclick = () => this.handleRollDice();
+                this.DOMElements.resetBtn.onclick = () => gameManager.switchEdition(gameManager.activeEditionId);
+                this.DOMElements.restartModalBtn.onclick = () => gameManager.switchEdition(gameManager.activeEditionId);
+                this.DOMElements.closeModalBtn.onclick = () => this.DOMElements.gameOverModal.classList.add('hidden');
+                this.DOMElements.rotateBtn.onclick = () => this.activateSuperpower(this.SUPERPOWERS.ROTATE);
+                this.DOMElements.swapBtn.onclick = () => this.activateSuperpower(this.SUPERPOWERS.SWAP);
+                this.DOMElements.exchangeBtn.onclick = () => this.activateSuperpower(this.SUPERPOWERS.EXCHANGE);
+                this.DOMElements.moveBtn.onclick = () => this.activateSuperpower(this.SUPERPOWERS.MOVE);
+                this.DOMElements.closeExchangeModalBtn.onclick = () => this.DOMElements.exchangeModal.classList.add('hidden');
+            }
+            
+            populateHelpModal() {
+                this.DOMElements.helpModalContent.innerHTML = `
+                    <h3 class="font-bold text-lg" style="color: var(--accent);">🎯 The Goal</h3>
+                    <p>Fill the 8x8 grid by placing pairs of 'Alos' (quadrant pieces). Score points by forming circular patterns and sequences.</p>
+                    
+                    <h3 class="font-bold text-lg mt-4" style="color: var(--accent);">🕹️ How to Play</h3>
+                    <ol class="list-decimal list-inside space-y-1">
+                        <li><b>Roll the Dice:</b> Click the '🎲' icon to get two random Alos for your turn.</li>
+                        <li><b>Place Your Pair:</b> Place the first Alo in any empty square. Place the second Alo in any empty square that is horizontally or vertically adjacent to the first.</li>
+                        <li><b>Mistake?</b> Before placing the second Alo, you can double-click the first one to pick it up and move it.</li>
+                    </ol>
+
+                    <h3 class="font-bold text-lg mt-4" style="color: var(--accent);">✨ Superpowers</h3>
+                    <p>You can use any **two different** superpowers once per game. They are only active between turns.</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li><b>Rotate:</b> Click an Alo on the board to rotate it 90° clockwise.</li>
+                        <li><b>Swap:</b> Click two adjacent Alos on the board to swap their positions.</li>
+                        <li><b>Exchange:</b> Click an Alo on the board, then choose a new Alo from any of the game's symbols to replace it.</li>
+                        <li><b>Move:</b> Click an Alo, then click any empty square to move it there.</li>
+                    </ul>
+
+                    <h3 class="font-bold text-lg mt-4" style="color: var(--accent);">📈 Scoring</h3>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li><b>Full Circle (4 pcs):</b> 40 pts (same color), 20 pts (different colors)</li>
+                        <li><b>Almost Circle (3 pcs):</b> 20 pts (same color), 15 pts (different colors)</li>
+                        <li><b>Semi Circle (2 pcs):</b> 10 pts (same color), 5 pts (different colors)</li>
+                        <li><b>Sequence:</b> 1 pt for each Alo in a group of 2 or more same-colored, touching Alos.</li>
+                        <li><b>Line Master:</b> 10 pts for a full row or column of the same color.</li>
+                        <li><b>Diamond Heist (Penalty):</b> -10 pts for creating a diamond-shaped empty space with four Alos.</li>
+                    </ul>
+                `;
             }
 
-            // --- Event Handling ---
-            function onCellClick(row, col) {
+            onCellClick(row, col) {
                 const now = new Date().getTime();
-                if (now - lastClick.time < 300 && lastClick.row === row && lastClick.col === col) {
-                    handleDoubleClick(row, col);
-                    lastClick = { time: 0, row: -1, col: -1 }; return;
+                if (now - this.lastClick.time < 300 && this.lastClick.row === row && this.lastClick.col === col) {
+                    this.handleDoubleClick(row, col);
+                    this.lastClick = { time: 0, row: -1, col: -1 }; return;
                 }
-                lastClick = { time: now, row, col };
+                this.lastClick = { time: now, row, col };
+                if (this.activeSuperpower) this.handleSuperpowerClick(row, col);
+                else this.handlePlacementClick(row, col);
+            }
 
-                if (activeSuperpower) {
-                    handleSuperpowerClick(row, col);
-                } else {
-                    handlePlacementClick(row, col);
+            handleDoubleClick(row, col) {
+                if (this.placementState === 'AWAITING_SECOND_PLACEMENT' && this.firstPieceLocation.row === row && this.firstPieceLocation.col === col) {
+                    this.gridState[row * this.GRID_SIZE + col] = null;
+                    this.renderCell(row, col);
+                    this.firstPieceLocation = null;
+                    this.placementState = 'AWAITING_FIRST_PLACEMENT';
                 }
             }
 
-            function handleDoubleClick(row, col) {
-                if (placementState === 'AWAITING_SECOND_PLACEMENT' && firstPieceLocation.row === row && firstPieceLocation.col === col) {
-                    const index = row * GRID_SIZE + col;
-                    gridState[index] = null;
-                    renderCell(row, col);
-                    firstPieceLocation = null;
-                    placementState = 'AWAITING_FIRST_PLACEMENT';
-                }
-            }
-
-            function handlePlacementClick(row, col) {
-                const index = row * GRID_SIZE + col;
-                if (placementState === 'AWAITING_FIRST_PLACEMENT' && !gridState[index]) {
-                    placePiece(row, col, 0);
-                    firstPieceLocation = { row, col };
-                    placementState = 'AWAITING_SECOND_PLACEMENT';
-                } else if (placementState === 'AWAITING_SECOND_PLACEMENT') {
-                    const isAdjacent = Math.abs(firstPieceLocation.row - row) + Math.abs(firstPieceLocation.col - col) === 1;
-                    if (isAdjacent && !gridState[index]) {
-                        placePiece(row, col, 1);
-                        endTurn();
+            handlePlacementClick(row, col) {
+                const index = row * this.GRID_SIZE + col;
+                if (this.placementState === 'AWAITING_FIRST_PLACEMENT' && !this.gridState[index]) {
+                    this.placePiece(row, col, 0);
+                    this.firstPieceLocation = { row, col };
+                    this.placementState = 'AWAITING_SECOND_PLACEMENT';
+                } else if (this.placementState === 'AWAITING_SECOND_PLACEMENT') {
+                    const isAdjacent = Math.abs(this.firstPieceLocation.row - row) + Math.abs(this.firstPieceLocation.col - col) === 1;
+                    if (isAdjacent && !this.gridState[index]) {
+                        this.placePiece(row, col, 1);
+                        this.endTurn();
                     }
                 }
             }
             
-            // --- Game Flow ---
-            function endTurn() {
-                firstPieceLocation = null;
-                placementState = 'AWAITING_ROLL';
-                currentRoll = [];
-                DOMElements.rollDiceBtn.disabled = false;
-                
-                calculateTotalScore();
-                updateProgressBar();
-                updateDiceDisplay();
-                updateSuperpowerUI();
-
-                if (isGameOver()) showGameOver();
+            endTurn() {
+                this.firstPieceLocation = null;
+                this.placementState = 'AWAITING_ROLL';
+                this.currentRoll = [];
+                this.DOMElements.rollDiceBtn.disabled = false;
+                this.calculateTotalScore();
+                this.updateProgressBar();
+                this.updateDiceDisplay();
+                this.updateSuperpowerUI();
+                if (this.isGameOver()) this.showGameOver();
             }
 
-            function handleRollDice() {
-                if (activeSuperpower) cancelSuperpower();
-                if (placementState !== 'AWAITING_ROLL') return;
-                
-                DOMElements.rollDiceBtn.disabled = true;
-                DOMElements.dice1El.classList.add('dice-tumble');
-                DOMElements.dice2El.classList.add('dice-tumble');
-                
+            handleRollDice() {
+                if (this.activeSuperpower) this.cancelSuperpower();
+                if (this.placementState !== 'AWAITING_ROLL') return;
+                this.DOMElements.rollDiceBtn.disabled = true;
+                this.DOMElements.dice1El.classList.add('dice-tumble');
+                this.DOMElements.dice2El.classList.add('dice-tumble');
                 setTimeout(() => {
-                    const piece1 = generateRandomAlo();
-                    let piece2 = generateRandomAlo();
-                    while (piece2.quadrant === piece1.quadrant) {
-                        piece2 = generateRandomAlo();
-                    }
-                    currentRoll = [piece1, piece2];
-                    placementState = 'AWAITING_FIRST_PLACEMENT';
-                    updateDiceDisplay();
-                    updateSuperpowerUI();
-                    DOMElements.dice1El.classList.remove('dice-tumble');
-                    DOMElements.dice2El.classList.remove('dice-tumble');
+                    const piece1 = this.generateRandomAlo();
+                    let piece2 = this.generateRandomAlo();
+                    while (piece2.quadrant === piece1.quadrant) { piece2 = this.generateRandomAlo(); }
+                    this.currentRoll = [piece1, piece2];
+                    this.placementState = 'AWAITING_FIRST_PLACEMENT';
+                    this.updateDiceDisplay();
+                    this.updateSuperpowerUI();
+                    this.DOMElements.dice1El.classList.remove('dice-tumble');
+                    this.DOMElements.dice2El.classList.remove('dice-tumble');
                 }, 600);
             }
-            
+
             // --- Superpower Logic ---
-            function activateSuperpower(powerName) {
-                if (placementState !== 'AWAITING_ROLL' || usedSuperpowers.size >= 2 || usedSuperpowers.has(powerName)) {
-                    return;
-                }
-                
-                if (activeSuperpower === powerName) {
-                    cancelSuperpower();
-                } else {
-                    activeSuperpower = powerName;
-                    superpowerState = {}; // Reset state for new power
-                    updateSuperpowerUI();
-                }
-            }
-            
-            function cancelSuperpower() {
-                activeSuperpower = null;
-                superpowerState = {};
-                document.querySelectorAll('.pulsing-cell').forEach(c => c.classList.remove('pulsing-cell'));
-                updateSuperpowerUI();
-            }
-            
-            function consumeSuperpower(powerName) {
-                usedSuperpowers.add(powerName);
-                cancelSuperpower();
-                calculateTotalScore();
-                updateSuperpowerUI();
-            }
+            activateSuperpower(powerName) { if (this.placementState !== 'AWAITING_ROLL' || this.usedSuperpowers.size >= 2 || this.usedSuperpowers.has(powerName)) return; if (this.activeSuperpower === powerName) this.cancelSuperpower(); else { this.activeSuperpower = powerName; this.superpowerState = {}; this.updateSuperpowerUI(); } }
+            cancelSuperpower() { this.activeSuperpower = null; this.superpowerState = {}; document.querySelectorAll('.pulsing-cell').forEach(c => c.classList.remove('pulsing-cell')); this.updateSuperpowerUI(); }
+            consumeSuperpower(powerName) { this.usedSuperpowers.add(powerName); this.cancelSuperpower(); this.calculateTotalScore(); this.updateSuperpowerUI(); }
 
-            function handleSuperpowerClick(row, col) {
-                const index = row * GRID_SIZE + col;
-                const piece = gridState[index];
-                
-                switch (activeSuperpower) {
-                    case SUPERPOWERS.ROTATE:
-                        if (!piece) return;
-                        const quadrantOrder = ['TL', 'TR', 'BR', 'BL'];
-                        const currentIdx = quadrantOrder.indexOf(piece.quadrant);
-                        const nextIdx = (currentIdx + 1) % 4;
-                        piece.quadrant = quadrantOrder[nextIdx];
-                        renderCell(row, col);
-                        consumeSuperpower(SUPERPOWERS.ROTATE);
-                        break;
-                    
-                    case SUPERPOWERS.MOVE:
-                        if (!superpowerState.source) {
-                            if (!piece) return;
-                            superpowerState.source = { row, col };
-                            DOMElements.gameBoard.querySelector(`[data-index='${index}']`).classList.add('pulsing-cell');
-                        } else {
-                            if (piece) return; // Destination must be empty
-                            const sourceIndex = superpowerState.source.row * GRID_SIZE + superpowerState.source.col;
-                            gridState[index] = gridState[sourceIndex];
-                            gridState[sourceIndex] = null;
-                            renderCell(superpowerState.source.row, superpowerState.source.col);
-                            renderCell(row, col);
-                            consumeSuperpower(SUPERPOWERS.MOVE);
-                        }
-                        break;
-                        
-                    case SUPERPOWERS.SWAP:
-                        if (!superpowerState.source) {
-                            if (!piece) return;
-                            superpowerState.source = { row, col };
-                            DOMElements.gameBoard.querySelector(`[data-index='${index}']`).classList.add('pulsing-cell');
-                        } else {
-                            if (!piece) return;
-                            const isAdjacent = Math.abs(superpowerState.source.row - row) + Math.abs(superpowerState.source.col - col) === 1;
-                            if (!isAdjacent) return;
-
-                            const sourceIndex = superpowerState.source.row * GRID_SIZE + superpowerState.source.col;
-                            const temp = gridState[sourceIndex];
-                            gridState[sourceIndex] = gridState[index];
-                            gridState[index] = temp;
-                            renderCell(superpowerState.source.row, superpowerState.source.col);
-                            renderCell(row, col);
-                            consumeSuperpower(SUPERPOWERS.SWAP);
-                        }
-                        break;
-                    
-                    case SUPERPOWERS.EXCHANGE:
-                        if (!piece) return;
-                        superpowerState.source = { row, col };
-                        DOMElements.exchangeOptions.innerHTML = '';
-                        const allAlos = SYMBOLS.flatMap(s => QUADRANTS.map(q => ({ symbol: s, quadrant: q })));
-                        
-                        allAlos.forEach(alo => {
-                            const option = document.createElement('div');
-                            option.className = 'w-16 h-16 bg-white/50 rounded-lg p-1 cursor-pointer hover:bg-white/90';
-                            const img = document.createElement('img');
-                            img.src = `${IMAGE_PATH}${alo.symbol}_${alo.quadrant}.svg`;
-                            option.appendChild(img);
-                            
-                            if (alo.symbol === piece.symbol && alo.quadrant === piece.quadrant) {
-                                option.classList.add('opacity-30', 'cursor-not-allowed');
-                            } else {
-                                option.addEventListener('click', () => {
-                                    const sourceIndex = superpowerState.source.row * GRID_SIZE + superpowerState.source.col;
-                                    gridState[sourceIndex] = alo;
-                                    renderCell(superpowerState.source.row, superpowerState.source.col);
-                                    DOMElements.exchangeModal.classList.add('hidden');
-                                    consumeSuperpower(SUPERPOWERS.EXCHANGE);
-                                });
-                            }
-                            DOMElements.exchangeOptions.appendChild(option);
-                        });
-                        DOMElements.exchangeModal.classList.remove('hidden');
-                        break;
+            handleSuperpowerClick(row, col) {
+                const index = row * this.GRID_SIZE + col;
+                const piece = this.gridState[index];
+                switch (this.activeSuperpower) {
+                    case this.SUPERPOWERS.ROTATE: if (!piece) return; const order = ['TL', 'TR', 'BR', 'BL']; piece.quadrant = order[(order.indexOf(piece.quadrant) + 1) % 4]; this.renderCell(row, col); this.consumeSuperpower(this.SUPERPOWERS.ROTATE); break;
+                    case this.SUPERPOWERS.MOVE: if (!this.superpowerState.source) { if (!piece) return; this.superpowerState.source = { row, col }; this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`).classList.add('pulsing-cell'); } else { if (piece) return; const srcIdx = this.superpowerState.source.row * this.GRID_SIZE + this.superpowerState.source.col; this.gridState[index] = this.gridState[srcIdx]; this.gridState[srcIdx] = null; this.renderCell(this.superpowerState.source.row, this.superpowerState.source.col); this.renderCell(row, col); this.consumeSuperpower(this.SUPERPOWERS.MOVE); } break;
+                    case this.SUPERPOWERS.SWAP: if (!this.superpowerState.source) { if (!piece) return; this.superpowerState.source = { row, col }; this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`).classList.add('pulsing-cell'); } else { if (!piece || Math.abs(this.superpowerState.source.row - row) + Math.abs(this.superpowerState.source.col - col) !== 1) return; const srcIdx = this.superpowerState.source.row * this.GRID_SIZE + this.superpowerState.source.col; const temp = this.gridState[srcIdx]; this.gridState[srcIdx] = this.gridState[index]; this.gridState[index] = temp; this.renderCell(this.superpowerState.source.row, this.superpowerState.source.col); this.renderCell(row, col); this.consumeSuperpower(this.SUPERPOWERS.SWAP); } break;
+                    case this.SUPERPOWERS.EXCHANGE: if (!piece) return; this.superpowerState.source = { row, col }; this.DOMElements.exchangeOptions.innerHTML = ''; const allAlos = this.SYMBOLS.flatMap(s => this.QUADRANTS.map(q => ({ symbol: s, quadrant: q }))); allAlos.forEach(alo => { const option = document.createElement('div'); option.className = 'w-16 h-16 bg-white/50 rounded-lg p-1 cursor-pointer hover:bg-white/90'; const img = document.createElement('img'); img.src = `${this.IMAGE_PATH}${alo.symbol}_${alo.quadrant}.svg`; option.appendChild(img); if (alo.symbol === piece.symbol && alo.quadrant === piece.quadrant) { option.classList.add('opacity-30', 'cursor-not-allowed'); } else { option.onclick = () => { this.gridState[this.superpowerState.source.row * this.GRID_SIZE + this.superpowerState.source.col] = alo; this.renderCell(this.superpowerState.source.row, this.superpowerState.source.col); this.DOMElements.exchangeModal.classList.add('hidden'); this.consumeSuperpower(this.SUPERPOWERS.EXCHANGE); }; } this.DOMElements.exchangeOptions.appendChild(option); }); this.DOMElements.exchangeModal.classList.remove('hidden'); break;
                 }
             }
 
-            // --- Scoring Engine ---
-            function calculateTotalScore() {
-                // 1. Reset scores and create state for this calculation
-                let scoreBreakdown = { circle: 0, semiCircle: 0, almostCircle: 0, sequence: 0, lineMaster: 0, diamondHeist: 0 };
-                const scoredPieces = new Set(); // This Set is the key to preventing double counting
+            calculateTotalScore() { /* ... full scoring logic from previous turn ... */ }
+            // --- UI & Utility Functions ---
+            updateScoreUI(breakdown) { /* ... */ }
+            updateSuperpowerUI() { /* ... */ }
+            placePiece(row, col, rollIndex) { /* ... */ }
+            renderCell(row, col) { /* ... */ }
+            generateRandomAlo() { /* ... */ }
+            isGameOver() { /* ... */ }
+            showGameOver() { /* ... */ }
+            updateProgressBar() { /* ... */ }
+            updateDiceDisplay() { /* ... */ }
+        }
 
-                // --- HIERARCHICAL PATTERN MATCHING ---
+        // --- Simplified function stubs for brevity. The full logic is included below. ---
+        Game.prototype.calculateTotalScore = function() { let scoreBreakdown = { circle: 0, semiCircle: 0, almostCircle: 0, sequence: 0, lineMaster: 0, diamondHeist: 0 }; const scoredPieces = new Set(); for (let r = 0; r < this.GRID_SIZE - 1; r++) { for (let c = 0; c < this.GRID_SIZE - 1; c++) { const indices = [r*this.GRID_SIZE+c, r*this.GRID_SIZE+c+1, (r+1)*this.GRID_SIZE+c, (r+1)*this.GRID_SIZE+c+1]; if (indices.some(i => scoredPieces.has(i))) continue; const pieces = indices.map(i => this.gridState[i]); if (pieces.some(p => !p)) continue; const quadrants = new Set(pieces.map(p => p.quadrant)); if (quadrants.size === 4 && quadrants.has('TL') && quadrants.has('TR') && quadrants.has('BL') && quadrants.has('BR')) { const symbols = pieces.map(p => p.symbol); scoreBreakdown.circle += (new Set(symbols).size === 1) ? 40 : 20; indices.forEach(i => scoredPieces.add(i)); } } } for (let r = 0; r < this.GRID_SIZE - 1; r++) { for (let c = 0; c < this.GRID_SIZE - 1; c++) { const indices = [r*this.GRID_SIZE+c, r*this.GRID_SIZE+c+1, (r+1)*this.GRID_SIZE+c, (r+1)*this.GRID_SIZE+c+1]; const availablePieces = indices.map(i => this.gridState[i]).filter((p, idx) => p && !scoredPieces.has(indices[idx])); const availableIndices = indices.filter((i, idx) => this.gridState[i] && !scoredPieces.has(i)); if (availablePieces.length === 3) { const quadrants = new Set(availablePieces.map(p => p.quadrant)); const validSets = [ new Set(['TL', 'TR', 'BL']), new Set(['TL', 'TR', 'BR']), new Set(['TL', 'BL', 'BR']), new Set(['TR', 'BL', 'BR']) ]; for (const validSet of validSets) { if (quadrants.size === 3 && [...validSet].every(q => quadrants.has(q))) { const symbols = availablePieces.map(p => p.symbol); scoreBreakdown.almostCircle += (new Set(symbols).size === 1) ? 20 : 15; availableIndices.forEach(i => scoredPieces.add(i)); break; } } } } } for (let r = 0; r < this.GRID_SIZE; r++) { for (let c = 0; c < this.GRID_SIZE; c++) { const p1_idx = r * this.GRID_SIZE + c; const p1 = this.gridState[p1_idx]; if (!p1 || scoredPieces.has(p1_idx)) continue; if (c < this.GRID_SIZE - 1) { const p2_idx = r * this.GRID_SIZE + c + 1; const p2 = this.gridState[p2_idx]; if (p2 && !scoredPieces.has(p2_idx)) { const q1 = p1.quadrant, q2 = p2.quadrant; if ((q1 === 'TL' && q2 === 'TR') || (q1 === 'TR' && q2 === 'TL') || (q1 === 'BL' && q2 === 'BR') || (q1 === 'BR' && q2 === 'BL')) { scoreBreakdown.semiCircle += (p1.symbol === p2.symbol) ? 10 : 5; scoredPieces.add(p1_idx); scoredPieces.add(p2_idx); continue; } } } if (r < this.GRID_SIZE - 1) { const p2_idx = (r + 1) * this.GRID_SIZE + c; const p2 = this.gridState[p2_idx]; if (p2 && !scoredPieces.has(p2_idx)) { const q1 = p1.quadrant, q2 = p2.quadrant; if ((q1 === 'TL' && q2 === 'BL') || (q1 === 'BL' && q2 === 'TL') || (q1 === 'TR' && q2 === 'BR') || (q1 === 'BR' && q2 === 'TR')) { scoreBreakdown.semiCircle += (p1.symbol === p2.symbol) ? 10 : 5; scoredPieces.add(p1_idx); scoredPieces.add(p2_idx); } } } } } for (let r = 0; r < this.GRID_SIZE - 1; r++) { for (let c = 0; c < this.GRID_SIZE - 1; c++) { const tl = this.gridState[r*this.GRID_SIZE+c], tr = this.gridState[r*this.GRID_SIZE+c+1], bl = this.gridState[(r+1)*this.GRID_SIZE+c], br = this.gridState[(r+1)*this.GRID_SIZE+c+1]; if (tl && tr && bl && br) { if (tl.quadrant === 'BR' && tr.quadrant === 'BL' && bl.quadrant === 'TR' && br.quadrant === 'TL') { scoreBreakdown.diamondHeist -= 10; } } } } const visited = Array(this.GRID_SIZE * this.GRID_SIZE).fill(false); for (let i = 0; i < this.GRID_SIZE * this.GRID_SIZE; i++) { if (this.gridState[i] && !visited[i]) { const blob = []; const queue = [i]; visited[i] = true; const symbol = this.gridState[i].symbol; while (queue.length > 0) { const currentIdx = queue.shift(); blob.push(currentIdx); const r = Math.floor(currentIdx / this.GRID_SIZE), c = currentIdx % this.GRID_SIZE; [[r-1,c], [r+1,c], [r,c-1], [r,c+1]].forEach(([nr, nc]) => { const neighborIdx = nr * this.GRID_SIZE + nc; if (nr >= 0 && nr < this.GRID_SIZE && nc >= 0 && nc < this.GRID_SIZE && this.gridState[neighborIdx]?.symbol === symbol && !visited[neighborIdx]) { visited[neighborIdx] = true; queue.push(neighborIdx); } }); } if (blob.length > 1) scoreBreakdown.sequence += blob.length; } } for (let r = 0; r < this.GRID_SIZE; r++) { const firstPiece = this.gridState[r * this.GRID_SIZE]; if (firstPiece && this.gridState.slice(r * this.GRID_SIZE, (r + 1) * this.GRID_SIZE).every(p => p?.symbol === firstPiece.symbol)) scoreBreakdown.lineMaster += 10; } for (let c = 0; c < this.GRID_SIZE; c++) { const firstPiece = this.gridState[c]; if (firstPiece) { let isLineMaster = true; for (let r = 1; r < this.GRID_SIZE; r++) { if (this.gridState[r * this.GRID_SIZE + c]?.symbol !== firstPiece.symbol) { isLineMaster = false; break; } } if (isLineMaster) scoreBreakdown.lineMaster += 10; } } this.score = Object.values(scoreBreakdown).reduce((a, b) => a + b, 0); this.updateScoreUI(scoreBreakdown); };
+        Game.prototype.updateScoreUI = function(breakdown) { this.DOMElements.totalScore.textContent = this.score; this.DOMElements.scoreCircle.textContent = breakdown.circle; this.DOMElements.scoreSemiCircle.textContent = breakdown.semiCircle; this.DOMElements.scoreAlmostCircle.textContent = breakdown.almostCircle; this.DOMElements.scoreSequence.textContent = breakdown.sequence; this.DOMElements.scoreLineMaster.textContent = breakdown.lineMaster; this.DOMElements.scoreDiamondHeist.textContent = breakdown.diamondHeist; if (this.score > this.highScore) { this.highScore = this.score; localStorage.setItem(`matchaloHighScore_${this.config.id}`, this.highScore); } this.DOMElements.highScore.textContent = this.highScore; };
+        Game.prototype.updateSuperpowerUI = function() { const canUsePower = this.placementState === 'AWAITING_ROLL' && this.usedSuperpowers.size < 2; [this.DOMElements.rotateBtn, this.DOMElements.swapBtn, this.DOMElements.exchangeBtn, this.DOMElements.moveBtn].forEach(btn => { const powerName = btn.id.replace('-btn', ''); const isUsed = this.usedSuperpowers.has(powerName); btn.disabled = !canUsePower || isUsed; btn.classList.toggle('opacity-50', !canUsePower || isUsed); btn.querySelector('.superpower-used-overlay').classList.toggle('hidden', !isUsed); btn.classList.toggle('superpower-btn--active', this.activeSuperpower === powerName); }); this.DOMElements.spCharge1.classList.toggle('opacity-30', this.usedSuperpowers.size >= 1); this.DOMElements.spCharge2.classList.toggle('opacity-30', this.usedSuperpowers.size >= 2); };
+        Game.prototype.placePiece = function(row, col, rollIndex) { this.gridState[row * this.GRID_SIZE + col] = this.currentRoll[rollIndex]; this.renderCell(row, col); };
+        Game.prototype.renderCell = function(row, col) { const index = row * this.GRID_SIZE + col, cell = this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`), piece = this.gridState[index]; cell.innerHTML = ''; if (piece) { cell.classList.remove('empty'); const img = document.createElement('img'); img.src = `${this.IMAGE_PATH}${piece.symbol}_${piece.quadrant}.svg`; cell.appendChild(img); } else { cell.classList.add('empty'); } };
+        Game.prototype.generateRandomAlo = function() { const symbol = this.SYMBOLS[Math.floor(Math.random() * this.SYMBOLS.length)], quadrant = this.QUADRANTS[Math.floor(Math.random() * this.QUADRANTS.length)]; return { symbol, quadrant }; };
+        Game.prototype.isGameOver = function() { if (!this.gridState.includes(null)) return true; for (let r = 0; r < this.GRID_SIZE; r++) { for (let c = 0; c < this.GRID_SIZE; c++) { if (!this.gridState[r * this.GRID_SIZE + c]) { if ((c < this.GRID_SIZE - 1 && !this.gridState[r * this.GRID_SIZE + c + 1]) || (r < this.GRID_SIZE - 1 && !this.gridState[(r + 1) * this.GRID_SIZE + c])) return false; } } } return true; };
+        Game.prototype.showGameOver = function() { this.DOMElements.finalScore.textContent = this.score; this.DOMElements.gameOverModal.classList.remove('hidden'); this.DOMElements.rollDiceBtn.disabled = true; this.DOMElements.gameBoard.querySelectorAll('.grid-cell.empty').forEach(cell => cell.classList.remove('empty')); };
+        Game.prototype.updateProgressBar = function() { const filled = this.gridState.filter(c => c !== null).length; this.DOMElements.progressBarFill.style.width = `${(filled / (this.GRID_SIZE * this.GRID_SIZE)) * 100}%`; };
+        Game.prototype.updateDiceDisplay = function() { [this.DOMElements.dice1El, this.DOMElements.dice2El].forEach((el, i) => { el.innerHTML = ''; if (this.currentRoll[i]) { const piece = this.currentRoll[i], img = document.createElement('img'); img.src = `${this.IMAGE_PATH}${piece.symbol.toLowerCase()}_${piece.quadrant}.svg`; el.appendChild(img); } else { el.textContent = '?'; } }); };
 
-                // PASS 1: Find and score FULL CIRCLES first.
-                for (let r = 0; r < GRID_SIZE - 1; r++) {
-                    for (let c = 0; c < GRID_SIZE - 1; c++) {
-                        const indices = [r*GRID_SIZE+c, r*GRID_SIZE+c+1, (r+1)*GRID_SIZE+c, (r+1)*GRID_SIZE+c+1];
-                        if (indices.some(i => scoredPieces.has(i))) continue;
-
-                        const pieces = indices.map(i => gridState[i]);
-                        if (pieces.some(p => !p)) continue; // Needs all 4 pieces to be a full circle
-
-                        const quadrants = new Set(pieces.map(p => p.quadrant));
-                        if (quadrants.size === 4 && quadrants.has('TL') && quadrants.has('TR') && quadrants.has('BL') && quadrants.has('BR')) {
-                            const symbols = pieces.map(p => p.symbol);
-                            scoreBreakdown.circle += (new Set(symbols).size === 1) ? 40 : 20;
-                            indices.forEach(i => scoredPieces.add(i)); // Lock these pieces from being scored again
-                        }
-                    }
-                }
-
-                // PASS 2: Find and score ALMOST CIRCLES on remaining pieces.
-                for (let r = 0; r < GRID_SIZE - 1; r++) {
-                    for (let c = 0; c < GRID_SIZE - 1; c++) {
-                        const indices = [r*GRID_SIZE+c, r*GRID_SIZE+c+1, (r+1)*GRID_SIZE+c, (r+1)*GRID_SIZE+c+1];
-                        const availablePieces = indices.map(i => gridState[i]).filter((p, idx) => p && !scoredPieces.has(indices[idx]));
-                        const availableIndices = indices.filter((i, idx) => gridState[i] && !scoredPieces.has(i));
-
-                        if (availablePieces.length === 3) {
-                            const quadrants = new Set(availablePieces.map(p => p.quadrant));
-                            const validSets = [ new Set(['TL', 'TR', 'BL']), new Set(['TL', 'TR', 'BR']), new Set(['TL', 'BL', 'BR']), new Set(['TR', 'BL', 'BR']) ];
-                            
-                            for (const validSet of validSets) {
-                                if (quadrants.size === 3 && [...validSet].every(q => quadrants.has(q))) {
-                                    const symbols = availablePieces.map(p => p.symbol);
-                                    scoreBreakdown.almostCircle += (new Set(symbols).size === 1) ? 20 : 15;
-                                    availableIndices.forEach(i => scoredPieces.add(i)); // Lock these pieces
-                                    break; 
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                // PASS 3: Find and score SEMI CIRCLES on remaining pieces.
-                for (let r = 0; r < GRID_SIZE; r++) {
-                    for (let c = 0; c < GRID_SIZE; c++) {
-                        const p1_idx = r * GRID_SIZE + c;
-                        const p1 = gridState[p1_idx];
-                        if (!p1 || scoredPieces.has(p1_idx)) continue;
-
-                        // Check horizontal neighbor
-                        if (c < GRID_SIZE - 1) {
-                            const p2_idx = r * GRID_SIZE + c + 1;
-                            const p2 = gridState[p2_idx];
-                            if (p2 && !scoredPieces.has(p2_idx)) {
-                                const q1 = p1.quadrant, q2 = p2.quadrant;
-                                if ((q1 === 'TL' && q2 === 'TR') || (q1 === 'TR' && q2 === 'TL') || (q1 === 'BL' && q2 === 'BR') || (q1 === 'BR' && q2 === 'BL')) {
-                                    scoreBreakdown.semiCircle += (p1.symbol === p2.symbol) ? 10 : 5;
-                                    scoredPieces.add(p1_idx); scoredPieces.add(p2_idx);
-                                    continue; // Move to next piece once scored
-                                }
-                            }
-                        }
-
-                        // Check vertical neighbor
-                        if (r < GRID_SIZE - 1) {
-                            const p2_idx = (r + 1) * GRID_SIZE + c;
-                            const p2 = gridState[p2_idx];
-                            if (p2 && !scoredPieces.has(p2_idx)) {
-                                const q1 = p1.quadrant, q2 = p2.quadrant;
-                                if ((q1 === 'TL' && q2 === 'BL') || (q1 === 'BL' && q2 === 'TL') || (q1 === 'TR' && q2 === 'BR') || (q1 === 'BR' && q2 === 'TR')) {
-                                    scoreBreakdown.semiCircle += (p1.symbol === p2.symbol) ? 10 : 5;
-                                    scoredPieces.add(p1_idx); scoredPieces.add(p2_idx);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // PASS 4: Diamond Heist (a specific 4-piece pattern)
-                for (let r = 0; r < GRID_SIZE - 1; r++) {
-                    for (let c = 0; c < GRID_SIZE - 1; c++) {
-                        const tl = gridState[r*GRID_SIZE+c], tr = gridState[r*GRID_SIZE+c+1], bl = gridState[(r+1)*GRID_SIZE+c], br = gridState[(r+1)*GRID_SIZE+c+1];
-                        if (tl && tr && bl && br) {
-                            if (tl.quadrant === 'BR' && tr.quadrant === 'BL' && bl.quadrant === 'TR' && br.quadrant === 'TL') {
-                                scoreBreakdown.diamondHeist -= 10;
-                            }
-                        }
-                    }
-                }
-
-                // --- Sequence and Line Master logic (run independently) ---
-                const visited = Array(GRID_SIZE * GRID_SIZE).fill(false);
-                for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
-                    if (gridState[i] && !visited[i]) {
-                        const blob = []; const queue = [i]; visited[i] = true;
-                        const symbol = gridState[i].symbol;
-                        while (queue.length > 0) {
-                            const currentIdx = queue.shift(); blob.push(currentIdx);
-                            const r = Math.floor(currentIdx / GRID_SIZE), c = currentIdx % GRID_SIZE;
-                            [[r-1,c], [r+1,c], [r,c-1], [r,c+1]].forEach(([nr, nc]) => {
-                                const neighborIdx = nr * GRID_SIZE + nc;
-                                if (nr >= 0 && nr < GRID_SIZE && nc >= 0 && nc < GRID_SIZE && gridState[neighborIdx]?.symbol === symbol && !visited[neighborIdx]) {
-                                    visited[neighborIdx] = true; queue.push(neighborIdx);
-                                }
-                            });
-                        }
-                        if (blob.length > 1) scoreBreakdown.sequence += blob.length;
-                    }
-                }
-                
-                for (let r = 0; r < GRID_SIZE; r++) { const firstPiece = gridState[r * GRID_SIZE]; if (firstPiece && gridState.slice(r * GRID_SIZE, (r + 1) * GRID_SIZE).every(p => p?.symbol === firstPiece.symbol)) scoreBreakdown.lineMaster += 10; }
-                for (let c = 0; c < GRID_SIZE; c++) { const firstPiece = gridState[c]; if (firstPiece) { let isLineMaster = true; for (let r = 1; r < GRID_SIZE; r++) { if (gridState[r * GRID_SIZE + c]?.symbol !== firstPiece.symbol) { isLineMaster = false; break; } } if (isLineMaster) scoreBreakdown.lineMaster += 10; } }
-
-                // Final Tally
-                score = Object.values(scoreBreakdown).reduce((a, b) => a + b, 0);
-                updateScoreUI(scoreBreakdown);
-            }
-            
-            // --- UI Update Functions ---
-            function updateScoreUI(breakdown) {
-                DOMElements.totalScore.textContent = score;
-                DOMElements.scoreCircle.textContent = breakdown.circle;
-                DOMElements.scoreSemiCircle.textContent = breakdown.semiCircle;
-                DOMElements.scoreAlmostCircle.textContent = breakdown.almostCircle;
-                DOMElements.scoreSequence.textContent = breakdown.sequence;
-                DOMElements.scoreLineMaster.textContent = breakdown.lineMaster;
-                DOMElements.scoreDiamondHeist.textContent = breakdown.diamondHeist;
-                if (score > highScore) {
-                    highScore = score;
-                    localStorage.setItem('matchaloHighScore', highScore);
-                }
-                DOMElements.highScore.textContent = highScore;
-            }
-
-            function updateSuperpowerUI() {
-                const canUsePower = placementState === 'AWAITING_ROLL' && usedSuperpowers.size < 2;
-                
-                [DOMElements.rotateBtn, DOMElements.swapBtn, DOMElements.exchangeBtn, DOMElements.moveBtn].forEach(btn => {
-                    const powerName = btn.id.replace('-btn', '');
-                    const isUsed = usedSuperpowers.has(powerName);
-                    btn.disabled = !canUsePower || isUsed;
-                    btn.classList.toggle('opacity-50', !canUsePower || isUsed);
-                    btn.classList.toggle('cursor-not-allowed', !canUsePower || isUsed);
-                    btn.querySelector('.superpower-used-overlay').classList.toggle('hidden', !isUsed);
-                    btn.classList.toggle('superpower-btn--active', activeSuperpower === powerName);
-                });
-                
-                DOMElements.spCharge1.classList.toggle('opacity-30', usedSuperpowers.size >= 1);
-                DOMElements.spCharge2.classList.toggle('opacity-30', usedSuperpowers.size >= 2);
-            }
-
-            // --- Utility Functions (unchanged from previous version) ---
-            function placePiece(row, col, rollIndex) { gridState[row * GRID_SIZE + col] = currentRoll[rollIndex]; renderCell(row, col); }
-            function renderCell(row, col) { const index = row * GRID_SIZE + col, cell = DOMElements.gameBoard.querySelector(`[data-index='${index}']`), piece = gridState[index]; cell.innerHTML = ''; if (piece) { cell.classList.remove('empty'); const img = document.createElement('img'); img.src = `${IMAGE_PATH}${piece.symbol}_${piece.quadrant}.svg`; cell.appendChild(img); } else { cell.classList.add('empty'); } }
-            function generateRandomAlo() { const symbol = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)], quadrant = QUADRANTS[Math.floor(Math.random() * QUADRANTS.length)]; return { symbol, quadrant }; }
-            function isGameOver() { if (!gridState.includes(null)) return true; for (let r = 0; r < GRID_SIZE; r++) { for (let c = 0; c < GRID_SIZE; c++) { const idx = r * GRID_SIZE + c; if (!gridState[idx]) { if ((c < GRID_SIZE - 1 && !gridState[idx + 1]) || (r < GRID_SIZE - 1 && !gridState[idx + GRID_SIZE])) return false; } } } return true; }
-            function showGameOver() { DOMElements.finalScore.textContent = score; DOMElements.gameOverModal.classList.remove('hidden'); DOMElements.rollDiceBtn.disabled = true; DOMElements.gameBoard.querySelectorAll('.grid-cell.empty').forEach(cell => cell.classList.remove('empty')); }
-            function updateProgressBar() { const filledCells = gridState.filter(cell => cell !== null).length; DOMElements.progressBarFill.style.width = `${(filledCells / (GRID_SIZE * GRID_SIZE)) * 100}%`; }
-            function updateDiceDisplay() { [DOMElements.dice1El, DOMElements.dice2El].forEach((el, i) => { el.innerHTML = ''; if (currentRoll[i]) { const piece = currentRoll[i], img = document.createElement('img'); img.src = `${IMAGE_PATH}${piece.symbol.toLowerCase()}_${piece.quadrant}.svg`; el.appendChild(img); } else { el.textContent = '?'; } }); }
-
-            // --- Initial Setup of Event Listeners ---
-            DOMElements.rollDiceBtn.addEventListener('click', handleRollDice);
-            DOMElements.resetBtn.addEventListener('click', init);
-            DOMElements.restartModalBtn.addEventListener('click', init);
-            DOMElements.closeModalBtn.addEventListener('click', () => DOMElements.gameOverModal.classList.add('hidden'));
-            DOMElements.rotateBtn.addEventListener('click', () => activateSuperpower(SUPERPOWERS.ROTATE));
-            DOMElements.swapBtn.addEventListener('click', () => activateSuperpower(SUPERPOWERS.SWAP));
-            DOMElements.exchangeBtn.addEventListener('click', () => activateSuperpower(SUPERPOWERS.EXCHANGE));
-            DOMElements.moveBtn.addEventListener('click', () => activateSuperpower(SUPERPOWERS.MOVE));
-            
-            init();
-        });
+        gameManager.init();
     </script>
 </body>
 </html>
