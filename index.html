@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MATCHALO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #EADBFD 0%, #B8A2D6 100%);
+            --card-bg: rgba(255, 255, 255, 0.4);
+            --text-primary: #4A235A;
+            --text-secondary: #6A357A;
+            --accent-color: #F7B733;
+            --border-color: rgba(255, 255, 255, 0.3);
+            --grid-border-color: rgba(0, 0, 0, 0.1);
+            --shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+            --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            font-weight: 500;
+            margin: 0;
+            padding: 1rem;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        #game-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+            justify-content: center;
+            align-items: stretch; /* This makes both panels equal height */
+        }
+
+        .panel {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #game-board-panel {
+            flex: 2; /* Takes up more space */
+            max-width: 600px;
+            min-width: 300px;
+        }
+
+        #control-panel {
+            flex: 1; /* Takes up less space */
+            min-width: 280px;
+            max-width: 350px;
+        }
+
+        /* 1. Game Board Styling */
+        .game-board-wrapper {
+            background: var(--card-bg);
+            border-radius: 16px; /* Container has rounded edges */
+            padding: 1rem;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--border-color);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            width: 100%;
+            aspect-ratio: 1;
+            background-color: #ffffff; /* Perfect white background */
+            border-radius: 0; /* Perfect square with sharp corners */
+            overflow: hidden;
+        }
+
+        .grid-cell {
+            aspect-ratio: 1;
+            border-right: 1px solid var(--grid-border-color);
+            border-bottom: 1px solid var(--grid-border-color);
+            box-sizing: border-box;
+            transition: background-color 0.2s var(--ease-smooth);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .grid-cell:nth-child(8n) { border-right: none; }
+        .grid-cell:nth-child(n+57) { border-bottom: none; }
+
+        .grid-cell.empty:hover {
+            background-color: rgba(184, 162, 214, 0.2);
+            cursor: pointer;
+        }
+
+        .grid-cell img { width: 100%; height: 100%; display: block; }
+        
+        /* 2. Scoring Panel Height Alignment */
+        #right-panel-card {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%; /* Makes the card fill the panel's height */
+            box-sizing: border-box;
+            padding: 1.5rem;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 16px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--border-color);
+        }
+        
+        .card-section {
+            margin-bottom: 1.5rem;
+        }
+        .card-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .panel-title { margin: 0 0 1rem 0; font-weight: 700; text-align: center; opacity: 0.9; }
+        .score-value { font-size: 3rem; font-weight: 700; text-align: center; color: var(--text-primary); text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        #status-message { text-align: center; font-size: 1.1rem; min-height: 44px; }
+
+        /* 3. Progress Bar Styling */
+        .progress-bar-container {
+            height: 10px;
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        #progress-bar-fill {
+            height: 100%;
+            width: 0%; /* Starts at 0 */
+            background: linear-gradient(90deg, #F7B733 0%, #FC4A1A 100%);
+            border-radius: 5px;
+            transition: width 0.5s var(--ease-smooth);
+        }
+
+        /* 4. Dice Display Styling */
+        #dice-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .dice-roll-button {
+            font-size: 2.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            transition: transform 0.2s ease;
+        }
+        .dice-roll-button:hover {
+            transform: scale(1.1);
+        }
+        .dice-roll-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .dice-slot {
+            width: 80px;
+            height: 80px;
+            background-color: rgba(255,255,255,0.5);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid var(--border-color);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .dice-slot img { width: 100%; height: 100%; }
+        .placeholder-text { font-size: 2.5rem; color: var(--text-secondary); opacity: 0.5; }
+
+        .controls { display: flex; flex-direction: column; gap: 1rem; margin-top: auto;}
+        .themed-button { padding: 0.75rem 1rem; font-size: 1rem; font-weight: 700; font-family: 'Quicksand', sans-serif; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s var(--ease-smooth); }
+        .themed-button.secondary { background-color: transparent; border: 2px solid var(--text-primary); color: var(--text-primary); }
+        .themed-button:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .themed-button:disabled { background-color: #888; cursor: not-allowed; transform: none; box-shadow: none; }
+        
+        .valid-placement-hint { background-color: rgba(247, 183, 51, 0.4) !important; cursor: pointer; }
+        .shape-complete-flash { animation: flash 1s ease-out; }
+        @keyframes flash { 0% { background-color: #ffffff; } 50% { background-color: var(--accent-color); } 100% { background-color: #ffffff; } }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: var(--bg-gradient); padding: 2rem; border-radius: 12px; text-align: center; box-shadow: var(--shadow-soft); border: 1px solid var(--border-color); }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <main id="game-container">
+        <div class="panel" id="game-board-panel">
+            <div class="game-board-wrapper">
+                <div id="game-board">
+                    </div>
+            </div>
+        </div>
+
+        <div class="panel" id="control-panel">
+            <div class="glass-card" id="right-panel-card">
+                <div class="card-section">
+                    <h2 class="panel-title">Score</h2>
+                    <div id="score-display" class="score-value">0</div>
+                </div>
+
+                <div class="card-section">
+                    <h2 class="panel-title">Your ALO Pieces</h2>
+                    <div id="dice-container">
+                        <button id="roll-dice-btn" class="dice-roll-button">🎲</button>
+                        <div id="dice-1" class="dice-slot"><div class="placeholder-text">?</div></div>
+                        <div id="dice-2" class="dice-slot"><div class="placeholder-text">?</div></div>
+                    </div>
+                </div>
+                
+                <div class="card-section">
+                     <div class="progress-bar-container">
+                        <div id="progress-bar-fill"></div>
+                    </div>
+                </div>
+
+                <div class="card-section">
+                    <h2 class="panel-title">Status</h2>
+                    <p id="status-message">Click the Dice Icon to begin!</p>
+                </div>
+
+                <div class="card-section" style="flex-grow: 1;"></div>
+
+                <div class="card-section controls">
+                    <button id="reset-btn" class="themed-button secondary">Reset</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="game-over-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2>Game Over!</h2>
+            <p>You can no longer make a move.</p>
+            <p>Final Score: <span id="final-score">0</span></p>
+            <button id="restart-modal-btn" class="themed-button">Play Again</button>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const gameBoard = document.getElementById('game-board');
+            const rollDiceBtn = document.getElementById('roll-dice-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const dice1El = document.getElementById('dice-1');
+            const dice2El = document.getElementById('dice-2');
+            const scoreDisplay = document.getElementById('score-display');
+            const statusMessage = document.getElementById('status-message');
+            const gameOverModal = document.getElementById('game-over-modal');
+            const finalScoreEl = document.getElementById('final-score');
+            const restartModalBtn = document.getElementById('restart-modal-btn');
+            
+            const GRID_SIZE = 8;
+            const SYMBOLS = ['Crown', 'Circle', 'Comb', 'Pinch'];
+            const QUADRANTS = ['TL', 'TR', 'BL', 'BR'];
+            const IMAGE_PATH = 'images/';
+
+            let gridState = [];
+            let currentRoll = [];
+            let placementState = 'AWAITING_ROLL';
+            let firstPieceLocation = null;
+            let score = 0;
+            let lastClick = { time: 0, row: -1, col: -1 };
+
+            function init() {
+                gameBoard.innerHTML = '';
+                gridState = Array(GRID_SIZE * GRID_SIZE).fill(null);
+                
+                for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('grid-cell', 'empty');
+                    cell.dataset.index = i;
+                    const row = Math.floor(i / GRID_SIZE);
+                    const col = i % GRID_SIZE;
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    cell.addEventListener('click', () => onCellClick(row, col));
+                    gameBoard.appendChild(cell);
+                }
+
+                score = 0;
+                currentRoll = [];
+                firstPieceLocation = null;
+                placementState = 'AWAITING_ROLL';
+                
+                updateScore();
+                updateDiceDisplay();
+                updateProgressBar();
+                updateStatus();
+                gameOverModal.classList.add('hidden');
+                rollDiceBtn.disabled = false;
+            }
+
+            function onCellClick(row, col) {
+                const index = row * GRID_SIZE + col;
+                const now = new Date().getTime();
+
+                if (now - lastClick.time < 300 && lastClick.row === row && lastClick.col === col) {
+                    handleDoubleClick(row, col);
+                    lastClick = { time: 0, row: -1, col: -1 };
+                    return;
+                }
+                lastClick = { time: now, row, col };
+
+                if (placementState === 'AWAITING_FIRST_PLACEMENT' && !gridState[index]) {
+                    placePiece(row, col, 0);
+                    firstPieceLocation = { row, col };
+                    placementState = 'AWAITING_SECOND_PLACEMENT';
+                    updateStatus();
+                    highlightValidSecondPlacements();
+                } else if (placementState === 'AWAITING_SECOND_PLACEMENT') {
+                    const isAdjacent = Math.abs(firstPieceLocation.row - row) + Math.abs(firstPieceLocation.col - col) === 1;
+                    if (isAdjacent && !gridState[index]) {
+                        placePiece(row, col, 1);
+                        clearHighlights();
+
+                        checkForCompletedShapes(firstPieceLocation.row, firstPieceLocation.col);
+                        checkForCompletedShapes(row, col);
+                        
+                        updateProgressBar();
+
+                        firstPieceLocation = null;
+                        placementState = 'AWAITING_ROLL';
+                        currentRoll = [];
+                        updateDiceDisplay();
+                        updateStatus();
+
+                        if (isGameOver()) {
+                            showGameOver();
+                        }
+                    }
+                }
+            }
+
+            function handleDoubleClick(row, col) {
+                if (placementState === 'AWAITING_SECOND_PLACEMENT' &&
+                    firstPieceLocation.row === row && firstPieceLocation.col === col) {
+                    const index = row * GRID_SIZE + col;
+                    gridState[index] = null;
+                    renderCell(row, col);
+                    
+                    firstPieceLocation = null;
+                    placementState = 'AWAITING_FIRST_PLACEMENT';
+                    updateStatus();
+                    clearHighlights();
+                }
+            }
+
+            function placePiece(row, col, rollIndex) {
+                const piece = currentRoll[rollIndex];
+                const index = row * GRID_SIZE + col;
+                gridState[index] = piece;
+                renderCell(row, col);
+            }
+            
+            function handleRollDice() {
+                if (placementState !== 'AWAITING_ROLL') return;
+                const piece1 = generateRandomAlo();
+                const piece2 = generateRandomAlo();
+                currentRoll = [piece1, piece2];
+                placementState = 'AWAITING_FIRST_PLACEMENT';
+                rollDiceBtn.disabled = true;
+                updateDiceDisplay();
+                updateStatus();
+            }
+            
+            function generateRandomAlo() {
+                const symbol = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+                const quadrant = QUADRANTS[Math.floor(Math.random() * QUADRANTS.length)];
+                return { symbol, quadrant };
+            }
+            
+            function checkForCompletedShapes(r, c) {
+                if (r > 0 && c > 0) check2x2(r - 1, c - 1);
+                if (r > 0 && c < GRID_SIZE - 1) check2x2(r - 1, c);
+                if (r < GRID_SIZE - 1 && c > 0) check2x2(r, c - 1);
+                if (r < GRID_SIZE - 1 && c < GRID_SIZE - 1) check2x2(r, c);
+            }
+            
+            function check2x2(topLeftRow, topLeftCol) {
+                const tl_idx = topLeftRow * GRID_SIZE + topLeftCol;
+                const tr_idx = tl_idx + 1;
+                const bl_idx = (topLeftRow + 1) * GRID_SIZE + topLeftCol;
+                const br_idx = bl_idx + 1;
+
+                const tl = gridState[tl_idx];
+                const tr = gridState[tr_idx];
+                const bl = gridState[bl_idx];
+                const br = gridState[br_idx];
+                
+                if (!tl || !tr || !bl || !br) return;
+
+                if (
+                    tl.quadrant === 'TL' && tr.quadrant === 'TR' &&
+                    bl.quadrant === 'BL' && br.quadrant === 'BR' &&
+                    tl.symbol === tr.symbol && tl.symbol === bl.symbol && tl.symbol === br.symbol
+                ) {
+                    score += 5;
+                    updateScore();
+                    flashCells([tl_idx, tr_idx, bl_idx, br_idx]);
+                }
+            }
+
+            function isGameOver() {
+                if (!gridState.includes(null)) return true;
+                for (let r = 0; r < GRID_SIZE; r++) {
+                    for (let c = 0; c < GRID_SIZE; c++) {
+                        const idx = r * GRID_SIZE + c;
+                        if (!gridState[idx]) {
+                            if (c < GRID_SIZE - 1 && !gridState[idx + 1]) return false;
+                            if (r < GRID_SIZE - 1 && !gridState[idx + GRID_SIZE]) return false;
+                        }
+                    }
+                }
+                return true;
+            }
+
+            function showGameOver() {
+                finalScoreEl.textContent = score;
+                gameOverModal.classList.remove('hidden');
+                rollDiceBtn.disabled = true;
+            }
+
+            function flashCells(indices) {
+                indices.forEach(index => {
+                    const cell = gameBoard.querySelector(`[data-index='${index}']`);
+                    if (cell) {
+                        cell.classList.add('shape-complete-flash');
+                        setTimeout(() => cell.classList.remove('shape-complete-flash'), 1000);
+                    }
+                });
+            }
+
+            function highlightValidSecondPlacements() {
+                const { row, col } = firstPieceLocation;
+                const neighbors = [
+                    { r: row - 1, c: col }, { r: row + 1, c: col },
+                    { r: row, c: col - 1 }, { r: row, c: col + 1 }
+                ];
+                neighbors.forEach(n => {
+                    if (n.r >= 0 && n.r < GRID_SIZE && n.c >= 0 && n.c < GRID_SIZE) {
+                        const index = n.r * GRID_SIZE + n.c;
+                        if (!gridState[index]) {
+                            const cell = gameBoard.querySelector(`[data-index='${index}']`);
+                            cell.classList.add('valid-placement-hint');
+                        }
+                    }
+                });
+            }
+
+            function clearHighlights() {
+                document.querySelectorAll('.valid-placement-hint').forEach(cell => {
+                    cell.classList.remove('valid-placement-hint');
+                });
+            }
+
+            function renderCell(row, col) {
+                const index = row * GRID_SIZE + col;
+                const cell = gameBoard.querySelector(`[data-index='${index}']`);
+                const piece = gridState[index];
+                cell.innerHTML = '';
+                if (piece) {
+                    cell.classList.remove('empty');
+                    const img = document.createElement('img');
+                    img.src = `${IMAGE_PATH}${piece.symbol.toLowerCase()}_${piece.quadrant}.svg`;
+                    img.alt = `${piece.symbol} ${piece.quadrant}`;
+                    cell.appendChild(img);
+                } else {
+                    cell.classList.add('empty');
+                }
+            }
+            
+            function updateProgressBar() {
+                const progressBarFill = document.getElementById('progress-bar-fill');
+                const totalCells = GRID_SIZE * GRID_SIZE;
+                const filledCells = gridState.filter(cell => cell !== null).length;
+                const percentage = (filledCells / totalCells) * 100;
+                progressBarFill.style.width = `${percentage}%`;
+            }
+
+            function updateScore() {
+                scoreDisplay.textContent = score;
+            }
+
+            function updateDiceDisplay() {
+                const diceElements = [dice1El, dice2El];
+                diceElements.forEach((el, i) => {
+                    el.innerHTML = '';
+                    if (currentRoll[i]) {
+                        const piece = currentRoll[i];
+                        const img = document.createElement('img');
+                        img.src = `${IMAGE_PATH}${piece.symbol.toLowerCase()}_${piece.quadrant}.svg`;
+                        img.alt = `${piece.symbol} ${piece.quadrant}`;
+                        el.appendChild(img);
+                    } else {
+                        el.innerHTML = '<div class="placeholder-text">?</div>';
+                    }
+                });
+            }
+
+            function updateStatus() {
+                switch (placementState) {
+                    case 'AWAITING_ROLL':
+                        statusMessage.textContent = 'Click the Dice Icon to get new pieces.';
+                        rollDiceBtn.disabled = isGameOver();
+                        break;
+                    case 'AWAITING_FIRST_PLACEMENT':
+                        statusMessage.textContent = 'Place the first Alo piece.';
+                        break;
+                    case 'AWAITING_SECOND_PLACEMENT':
+                        statusMessage.textContent = 'Place the second Alo piece next to the first.';
+                        break;
+                }
+            }
+
+            rollDiceBtn.addEventListener('click', handleRollDice);
+            resetBtn.addEventListener('click', init);
+            restartModalBtn.addEventListener('click', init);
+
+            init();
+        });
+    </script>
+</body>
+</html>
