@@ -11,7 +11,7 @@
     
     <style>
         :root {
-            /* Adapted purple theme from previous MATCHALO version */
+            /* Adapted purple theme for MATCHALO */
             --bg: linear-gradient(135deg, #f5f7fa 0%, #e8e4f1 100%);
             --card: rgba(255, 255, 255, 0.85);
             --text: #4a0e69;
@@ -46,6 +46,7 @@
             border: none !important;
         }
 
+        .themed-button { font-weight: 600; border-radius: 12px; transition: all 0.3s var(--ease-smooth); border: none; }
         .themed-button.primary { background: var(--accent-gradient); }
         .themed-button.secondary { background-color: rgba(255,255,255,0.6); color: var(--text); border: 1px solid var(--faint-border); }
         .themed-button.tertiary { background: none; color: var(--text-secondary); }
@@ -61,10 +62,7 @@
         }
         .dice-tumble { animation: dice-tumble 0.6s var(--ease-bounce); }
 
-        .modal-overlay {
-            background-color: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(5px);
-        }
+        .modal-overlay { background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); }
     </style>
 </head>
 <body class="p-2 lg:p-4">
@@ -72,28 +70,28 @@
         
         <div class="w-full lg:w-2/3">
             <div id="game-board-container" class="p-4 lg:p-6 h-full glass-card rounded-2xl">
-                <div id="game-board" class="grid grid-cols-8 w-full aspect-square bg-white">
+                <div id="game-board" class="grid grid-cols-8 w-full aspect-square bg-white rounded-lg">
                     </div>
             </div>
         </div>
 
         <div class="w-full lg:w-1/3">
-            <div id="right-panel-card" class="flex-1 flex flex-col gap-y-3 lg:gap-y-4">
+            <div id="right-panel-card" class="h-full flex flex-col gap-y-3 lg:gap-y-4">
                 
                 <div class="glass-card rounded-2xl p-4">
-                    <div class="flex items-center gap-4">
-                        <button id="roll-dice-btn" class="w-16 h-16 text-4xl flex items-center justify-center rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-400">🎲</button>
+                    <div class="flex items-center gap-3">
+                        <button id="roll-dice-btn" class="w-16 h-16 text-4xl flex items-center justify-center rounded-xl bg-white/80 border border-gray-200/50 shadow-sm transition-all duration-300 hover:scale-110 hover:shadow-lg focus:outline-none">🎲</button>
                         <div class="flex-1 grid grid-cols-2 gap-2">
-                            <div id="dice-1" class="w-full aspect-square bg-white/60 rounded-lg flex items-center justify-center text-4xl text-gray-400 border border-gray-200/50 shadow-inner"></div>
-                            <div id="dice-2" class="w-full aspect-square bg-white/60 rounded-lg flex items-center justify-center text-4xl text-gray-400 border border-gray-200/50 shadow-inner"></div>
+                            <div id="dice-1" class="w-16 h-16 bg-white/60 rounded-lg flex items-center justify-center text-4xl text-gray-400 border border-gray-200/50 shadow-inner mx-auto"></div>
+                            <div id="dice-2" class="w-16 h-16 bg-white/60 rounded-lg flex items-center justify-center text-4xl text-gray-400 border border-gray-200/50 shadow-inner mx-auto"></div>
                         </div>
                     </div>
-                    <h3 class="text-xs font-semibold uppercase tracking-wider text-center mt-4 mb-2" style="color: var(--text-secondary);">Alo Superpowers</h3>
+                    <h3 class="text-xs font-semibold uppercase tracking-wider text-center mt-4 mb-2" style="color: var(--text-secondary);">Alo Superpowers ✨✨</h3>
                     <div class="grid grid-cols-4 gap-1 text-center">
-                        <button class="superpower-btn themed-button tertiary text-xs p-1 opacity-50 cursor-not-allowed">Rotate</button>
-                        <button class="superpower-btn themed-button tertiary text-xs p-1 opacity-50 cursor-not-allowed">Flip</button>
-                        <button class="superpower-btn themed-button tertiary text-xs p-1 opacity-50 cursor-not-allowed">Exchange</button>
-                        <button class="superpower-btn themed-button tertiary text-xs p-1 opacity-50 cursor-not-allowed">Swap</button>
+                        <button class="themed-button tertiary text-xs p-1 opacity-50 cursor-not-allowed">Rotate</button>
+                        <button class="themed-button tertiary text-xs p-1 opacity-50 cursor-not-allowed">Flip</button>
+                        <button class="themed-button tertiary text-xs p-1 opacity-50 cursor-not-allowed">Exchange</button>
+                        <button class="themed-button tertiary text-xs p-1 opacity-50 cursor-not-allowed">Swap</button>
                     </div>
                 </div>
 
@@ -105,12 +103,12 @@
 
                 <div class="glass-card rounded-2xl p-4">
                     <div class="flex justify-center items-center gap-3">
-                        <button class="themed-button secondary text-xs flex-1">Help</button>
-                        <button id="reset-btn" class="themed-button primary text-xs flex-1 text-white">New Game</button>
-                        <button class="themed-button secondary text-xs flex-1">Badges</button>
+                        <button class="themed-button secondary text-xs flex-1 py-2">Help</button>
+                        <button id="reset-btn" class="themed-button primary text-xs flex-1 py-2 text-white">New Game</button>
+                        <button class="themed-button secondary text-xs flex-1 py-2">Badges</button>
                     </div>
                     <div class="text-center mt-3">
-                        <button class="themed-button tertiary w-full text-sm">Edition: Circles</button>
+                        <button class="themed-button tertiary w-full text-sm py-2">Edition: Circles</button>
                     </div>
                 </div>
                 
@@ -167,7 +165,6 @@
     </div>
     
     <script>
-        // NOTE: This is the complex MATCHALO scoring logic wired up to the new Alloha-style UI.
         document.addEventListener('DOMContentLoaded', () => {
             const DOMElements = {
                 gameBoard: document.getElementById('game-board'),
@@ -209,7 +206,7 @@
                 
                 for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
                     const cell = document.createElement('div');
-                    cell.className = 'grid-cell empty'; // Tailwind is handled by parent, we just add state
+                    cell.className = 'grid-cell empty relative'; // Added relative for positioning if needed
                     cell.dataset.index = i;
                     const row = Math.floor(i / GRID_SIZE);
                     const col = i % GRID_SIZE;
@@ -349,7 +346,7 @@
                             if (pieces.length === 3 && ['TL', 'TR', 'BL', 'BR'].filter(q => quadrants.includes(q)).length === 3) {
                                 const symbols = pieces.map(p => p.symbol);
                                 scoreBreakdown.almostCircle += new Set(symbols).size === 1 ? 20 : 15;
-                            } else {
+                            } else if (pieces.length === 2) {
                                 if (tl?.quadrant === 'TL' && tr?.quadrant === 'TR') scoreBreakdown.semiCircle += (tl.symbol === tr.symbol ? 10 : 5);
                                 if (bl?.quadrant === 'BL' && br?.quadrant === 'BR') scoreBreakdown.semiCircle += (bl.symbol === br.symbol ? 10 : 5);
                                 if (tl?.quadrant === 'TL' && bl?.quadrant === 'BL') scoreBreakdown.semiCircle += (tl.symbol === bl.symbol ? 10 : 5);
@@ -450,10 +447,13 @@
                         const img = document.createElement('img');
                         img.src = `${IMAGE_PATH}${piece.symbol.toLowerCase()}_${piece.quadrant}.svg`;
                         el.appendChild(img);
+                    } else {
+                         el.textContent = '?';
                     }
                 });
             }
 
+            DOMElements.rollDiceBtn.addEventListener('click', handleRollDice);
             DOMElements.resetBtn.addEventListener('click', init);
             DOMElements.restartModalBtn.addEventListener('click', init);
             DOMElements.closeModalBtn.addEventListener('click', () => DOMElements.gameOverModal.classList.add('hidden'));
