@@ -14,7 +14,6 @@
             --text-secondary: #6A357A;
             --accent-color: #F7B733;
             --border-color: rgba(255, 255, 255, 0.3);
-            --grid-border-color: rgba(0, 0, 0, 0.1);
             --shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
             --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -40,7 +39,7 @@
             width: 100%;
             max-width: 1200px;
             justify-content: center;
-            align-items: stretch; /* This makes both panels equal height */
+            align-items: stretch;
         }
 
         .panel {
@@ -49,22 +48,21 @@
         }
 
         #game-board-panel {
-            flex: 2; /* Takes up more space */
+            flex: 2;
             max-width: 600px;
             min-width: 300px;
         }
 
         #control-panel {
-            flex: 1; /* Takes up less space */
+            flex: 1;
             min-width: 280px;
             max-width: 350px;
         }
 
-        /* 1. Game Board Styling */
         .game-board-wrapper {
             background: var(--card-bg);
-            border-radius: 16px; /* Container has rounded edges */
-            padding: 1rem;
+            border-radius: 16px;
+            padding: 0.5rem; 
             box-shadow: var(--shadow-soft);
             border: 1px solid var(--border-color);
             width: 100%;
@@ -77,23 +75,19 @@
             grid-template-rows: repeat(8, 1fr);
             width: 100%;
             aspect-ratio: 1;
-            background-color: #ffffff; /* Perfect white background */
-            border-radius: 0; /* Perfect square with sharp corners */
+            background-color: #ffffff;
+            border-radius: 0;
             overflow: hidden;
         }
 
         .grid-cell {
             aspect-ratio: 1;
-            border-right: 1px solid var(--grid-border-color);
-            border-bottom: 1px solid var(--grid-border-color);
             box-sizing: border-box;
             transition: background-color 0.2s var(--ease-smooth);
             display: flex;
             justify-content: center;
             align-items: center;
         }
-        .grid-cell:nth-child(8n) { border-right: none; }
-        .grid-cell:nth-child(n+57) { border-bottom: none; }
 
         .grid-cell.empty:hover {
             background-color: rgba(184, 162, 214, 0.2);
@@ -102,12 +96,11 @@
 
         .grid-cell img { width: 100%; height: 100%; display: block; }
         
-        /* 2. Scoring Panel Height Alignment */
         #right-panel-card {
             display: flex;
             flex-direction: column;
             width: 100%;
-            height: 100%; /* Makes the card fill the panel's height */
+            height: 100%;
             box-sizing: border-box;
             padding: 1.5rem;
         }
@@ -132,7 +125,6 @@
         .score-value { font-size: 3rem; font-weight: 700; text-align: center; color: var(--text-primary); text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         #status-message { text-align: center; font-size: 1.1rem; min-height: 44px; }
 
-        /* 3. Progress Bar Styling */
         .progress-bar-container {
             height: 10px;
             background-color: rgba(0, 0, 0, 0.1);
@@ -142,13 +134,12 @@
 
         #progress-bar-fill {
             height: 100%;
-            width: 0%; /* Starts at 0 */
+            width: 0%;
             background: linear-gradient(90deg, #F7B733 0%, #FC4A1A 100%);
             border-radius: 5px;
             transition: width 0.5s var(--ease-smooth);
         }
 
-        /* 4. Dice Display Styling */
         #dice-container {
             display: flex;
             justify-content: space-around;
@@ -197,8 +188,24 @@
         @keyframes flash { 0% { background-color: #ffffff; } 50% { background-color: var(--accent-color); } 100% { background-color: #ffffff; } }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: var(--bg-gradient); padding: 2rem; border-radius: 12px; text-align: center; box-shadow: var(--shadow-soft); border: 1px solid var(--border-color); }
+        .modal-content { position: relative; background: var(--bg-gradient); padding: 2rem; border-radius: 12px; text-align: center; box-shadow: var(--shadow-soft); border: 1px solid var(--border-color); }
         .hidden { display: none; }
+        
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            opacity: 0.7;
+            line-height: 1;
+        }
+        .close-button:hover {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -248,6 +255,7 @@
 
     <div id="game-over-modal" class="modal-overlay hidden">
         <div class="modal-content">
+            <button id="close-modal-btn" class="close-button">&times;</button>
             <h2>Game Over!</h2>
             <p>You can no longer make a move.</p>
             <p>Final Score: <span id="final-score">0</span></p>
@@ -267,6 +275,7 @@
             const gameOverModal = document.getElementById('game-over-modal');
             const finalScoreEl = document.getElementById('final-score');
             const restartModalBtn = document.getElementById('restart-modal-btn');
+            const closeModalBtn = document.getElementById('close-modal-btn');
             
             const GRID_SIZE = 8;
             const SYMBOLS = ['navy', 'red', 'blue', 'grey'];
@@ -373,9 +382,16 @@
             
             function handleRollDice() {
                 if (placementState !== 'AWAITING_ROLL') return;
+
                 const piece1 = generateRandomAlo();
-                const piece2 = generateRandomAlo();
+                let piece2 = generateRandomAlo();
+
+                while (piece2.quadrant === piece1.quadrant) {
+                    piece2 = generateRandomAlo();
+                }
+                
                 currentRoll = [piece1, piece2];
+                
                 placementState = 'AWAITING_FIRST_PLACEMENT';
                 rollDiceBtn.disabled = true;
                 updateDiceDisplay();
@@ -534,6 +550,9 @@
             rollDiceBtn.addEventListener('click', handleRollDice);
             resetBtn.addEventListener('click', init);
             restartModalBtn.addEventListener('click', init);
+            closeModalBtn.addEventListener('click', () => {
+                gameOverModal.classList.add('hidden');
+            });
 
             init();
         });
