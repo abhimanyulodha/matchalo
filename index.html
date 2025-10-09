@@ -11,7 +11,6 @@
     
     <style>
         :root {
-            /* Adapted purple theme for MATCHALO */
             --bg: linear-gradient(135deg, #f5f7fa 0%, #e8e4f1 100%);
             --card: rgba(255, 255, 255, 0.85);
             --text: #4a0e69;
@@ -19,14 +18,11 @@
             --accent: #6a11cb;
             --accent-light: rgba(106, 17, 203, 0.1);
             --accent-gradient: linear-gradient(135deg, #2575fc 0%, #6a11cb 100%);
-            --accent-gradient-shaded: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
-            --highlighted-bg: rgba(106, 17, 203, 0.15);
-            --grid-line-color: rgba(106, 17, 203, 0.1);
             --glass-border: rgba(255, 255, 255, 0.2);
             --faint-border: rgba(0, 0, 0, 0.08);
+            --grid-line-color: rgba(106, 17, 203, 0.1);
             --shadow-soft: 0 4px 15px rgba(106, 17, 203, 0.08);
             --shadow-medium: 0 8px 30px rgba(106, 17, 203, 0.1);
-            --shadow-strong: 0 15px 50px rgba(106, 17, 203, 0.12);
             --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
             --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -55,6 +51,12 @@
         .progress-bar-container { background: var(--accent-light); }
         .progress-bar-fill { background: var(--accent-gradient); }
 
+        .grid-cell.empty {
+            box-shadow: inset 0 0 0 1px var(--grid-line-color);
+        }
+
+        hr { border-color: var(--faint-border); }
+
         @keyframes dice-tumble {
             0% { transform: rotate(0deg) scale(1); }
             50% { transform: rotate(-180deg) scale(1.1); }
@@ -66,17 +68,17 @@
     </style>
 </head>
 <body class="p-2 lg:p-4">
-    <main id="game-container" class="w-full max-w-6xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6 items-center lg:items-stretch pt-8 lg:pt-16">
+    <main id="game-container" class="w-full max-w-5xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6 items-center lg:items-stretch">
         
         <div class="w-full lg:w-2/3">
-            <div id="game-board-container" class="p-4 lg:p-6 h-full glass-card rounded-2xl">
+            <div class="p-4 lg:p-6 h-full glass-card rounded-2xl">
                 <div id="game-board" class="grid grid-cols-8 w-full aspect-square bg-white rounded-lg">
                     </div>
             </div>
         </div>
 
         <div class="w-full lg:w-1/3">
-            <div id="right-panel-card" class="h-full flex flex-col gap-y-3 lg:gap-y-4">
+            <div class="h-full p-4 lg:p-6 glass-card rounded-2xl flex flex-col gap-y-3">
                 
                 <div class="glass-card rounded-2xl p-4">
                     <div class="flex items-center gap-3">
@@ -96,7 +98,7 @@
                 </div>
 
                 <div class="glass-card rounded-xl p-3">
-                    <div class="relative w-full h-2.5 progress-bar-container rounded-full">
+                    <div class="relative w-full h-2 progress-bar-container rounded-full">
                         <div id="progress-bar-fill" class="progress-bar-fill h-full rounded-full"></div>
                     </div>
                 </div>
@@ -113,38 +115,41 @@
                 </div>
                 
                 <div class="glass-card rounded-2xl p-4 flex-1">
-                    <div class="grid grid-cols-2 gap-x-4 gap-y-3 text-center h-full">
-                        <div class="score-item">
-                            <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Total Score</h3>
+                    <div class="grid grid-cols-2 gap-4 text-center">
+                        <div>
+                            <h3 class="text-xs font-semibold uppercase tracking-wider mb-1" style="color: var(--text-secondary);">Total Score</h3>
                             <div id="total-score" class="text-3xl font-bold" style="color: var(--accent);">0</div>
                         </div>
-                        <div class="score-item">
-                            <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">High Score</h3>
+                        <div>
+                            <h3 class="text-xs font-semibold uppercase tracking-wider mb-1" style="color: var(--text-secondary);">High Score</h3>
                             <div id="high-score" class="text-3xl font-bold text-amber-500">0</div>
                         </div>
-                        <div class="score-item border-t border-gray-200/80 pt-2">
+                    </div>
+                    <hr class="border-t my-3">
+                    <div class="grid grid-cols-3 gap-y-2 text-center">
+                        <div class="score-item">
                             <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Circle</h3>
-                            <div id="score-circle" class="text-xl font-bold">0</div>
+                            <div id="score-circle" class="text-lg font-bold">0</div>
                         </div>
-                        <div class="score-item border-t border-gray-200/80 pt-2">
+                        <div class="score-item">
                             <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Semi Circle</h3>
-                            <div id="score-semi-circle" class="text-xl font-bold">0</div>
+                            <div id="score-semi-circle" class="text-lg font-bold">0</div>
                         </div>
                         <div class="score-item">
                             <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Almost Circle</h3>
-                            <div id="score-almost-circle" class="text-xl font-bold">0</div>
+                            <div id="score-almost-circle" class="text-lg font-bold">0</div>
                         </div>
                         <div class="score-item">
                             <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Sequence</h3>
-                            <div id="score-sequence" class="text-xl font-bold">0</div>
+                            <div id="score-sequence" class="text-lg font-bold">0</div>
                         </div>
                         <div class="score-item">
                             <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Line Master</h3>
-                            <div id="score-line-master" class="text-xl font-bold">0</div>
+                            <div id="score-line-master" class="text-lg font-bold">0</div>
                         </div>
                         <div class="score-item">
                             <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Diamond Heist</h3>
-                            <div id="score-diamond-heist" class="text-xl font-bold text-red-600">0</div>
+                            <div id="score-diamond-heist" class="text-lg font-bold text-red-600">0</div>
                         </div>
                     </div>
                 </div>
@@ -206,7 +211,7 @@
                 
                 for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
                     const cell = document.createElement('div');
-                    cell.className = 'grid-cell empty relative'; // Added relative for positioning if needed
+                    cell.className = 'grid-cell empty relative';
                     cell.dataset.index = i;
                     const row = Math.floor(i / GRID_SIZE);
                     const col = i % GRID_SIZE;
@@ -326,27 +331,26 @@
                 let scoreBreakdown = { circle: 0, semiCircle: 0, almostCircle: 0, sequence: 0, lineMaster: 0, diamondHeist: 0 };
                 const visited = Array(GRID_SIZE * GRID_SIZE).fill(false);
 
+                // This logic is complex and simplified here for clarity. The full, complex logic is maintained.
+                // Circle, Semi-circle, Almost-circle, Diamond Heist logic
                 for (let r = 0; r < GRID_SIZE - 1; r++) {
                     for (let c = 0; c < GRID_SIZE - 1; c++) {
-                        const tl = gridState[r * GRID_SIZE + c];
-                        const tr = gridState[r * GRID_SIZE + c + 1];
-                        const bl = gridState[(r + 1) * GRID_SIZE + c];
-                        const br = gridState[(r + 1) * GRID_SIZE + c + 1];
-                        
+                        const tl = gridState[r * GRID_SIZE + c], tr = gridState[r * GRID_SIZE + c + 1], bl = gridState[(r + 1) * GRID_SIZE + c], br = gridState[(r + 1) * GRID_SIZE + c + 1];
                         const pieces = [tl, tr, bl, br].filter(Boolean);
                         if (pieces.length < 2) continue;
-
                         if (tl?.quadrant === 'TL' && tr?.quadrant === 'TR' && bl?.quadrant === 'BL' && br?.quadrant === 'BR') {
-                            const isSameColor = tl.symbol === tr.symbol && tl.symbol === bl.symbol && tl.symbol === br.symbol;
-                            scoreBreakdown.circle += isSameColor ? 40 : 20;
+                            scoreBreakdown.circle += (new Set(pieces.map(p => p.symbol)).size === 1) ? 40 : 20;
                         } else if (tl?.quadrant === 'BR' && tr?.quadrant === 'BL' && bl?.quadrant === 'TR' && br?.quadrant === 'TL') {
                             scoreBreakdown.diamondHeist -= 10;
                         } else {
-                            const quadrants = pieces.map(p => p.quadrant);
-                            if (pieces.length === 3 && ['TL', 'TR', 'BL', 'BR'].filter(q => quadrants.includes(q)).length === 3) {
-                                const symbols = pieces.map(p => p.symbol);
-                                scoreBreakdown.almostCircle += new Set(symbols).size === 1 ? 20 : 15;
-                            } else if (pieces.length === 2) {
+                            if (pieces.length === 3) {
+                                const quadrants = new Set(pieces.map(p => p.quadrant));
+                                if (quadrants.has('TL') && quadrants.has('TR') && quadrants.has('BL')) scoreBreakdown.almostCircle += (new Set(pieces.map(p => p.symbol)).size === 1 ? 20 : 15);
+                                else if (quadrants.has('TL') && quadrants.has('TR') && quadrants.has('BR')) scoreBreakdown.almostCircle += (new Set(pieces.map(p => p.symbol)).size === 1 ? 20 : 15);
+                                else if (quadrants.has('TL') && quadrants.has('BL') && quadrants.has('BR')) scoreBreakdown.almostCircle += (new Set(pieces.map(p => p.symbol)).size === 1 ? 20 : 15);
+                                else if (quadrants.has('TR') && quadrants.has('BL') && quadrants.has('BR')) scoreBreakdown.almostCircle += (new Set(pieces.map(p => p.symbol)).size === 1 ? 20 : 15);
+                            }
+                            if (pieces.length === 2) {
                                 if (tl?.quadrant === 'TL' && tr?.quadrant === 'TR') scoreBreakdown.semiCircle += (tl.symbol === tr.symbol ? 10 : 5);
                                 if (bl?.quadrant === 'BL' && br?.quadrant === 'BR') scoreBreakdown.semiCircle += (bl.symbol === br.symbol ? 10 : 5);
                                 if (tl?.quadrant === 'TL' && bl?.quadrant === 'BL') scoreBreakdown.semiCircle += (tl.symbol === bl.symbol ? 10 : 5);
@@ -356,23 +360,18 @@
                     }
                 }
 
+                // Sequence logic
                 for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
                     if (gridState[i] && !visited[i]) {
-                        const blob = [];
-                        const queue = [i];
-                        visited[i] = true;
+                        const blob = []; const queue = [i]; visited[i] = true;
                         const symbol = gridState[i].symbol;
                         while (queue.length > 0) {
-                            const currentIdx = queue.shift();
-                            blob.push(currentIdx);
+                            const currentIdx = queue.shift(); blob.push(currentIdx);
                             const r = Math.floor(currentIdx / GRID_SIZE), c = currentIdx % GRID_SIZE;
                             [[r-1,c], [r+1,c], [r,c-1], [r,c+1]].forEach(([nr, nc]) => {
-                                if (nr >= 0 && nr < GRID_SIZE && nc >= 0 && nc < GRID_SIZE) {
-                                    const neighborIdx = nr * GRID_SIZE + nc;
-                                    if (gridState[neighborIdx]?.symbol === symbol && !visited[neighborIdx]) {
-                                        visited[neighborIdx] = true;
-                                        queue.push(neighborIdx);
-                                    }
+                                const neighborIdx = nr * GRID_SIZE + nc;
+                                if (nr >= 0 && nr < GRID_SIZE && nc >= 0 && nc < GRID_SIZE && gridState[neighborIdx]?.symbol === symbol && !visited[neighborIdx]) {
+                                    visited[neighborIdx] = true; queue.push(neighborIdx);
                                 }
                             });
                         }
@@ -380,20 +379,9 @@
                     }
                 }
                 
-                for (let r = 0; r < GRID_SIZE; r++) {
-                    const firstPiece = gridState[r * GRID_SIZE];
-                    if (firstPiece && gridState.slice(r * GRID_SIZE, (r + 1) * GRID_SIZE).every(p => p?.symbol === firstPiece.symbol)) scoreBreakdown.lineMaster += 10;
-                }
-                for (let c = 0; c < GRID_SIZE; c++) {
-                    const firstPiece = gridState[c];
-                    if (firstPiece) {
-                        let isLineMaster = true;
-                        for (let r = 1; r < GRID_SIZE; r++) {
-                            if (gridState[r * GRID_SIZE + c]?.symbol !== firstPiece.symbol) { isLineMaster = false; break; }
-                        }
-                        if (isLineMaster) scoreBreakdown.lineMaster += 10;
-                    }
-                }
+                // Line Master logic
+                for (let r = 0; r < GRID_SIZE; r++) { const firstPiece = gridState[r * GRID_SIZE]; if (firstPiece && gridState.slice(r * GRID_SIZE, (r + 1) * GRID_SIZE).every(p => p?.symbol === firstPiece.symbol)) scoreBreakdown.lineMaster += 10; }
+                for (let c = 0; c < GRID_SIZE; c++) { const firstPiece = gridState[c]; if (firstPiece) { let isLineMaster = true; for (let r = 1; r < GRID_SIZE; r++) { if (gridState[r * GRID_SIZE + c]?.symbol !== firstPiece.symbol) { isLineMaster = false; break; } } if (isLineMaster) scoreBreakdown.lineMaster += 10; } }
 
                 score = Object.values(scoreBreakdown).reduce((a, b) => a + b, 0);
                 updateScoreUI(scoreBreakdown);
