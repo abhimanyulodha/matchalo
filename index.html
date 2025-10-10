@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MATCHALO</title>
     
-    <!-- FIX: Removed integrity and crossorigin to prevent CORS error on local file execution -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
@@ -531,25 +530,31 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Particle Animation */
-        .particle {
-            position: fixed;
-            pointer-events: none;
+        /* NEW: Scoring Ripple Animation */
+        .scoring-ripple {
+            position: absolute;
             border-radius: 50%;
-            z-index: 5000;
-            animation: particle-burst 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            border: 2px solid var(--accent);
+            animation: ripple-effect 0.7s ease-out forwards;
+            pointer-events: none;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
         }
 
-        @keyframes particle-burst {
+        @keyframes ripple-effect {
             0% {
-                transform: translate(0, 0) scale(1);
-                opacity: 1;
+                width: 0;
+                height: 0;
+                opacity: 0.8;
             }
             100% {
-                transform: translate(var(--tx), var(--ty)) scale(0);
+                width: 150%;
+                height: 150%;
                 opacity: 0;
             }
         }
+
 
         /* Flying Score Animation */
         .flying-score {
@@ -1126,6 +1131,8 @@
                 this.highScoreCelebrated = false;
                 this.stats = { perfectShapes: 0, highestScoringPattern: { name: 'None', score: 0 }, badgesUnlocked: 0 };
                 
+                this.previousScoringCells = new Set();
+                
                 this.DOMElements.gameBoard.innerHTML = '';
                 ImageLoader.preloadImages(this.config, this.IMAGE_PATH);
 
@@ -1148,7 +1155,7 @@
                 }
                 
                 this.populateHelpModal();
-                this.calculateTotalScore();
+                this.processScoring(); // Initial score calculation
                 this.updateProgressBar();
                 this.updateDiceDisplay();
                 this.updateSuperpowerUI();
@@ -1263,12 +1270,30 @@
                 this.placementState = 'AWAITING_ROLL';
                 this.currentRoll = [];
                 this.DOMElements.rollDiceBtn.disabled = false;
-                this.calculateTotalScore();
+                this.processScoring();
                 this.updateProgressBar();
                 this.updateDiceDisplay();
                 this.updateSuperpowerUI();
                 if (this.checkGameOver()) {
                     this.showGameOver();
+                }
+            }
+
+            processScoring() {
+                try {
+                    const { scoreBreakdown, totalScore, scoringCells } = this.calculateTotalScore();
+                    const scoreDiff = totalScore - this.score;
+                    this.score = totalScore;
+
+                    const newlyScoredCells = new Set([...scoringCells].filter(x => !this.previousScoringCells.has(x)));
+
+                    this.highlightScoringCells(scoringCells, newlyScoredCells, scoreDiff);
+                    this.checkAchievements(scoreBreakdown);
+                    this.updateScoreUI(scoreBreakdown);
+
+                    this.previousScoringCells = scoringCells;
+                } catch(e) {
+                    ErrorHandler.handle(e, 'processScoring');
                 }
             }
 
@@ -1311,7 +1336,7 @@
             consumeSuperpower(powerName) {
                 this.usedSuperpowers.add(powerName);
                 this.cancelSuperpower();
-                this.calculateTotalScore();
+                this.processScoring();
                 this.updateSuperpowerUI();
             }
 
@@ -1396,34 +1421,11 @@
                 this.DOMElements.exchangeModal.classList.remove('hidden');
             }
 
-            createParticleBurst(cellElement) {
-                const rect = cellElement.getBoundingClientRect();
-                const centerX = rect.left + rect.width / 2;
-                const centerY = rect.top + rect.height / 2;
-                const colors = ['#6a11cb', '#2575fc', '#c4b5fd', '#a78bfa', '#fbbf24'];
-                
-                for (let i = 0; i < 12; i++) {
-                    const particle = document.createElement('div');
-                    particle.className = 'particle';
-                    particle.style.cssText = `
-                        width: ${6 + Math.random() * 6}px;
-                        height: ${6 + Math.random() * 6}px;
-                        background: ${colors[Math.floor(Math.random() * colors.length)]};
-                        left: ${centerX}px;
-                        top: ${centerY}px;
-                    `;
-                    
-                    const angle = (Math.PI * 2 * i) / 12 + (Math.random() - 0.5) * 0.5;
-                    const velocity = 25 + Math.random() * 35;
-                    const tx = Math.cos(angle) * velocity;
-                    const ty = Math.sin(angle) * velocity;
-                    
-                    particle.style.setProperty('--tx', `${tx}px`);
-                    particle.style.setProperty('--ty', `${ty}px`);
-                    
-                    document.body.appendChild(particle);
-                    setTimeout(() => particle.remove(), 800);
-                }
+            createScoreRipple(cellElement) {
+                const ripple = document.createElement('div');
+                ripple.className = 'scoring-ripple';
+                cellElement.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 700); // Match animation duration
             }
 
             createFlyingScore(points, fromElement, toElement) {
@@ -1474,206 +1476,201 @@
             }
             
             calculateTotalScore() {
-                try {
-                    let scoreBreakdown = { perfectShape: 0, halfBaked: 0, almostThere: 0, greatSequence: 0, lineMaster: 0, diamondHeist: 0 };
-                    const scoredPieces = new Set();
-                    const scoringCells = new Set();
-                    this.stats.perfectShapes = 0;
-                    
-                    // Perfect Shape scoring
-                    for (let r = 0; r < this.GRID_SIZE - 1; r++) {
-                        for (let c = 0; c < this.GRID_SIZE - 1; c++) {
-                            const indices = [r * this.GRID_SIZE + c, r * this.GRID_SIZE + c + 1, (r + 1) * this.GRID_SIZE + c, (r + 1) * this.GRID_SIZE + c + 1];
-                            if (indices.some(i => scoredPieces.has(i))) continue;
-                            const [tl, tr, bl, br] = indices.map(i => this.gridState[i]);
-                            if (tl?.quadrant === 'TL' && tr?.quadrant === 'TR' && bl?.quadrant === 'BL' && br?.quadrant === 'BR') {
-                                const symbols = [tl.symbol, tr.symbol, bl.symbol, br.symbol];
-                                const allSameColor = new Set(symbols).size === 1;
-                                const score = allSameColor ? 40 : 20;
-                                scoreBreakdown.perfectShape += score;
-                                indices.forEach(i => { scoredPieces.add(i); scoringCells.add(i); });
-                                this.stats.perfectShapes++;
-                                if (score > this.stats.highestScoringPattern.score) {
-                                    this.stats.highestScoringPattern = { name: 'Perfect Shape', score };
-                                }
+                let scoreBreakdown = { perfectShape: 0, halfBaked: 0, almostThere: 0, greatSequence: 0, lineMaster: 0, diamondHeist: 0 };
+                const scoredPieces = new Set();
+                const scoringCells = new Set();
+                this.stats.perfectShapes = 0;
+                
+                // Perfect Shape scoring
+                for (let r = 0; r < this.GRID_SIZE - 1; r++) {
+                    for (let c = 0; c < this.GRID_SIZE - 1; c++) {
+                        const indices = [r * this.GRID_SIZE + c, r * this.GRID_SIZE + c + 1, (r + 1) * this.GRID_SIZE + c, (r + 1) * this.GRID_SIZE + c + 1];
+                        if (indices.some(i => scoredPieces.has(i))) continue;
+                        const [tl, tr, bl, br] = indices.map(i => this.gridState[i]);
+                        if (tl?.quadrant === 'TL' && tr?.quadrant === 'TR' && bl?.quadrant === 'BL' && br?.quadrant === 'BR') {
+                            const symbols = [tl.symbol, tr.symbol, bl.symbol, br.symbol];
+                            const allSameColor = new Set(symbols).size === 1;
+                            const score = allSameColor ? 40 : 20;
+                            scoreBreakdown.perfectShape += score;
+                            indices.forEach(i => { scoredPieces.add(i); scoringCells.add(i); });
+                            this.stats.perfectShapes++;
+                            if (score > this.stats.highestScoringPattern.score) {
+                                this.stats.highestScoringPattern = { name: 'Perfect Shape', score };
                             }
                         }
                     }
-                    
-                    // Almost There scoring
-                    for (let r = 0; r < this.GRID_SIZE - 1; r++) {
-                        for (let c = 0; c < this.GRID_SIZE - 1; c++) {
-                            const positions = [
-                                { idx: r * this.GRID_SIZE + c, correctQuadrant: 'TL' },
-                                { idx: r * this.GRID_SIZE + c + 1, correctQuadrant: 'TR' },
-                                { idx: (r + 1) * this.GRID_SIZE + c, correctQuadrant: 'BL' },
-                                { idx: (r + 1) * this.GRID_SIZE + c + 1, correctQuadrant: 'BR' }
-                            ];
-                            const correctlyPositioned = positions.filter(pos => {
-                                const piece = this.gridState[pos.idx];
-                                return piece && piece.quadrant === pos.correctQuadrant && !scoredPieces.has(pos.idx);
-                            });
-                            if (correctlyPositioned.length === 3) {
-                                const pieces = correctlyPositioned.map(pos => this.gridState[pos.idx]);
-                                const allSameColor = new Set(pieces.map(p => p.symbol)).size === 1;
-                                const score = allSameColor ? 20 : 15;
-                                scoreBreakdown.almostThere += score;
-                                correctlyPositioned.forEach(pos => { scoredPieces.add(pos.idx); scoringCells.add(pos.idx); });
-                                if (score > this.stats.highestScoringPattern.score) {
-                                    this.stats.highestScoringPattern = { name: 'Almost There', score };
-                                }
-                            }
-                        }
-                    }
-                    
-                    // Half Baked scoring
-                    for (let r = 0; r < this.GRID_SIZE; r++) {
-                        for (let c = 0; c < this.GRID_SIZE; c++) {
-                            const p1_idx = r * this.GRID_SIZE + c;
-                            if (!this.gridState[p1_idx] || scoredPieces.has(p1_idx)) continue;
-                            
-                            const p2_idx_h = r * this.GRID_SIZE + c + 1;
-                            if (c < this.GRID_SIZE - 1 && this.gridState[p2_idx_h] && !scoredPieces.has(p2_idx_h)) {
-                                const q1 = this.gridState[p1_idx].quadrant, q2 = this.gridState[p2_idx_h].quadrant;
-                                if ((q1 === 'TL' && q2 === 'TR') || (q1 === 'BL' && q2 === 'BR')) {
-                                    const sameColor = this.gridState[p1_idx].symbol === this.gridState[p2_idx_h].symbol;
-                                    const score = sameColor ? 10 : 5;
-                                    scoreBreakdown.halfBaked += score;
-                                    scoredPieces.add(p1_idx); scoredPieces.add(p2_idx_h);
-                                    scoringCells.add(p1_idx); scoringCells.add(p2_idx_h);
-                                    if (score > this.stats.highestScoringPattern.score) {
-                                        this.stats.highestScoringPattern = { name: 'Half Baked', score };
-                                    }
-                                    continue;
-                                }
-                            }
-                            
-                            const p2_idx_v = (r + 1) * this.GRID_SIZE + c;
-                            if (r < this.GRID_SIZE - 1 && this.gridState[p2_idx_v] && !scoredPieces.has(p2_idx_v)) {
-                                const q1 = this.gridState[p1_idx].quadrant, q2 = this.gridState[p2_idx_v].quadrant;
-                                if ((q1 === 'TL' && q2 === 'BL') || (q1 === 'TR' && q2 === 'BR')) {
-                                    const sameColor = this.gridState[p1_idx].symbol === this.gridState[p2_idx_v].symbol;
-                                    const score = sameColor ? 10 : 5;
-                                    scoreBreakdown.halfBaked += score;
-                                    scoredPieces.add(p1_idx); scoredPieces.add(p2_idx_v);
-                                    scoringCells.add(p1_idx); scoringCells.add(p2_idx_v);
-                                    if (score > this.stats.highestScoringPattern.score) {
-                                        this.stats.highestScoringPattern = { name: 'Half Baked', score };
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    
-                    // Diamond Heist penalty
-                    for (let r = 0; r < this.GRID_SIZE - 1; r++) {
-                        for (let c = 0; c < this.GRID_SIZE - 1; c++) {
-                            const [tl, tr, bl, br] = [
-                                this.gridState[r * this.GRID_SIZE + c],
-                                this.gridState[r * this.GRID_SIZE + c + 1],
-                                this.gridState[(r + 1) * this.GRID_SIZE + c],
-                                this.gridState[(r + 1) * this.GRID_SIZE + c + 1]
-                            ];
-                            if (tl?.quadrant === 'BR' && tr?.quadrant === 'BL' && bl?.quadrant === 'TR' && br?.quadrant === 'TL') {
-                                scoreBreakdown.diamondHeist -= 10;
-                            }
-                        }
-                    }
-                    
-                    // Great Sequence scoring
-                    const visited = Array(this.GRID_SIZE * this.GRID_SIZE).fill(false);
-                    for (let i = 0; i < this.GRID_SIZE * this.GRID_SIZE; i++) {
-                        if (this.gridState[i] && !visited[i]) {
-                            const blob = [], queue = [i];
-                            visited[i] = true;
-                            const symbol = this.gridState[i].symbol;
-                            while (queue.length > 0) {
-                                const currentIdx = queue.shift();
-                                blob.push(currentIdx);
-                                const r = Math.floor(currentIdx / this.GRID_SIZE), c = currentIdx % this.GRID_SIZE;
-                                [[r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1]].forEach(([nr, nc]) => {
-                                    const neighborIdx = nr * this.GRID_SIZE + nc;
-                                    if (nr >= 0 && nr < this.GRID_SIZE && nc >= 0 && nc < this.GRID_SIZE && 
-                                        this.gridState[neighborIdx]?.symbol === symbol && !visited[neighborIdx]) {
-                                        visited[neighborIdx] = true;
-                                        queue.push(neighborIdx);
-                                    }
-                                });
-                            }
-                            if (blob.length > 1) {
-                                scoreBreakdown.greatSequence += blob.length;
-                                blob.forEach(idx => scoringCells.add(idx));
-                                if (blob.length > this.stats.highestScoringPattern.score) {
-                                    this.stats.highestScoringPattern = { name: 'Great Sequence', score: blob.length };
-                                }
-                            }
-                        }
-                    }
-                    
-                    // Line Master scoring
-                    for (let r = 0; r < this.GRID_SIZE; r++) {
-                        const firstPiece = this.gridState[r * this.GRID_SIZE];
-                        if (firstPiece) {
-                            const rowPieces = this.gridState.slice(r * this.GRID_SIZE, (r + 1) * this.GRID_SIZE);
-                            if (rowPieces.every(p => p?.symbol === firstPiece.symbol)) {
-                                scoreBreakdown.lineMaster += 10;
-                                for (let c = 0; c < this.GRID_SIZE; c++) scoringCells.add(r * this.GRID_SIZE + c);
-                                if (10 > this.stats.highestScoringPattern.score) {
-                                    this.stats.highestScoringPattern = { name: 'Line Master', score: 10 };
-                                }
-                            }
-                        }
-                    }
-                    
-                    for (let c = 0; c < this.GRID_SIZE; c++) {
-                        const firstPiece = this.gridState[c];
-                        if (firstPiece) {
-                            let isLineMaster = true;
-                            for (let r = 1; r < this.GRID_SIZE; r++) {
-                                if (this.gridState[r * this.GRID_SIZE + c]?.symbol !== firstPiece.symbol) {
-                                    isLineMaster = false;
-                                    break;
-                                }
-                            }
-                            if (isLineMaster) {
-                                scoreBreakdown.lineMaster += 10;
-                                for (let r = 0; r < this.GRID_SIZE; r++) scoringCells.add(r * this.GRID_SIZE + c);
-                                if (10 > this.stats.highestScoringPattern.score) {
-                                    this.stats.highestScoringPattern = { name: 'Line Master', score: 10 };
-                                }
-                            }
-                        }
-                    }
-                    
-                    const totalScore = Object.values(scoreBreakdown).reduce((a, b) => a + b, 0);
-                    const scoreDiff = totalScore - this.score;
-                    this.score = totalScore;
-                    
-                    this.highlightScoringCells(scoringCells, scoreDiff);
-                    this.checkAchievements(scoreBreakdown);
-                    this.updateScoreUI(scoreBreakdown);
-                } catch (error) {
-                    ErrorHandler.handle(error, 'calculateTotalScore');
                 }
+                
+                // Almost There scoring
+                for (let r = 0; r < this.GRID_SIZE - 1; r++) {
+                    for (let c = 0; c < this.GRID_SIZE - 1; c++) {
+                        const positions = [
+                            { idx: r * this.GRID_SIZE + c, correctQuadrant: 'TL' },
+                            { idx: r * this.GRID_SIZE + c + 1, correctQuadrant: 'TR' },
+                            { idx: (r + 1) * this.GRID_SIZE + c, correctQuadrant: 'BL' },
+                            { idx: (r + 1) * this.GRID_SIZE + c + 1, correctQuadrant: 'BR' }
+                        ];
+                        const correctlyPositioned = positions.filter(pos => {
+                            const piece = this.gridState[pos.idx];
+                            return piece && piece.quadrant === pos.correctQuadrant && !scoredPieces.has(pos.idx);
+                        });
+                        if (correctlyPositioned.length === 3) {
+                            const pieces = correctlyPositioned.map(pos => this.gridState[pos.idx]);
+                            const allSameColor = new Set(pieces.map(p => p.symbol)).size === 1;
+                            const score = allSameColor ? 20 : 15;
+                            scoreBreakdown.almostThere += score;
+                            correctlyPositioned.forEach(pos => { scoredPieces.add(pos.idx); scoringCells.add(pos.idx); });
+                            if (score > this.stats.highestScoringPattern.score) {
+                                this.stats.highestScoringPattern = { name: 'Almost There', score };
+                            }
+                        }
+                    }
+                }
+                
+                // Half Baked scoring
+                for (let r = 0; r < this.GRID_SIZE; r++) {
+                    for (let c = 0; c < this.GRID_SIZE; c++) {
+                        const p1_idx = r * this.GRID_SIZE + c;
+                        if (!this.gridState[p1_idx] || scoredPieces.has(p1_idx)) continue;
+                        
+                        const p2_idx_h = r * this.GRID_SIZE + c + 1;
+                        if (c < this.GRID_SIZE - 1 && this.gridState[p2_idx_h] && !scoredPieces.has(p2_idx_h)) {
+                            const q1 = this.gridState[p1_idx].quadrant, q2 = this.gridState[p2_idx_h].quadrant;
+                            if ((q1 === 'TL' && q2 === 'TR') || (q1 === 'BL' && q2 === 'BR')) {
+                                const sameColor = this.gridState[p1_idx].symbol === this.gridState[p2_idx_h].symbol;
+                                const score = sameColor ? 10 : 5;
+                                scoreBreakdown.halfBaked += score;
+                                scoredPieces.add(p1_idx); scoredPieces.add(p2_idx_h);
+                                scoringCells.add(p1_idx); scoringCells.add(p2_idx_h);
+                                if (score > this.stats.highestScoringPattern.score) {
+                                    this.stats.highestScoringPattern = { name: 'Half Baked', score };
+                                }
+                                continue;
+                            }
+                        }
+                        
+                        const p2_idx_v = (r + 1) * this.GRID_SIZE + c;
+                        if (r < this.GRID_SIZE - 1 && this.gridState[p2_idx_v] && !scoredPieces.has(p2_idx_v)) {
+                            const q1 = this.gridState[p1_idx].quadrant, q2 = this.gridState[p2_idx_v].quadrant;
+                            if ((q1 === 'TL' && q2 === 'BL') || (q1 === 'TR' && q2 === 'BR')) {
+                                const sameColor = this.gridState[p1_idx].symbol === this.gridState[p2_idx_v].symbol;
+                                const score = sameColor ? 10 : 5;
+                                scoreBreakdown.halfBaked += score;
+                                scoredPieces.add(p1_idx); scoredPieces.add(p2_idx_v);
+                                scoringCells.add(p1_idx); scoringCells.add(p2_idx_v);
+                                if (score > this.stats.highestScoringPattern.score) {
+                                    this.stats.highestScoringPattern = { name: 'Half Baked', score };
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Diamond Heist penalty
+                for (let r = 0; r < this.GRID_SIZE - 1; r++) {
+                    for (let c = 0; c < this.GRID_SIZE - 1; c++) {
+                        const [tl, tr, bl, br] = [
+                            this.gridState[r * this.GRID_SIZE + c],
+                            this.gridState[r * this.GRID_SIZE + c + 1],
+                            this.gridState[(r + 1) * this.GRID_SIZE + c],
+                            this.gridState[(r + 1) * this.GRID_SIZE + c + 1]
+                        ];
+                        if (tl?.quadrant === 'BR' && tr?.quadrant === 'BL' && bl?.quadrant === 'TR' && br?.quadrant === 'TL') {
+                            scoreBreakdown.diamondHeist -= 10;
+                        }
+                    }
+                }
+                
+                // Great Sequence scoring
+                const visited = Array(this.GRID_SIZE * this.GRID_SIZE).fill(false);
+                for (let i = 0; i < this.GRID_SIZE * this.GRID_SIZE; i++) {
+                    if (this.gridState[i] && !visited[i]) {
+                        const blob = [], queue = [i];
+                        visited[i] = true;
+                        const symbol = this.gridState[i].symbol;
+                        while (queue.length > 0) {
+                            const currentIdx = queue.shift();
+                            blob.push(currentIdx);
+                            const r = Math.floor(currentIdx / this.GRID_SIZE), c = currentIdx % this.GRID_SIZE;
+                            [[r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1]].forEach(([nr, nc]) => {
+                                const neighborIdx = nr * this.GRID_SIZE + nc;
+                                if (nr >= 0 && nr < this.GRID_SIZE && nc >= 0 && nc < this.GRID_SIZE && 
+                                    this.gridState[neighborIdx]?.symbol === symbol && !visited[neighborIdx]) {
+                                    visited[neighborIdx] = true;
+                                    queue.push(neighborIdx);
+                                }
+                            });
+                        }
+                        if (blob.length > 1) {
+                            scoreBreakdown.greatSequence += blob.length;
+                            blob.forEach(idx => scoringCells.add(idx));
+                            if (blob.length > this.stats.highestScoringPattern.score) {
+                                this.stats.highestScoringPattern = { name: 'Great Sequence', score: blob.length };
+                            }
+                        }
+                    }
+                }
+                
+                // Line Master scoring
+                for (let r = 0; r < this.GRID_SIZE; r++) {
+                    const firstPiece = this.gridState[r * this.GRID_SIZE];
+                    if (firstPiece) {
+                        const rowPieces = this.gridState.slice(r * this.GRID_SIZE, (r + 1) * this.GRID_SIZE);
+                        if (rowPieces.every(p => p?.symbol === firstPiece.symbol)) {
+                            scoreBreakdown.lineMaster += 10;
+                            for (let c = 0; c < this.GRID_SIZE; c++) scoringCells.add(r * this.GRID_SIZE + c);
+                            if (10 > this.stats.highestScoringPattern.score) {
+                                this.stats.highestScoringPattern = { name: 'Line Master', score: 10 };
+                            }
+                        }
+                    }
+                }
+                
+                for (let c = 0; c < this.GRID_SIZE; c++) {
+                    const firstPiece = this.gridState[c];
+                    if (firstPiece) {
+                        let isLineMaster = true;
+                        for (let r = 1; r < this.GRID_SIZE; r++) {
+                            if (this.gridState[r * this.GRID_SIZE + c]?.symbol !== firstPiece.symbol) {
+                                isLineMaster = false;
+                                break;
+                            }
+                        }
+                        if (isLineMaster) {
+                            scoreBreakdown.lineMaster += 10;
+                            for (let r = 0; r < this.GRID_SIZE; r++) scoringCells.add(r * this.GRID_SIZE + c);
+                            if (10 > this.stats.highestScoringPattern.score) {
+                                this.stats.highestScoringPattern = { name: 'Line Master', score: 10 };
+                            }
+                        }
+                    }
+                }
+                
+                const totalScore = Object.values(scoreBreakdown).reduce((a, b) => a + b, 0);
+                return { scoreBreakdown, totalScore, scoringCells };
             }
             
-            highlightScoringCells(cells, scoreDiff) {
+            highlightScoringCells(allScoringCells, newlyScoredCells, scoreDiff) {
                 document.querySelectorAll('.score-highlight').forEach(cell => cell.classList.remove('score-highlight'));
-                cells.forEach(index => {
+                allScoringCells.forEach(index => {
                     const cell = this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`);
                     if (cell) {
                         cell.classList.add('score-highlight');
-                        if (scoreDiff > 0) {
-                            setTimeout(() => this.createParticleBurst(cell), Math.random() * 200);
-                        }
                     }
                 });
                 
-                if (scoreDiff > 0 && cells.size > 0) {
-                    const firstCell = this.DOMElements.gameBoard.querySelector(`[data-index='${Array.from(cells)[0]}']`);
-                    const totalScoreEl = this.DOMElements.totalScore;
-                    if (firstCell && totalScoreEl) {
-                        this.createFlyingScore(scoreDiff, firstCell, totalScoreEl);
+                if (scoreDiff > 0) {
+                    newlyScoredCells.forEach(index => {
+                        const cell = this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`);
+                        if (cell) this.createScoreRipple(cell);
+                    });
+
+                    if (newlyScoredCells.size > 0) {
+                        const firstNewCell = this.DOMElements.gameBoard.querySelector(`[data-index='${Array.from(newlyScoredCells)[0]}']`);
+                        const totalScoreEl = this.DOMElements.totalScore;
+                        if (firstNewCell && totalScoreEl) {
+                            this.createFlyingScore(scoreDiff, firstNewCell, totalScoreEl);
+                        }
                     }
                 }
             }
