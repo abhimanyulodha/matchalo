@@ -272,7 +272,7 @@
             color: var(--accent);
         }
 
-        /* NEW - GAME CONTROL PANEL REFINEMENTS */
+        /* GAME CONTROL PANEL REFINEMENTS */
         .control-panel-card {
              background: rgba(255,255,255,0.5);
              box-shadow: var(--shadow-soft);
@@ -751,6 +751,8 @@
         class ImageLoader {
             static cache = new Map();
             static failedImages = new Set();
+            static dataURLCache = new Map();
+
             static async preloadImages(config, imagePath) {
                 const promises = [];
                 const symbols = config.symbols;
@@ -773,8 +775,29 @@
                 if (failed.length > 0) console.warn(`Failed to load ${failed.length} images`);
                 return results;
             }
+
             static getImageSrc(symbol, quadrant, imagePath) {
                 return imagePath + `${symbol.toLowerCase()}_${quadrant}.svg`;
+            }
+
+            static getDataURL(url) {
+                if (this.dataURLCache.has(url)) {
+                    return Promise.resolve(this.dataURLCache.get(url));
+                }
+                return new Promise((resolve, reject) => {
+                    fetch(url)
+                        .then(response => response.blob())
+                        .then(blob => {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                                this.dataURLCache.set(url, reader.result);
+                                resolve(reader.result);
+                            };
+                            reader.onerror = reject;
+                            reader.readAsDataURL(blob);
+                        })
+                        .catch(reject);
+                });
             }
         }
 
@@ -879,42 +902,44 @@
                 });
             },
             async shareScore(button) {
-                const originalText = button.innerHTML;
+                const originalHTML = button.innerHTML;
                 button.disabled = true;
                 button.innerHTML = 'Preparing...';
 
                 const score = this.currentGame.score;
                 const message = `✨ I scored ${score} in MatchAlo! ✨\nThink you can beat my score? 🎲\nhttps://abhimanyulodha.github.io/matchalo/`;
                 const title = 'My MatchAlo Score!';
+                
+                const boardElement = document.getElementById('game-board');
+                const images = boardElement.querySelectorAll('img');
+                const originalSrcs = Array.from(images).map(img => img.src);
 
                 try {
-                    const boardElement = document.getElementById('game-board');
+                    const conversionPromises = Array.from(images).map(img => ImageLoader.getDataURL(img.src));
+                    const dataUrls = await Promise.all(conversionPromises);
+                    images.forEach((img, index) => { if (dataUrls[index]) img.src = dataUrls[index]; });
+
                     const canvas = await html2canvas(boardElement, { useCORS: true, backgroundColor: null });
                     const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
                     const file = new File([blob], 'matchalo-board.png', { type: 'image/png' });
                     
-                    const shareData = {
-                        files: [file],
-                        title: title,
-                        text: message,
-                    };
+                    const shareData = { files: [file], title: title, text: message };
 
                     if (navigator.canShare && navigator.canShare(shareData)) {
                         await navigator.share(shareData);
                     } else {
-                        // Fallback for desktop or browsers that can't share files
                         throw new Error('File sharing not supported');
                     }
                 } catch (err) {
-                    // Fallback to text-only sharing
                     try {
                         await navigator.share({ title, text: message });
                     } catch (textErr) {
                         this.copyToClipboard(message, 'Score copied to clipboard!');
                     }
                 } finally {
+                    images.forEach((img, index) => { img.src = originalSrcs[index]; });
                     button.disabled = false;
-                    button.innerHTML = originalText;
+                    button.innerHTML = originalHTML;
                 }
             },
             shareBadges() {
