@@ -6,7 +6,6 @@
     <title>MATCHALO</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     
@@ -37,7 +36,6 @@
             overflow-x: hidden;
         }
         
-        /* Enhanced Glass Card */
         .glass-card { 
             background: linear-gradient(135deg, 
                 rgba(255, 255, 255, 0.95) 0%, 
@@ -71,7 +69,6 @@
             to { transform: rotate(360deg); }
         }
         
-        /* Premium Buttons */
         .themed-button { 
             font-weight: 600; 
             border-radius: 12px; 
@@ -134,7 +131,6 @@
             cursor: not-allowed;
         }
         
-        /* Progress Bar */
         .progress-bar-container { 
             background: var(--accent-light);
         }
@@ -165,7 +161,6 @@
             100% { left: 100%; }
         }
         
-        /* Grid Cells */
         .grid-cell {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
@@ -235,7 +230,6 @@
             border-color: var(--faint-border);
         }
         
-        /* Superpowers */
         .superpower-btn--active { 
             background: var(--accent-light) !important; 
             animation: glow-pulse 2s ease-in-out infinite;
@@ -260,7 +254,6 @@
             100% { box-shadow: 0 0 0 0 rgba(106, 17, 203, 0); }
         }
 
-        /* Score Animations */
         @keyframes score-pop {
             0% { transform: scale(1); }
             50% { transform: scale(1.25); }
@@ -272,7 +265,6 @@
             color: var(--accent);
         }
 
-        /* GAME CONTROL PANEL REFINEMENTS */
         .control-panel-card {
              background: rgba(255,255,255,0.5);
              box-shadow: var(--shadow-soft);
@@ -282,7 +274,6 @@
             box-shadow: var(--shadow-medium);
         }
 
-        /* Dice Enhancement */
         #dice-1, #dice-2 {
             background: transparent;
             box-shadow: none;
@@ -294,14 +285,9 @@
             animation: dice-roll 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
 
-        /* Empty Dice Animation */
         .dice-empty-state {
-            animation: flip-in 0.4s ease forwards;
-        }
-
-        @keyframes flip-in {
-            from { transform: rotateX(-90deg); opacity: 0; }
-            to { transform: rotateX(0deg); opacity: 1; }
+            opacity: 0.2;
+            filter: grayscale(100%);
         }
 
         @keyframes dice-roll {
@@ -312,7 +298,6 @@
             100% { transform: rotate(360deg) scale(1); }
         }
 
-        /* Modal Animations */
         @keyframes modal-fade-in {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -340,7 +325,6 @@
             animation: modal-slide-up 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         
-        /* Floating Animation for Dice Button */
         #roll-dice-btn {
             animation: float 3s ease-in-out infinite;
         }
@@ -350,7 +334,6 @@
             50% { transform: translateY(-8px); }
         }
 
-        /* Premium Tooltip */
         .premium-tooltip {
             position: absolute;
             bottom: 110%;
@@ -384,7 +367,6 @@
             transform: translateX(-50%) scale(1);
         }
 
-        /* Stagger Grid Animation */
         @keyframes stagger-in {
             from {
                 opacity: 0;
@@ -400,7 +382,6 @@
             animation: stagger-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
         }
         
-        /* Responsive Design */
         @media (max-width: 768px) {
             .glass-card {
                 backdrop-filter: blur(15px) saturate(150%);
@@ -408,7 +389,6 @@
             }
         }
 
-        /* High Score Celebration */
         @keyframes celebrate {
             0%, 100% { transform: scale(1); }
             25% { transform: scale(1.1) rotate(-5deg); }
@@ -419,14 +399,12 @@
             animation: celebrate 0.5s ease-in-out;
         }
         
-        /* Premium Font for Headers */
         .premium-header {
             font-family: 'Orbitron', sans-serif;
             font-weight: 900;
             letter-spacing: 0.05em;
         }
 
-        /* Badge styles */
         .badge-icon {
             filter: grayscale(100%);
             opacity: 0.3;
@@ -445,7 +423,6 @@
             100% { transform: scale(1) rotate(0deg); }
         }
 
-        /* Badge card with hidden description */
         .badge-card {
             position: relative;
             cursor: pointer;
@@ -474,7 +451,6 @@
             max-height: 100px;
         }
 
-        /* Share button styles */
         .share-button {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
@@ -500,7 +476,6 @@
             transform: translateY(0);
         }
 
-        /* Toast Notification System */
         #toast-container {
             position: fixed;
             bottom: 20px;
@@ -531,20 +506,114 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* NEW: Iteration 2 Animations */
+        /* NEW: Particle Animation */
         .particle {
             position: fixed;
             pointer-events: none;
             border-radius: 50%;
             z-index: 5000;
+            animation: particle-burst 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
+
+        @keyframes particle-burst {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* NEW: Flying Score Animation */
+        .flying-score {
+            position: fixed;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--accent);
+            text-shadow: 0 2px 8px rgba(106, 17, 203, 0.3);
+            pointer-events: none;
+            z-index: 5000;
+            animation: fly-to-score 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes fly-to-score {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            70% {
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(0.5);
+                opacity: 0;
+            }
+        }
+
+        /* NEW: Achievement Notification */
         .achievement-notification {
             position: fixed;
             z-index: 5000;
-            padding: 1rem;
-            min-width: 250px;
-            text-align: center;
-            transform-origin: bottom center;
+            padding: 1rem 1.5rem;
+            min-width: 280px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.95));
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(106, 17, 203, 0.2);
+            border: 2px solid var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            animation: achievement-slide-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        @keyframes achievement-slide-in {
+            0% {
+                transform: translateX(400px) scale(0.8);
+                opacity: 0;
+            }
+            100% {
+                transform: translateX(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes achievement-slide-out {
+            0% {
+                transform: translateX(0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(400px) scale(0.8);
+                opacity: 0;
+            }
+        }
+
+        .achievement-notification.hiding {
+            animation: achievement-slide-out 0.3s ease-in forwards;
+        }
+
+        .achievement-icon {
+            font-size: 3rem;
+            animation: badge-unlock 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .achievement-content {
+            flex: 1;
+        }
+
+        .achievement-title {
+            font-weight: 700;
+            color: var(--accent);
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .achievement-description {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
         }
     </style>
 </head>
@@ -566,8 +635,8 @@
                             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" zoomAndPan="magnify" viewBox="0 0 810 809.999993" preserveAspectRatio="xMidYMid meet" version="1.0"><defs><clipPath id="e22954cc75"><path d="M 76.496094 46 L 733.496094 46 L 733.496094 764 L 76.496094 764 Z M 76.496094 46 " clip-rule="nonzero"/></clipPath></defs><g clip-path="url(#e22954cc75)"><path fill="#1d2a89" d="M 470.445312 746.207031 L 667.625 632.363281 C 708.308594 609.066406 733.242188 565.761719 733.242188 518.84375 L 733.242188 291.15625 C 733.242188 244.238281 708.308594 201.261719 667.625 177.636719 L 470.445312 63.792969 C 429.765625 40.5 379.894531 40.5 339.542969 63.792969 L 142.363281 177.636719 C 101.683594 201.261719 76.746094 244.566406 76.746094 291.15625 L 76.746094 518.84375 C 76.746094 565.761719 101.683594 608.738281 142.363281 632.363281 L 339.542969 746.207031 C 379.894531 769.5 429.765625 769.5 470.445312 746.207031 Z M 470.445312 746.207031 " fill-opacity="1" fill-rule="nonzero"/></g><path fill="#ffffff" d="M 400.894531 392.859375 C 377.269531 392.859375 353.648438 386.628906 332.324219 374.488281 L 135.472656 260.644531 C 132.523438 259.003906 131.539062 255.394531 133.179688 252.441406 C 134.816406 249.488281 138.425781 248.503906 141.378906 250.144531 L 338.558594 363.988281 C 377.269531 386.300781 424.84375 386.300781 463.558594 363.988281 L 660.734375 250.472656 C 663.6875 248.832031 667.296875 249.816406 668.9375 252.769531 C 670.578125 255.722656 669.59375 259.332031 666.640625 260.972656 L 469.460938 374.488281 C 448.464844 386.957031 424.515625 392.859375 400.894531 392.859375 Z M 400.894531 392.859375 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 400.894531 716.679688 C 397.613281 716.679688 394.988281 714.054688 394.988281 710.773438 L 394.988281 482.753906 C 394.988281 433.871094 421.234375 388.597656 463.558594 364.316406 L 660.734375 250.472656 C 663.6875 248.832031 667.296875 249.816406 668.9375 252.769531 C 670.578125 255.722656 669.59375 259.332031 666.640625 260.972656 L 469.460938 374.488281 C 430.75 396.796875 406.796875 438.136719 406.796875 482.753906 L 406.796875 710.445312 C 406.796875 713.726562 404.175781 716.679688 400.894531 716.679688 Z M 400.894531 716.679688 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 400.894531 716.679688 C 397.613281 716.679688 394.988281 714.054688 394.988281 710.773438 L 394.988281 482.753906 C 394.988281 438.136719 371.039062 396.796875 332.324219 374.488281 L 135.472656 260.644531 C 132.523438 259.003906 131.539062 255.394531 133.179688 252.441406 C 134.816406 249.488281 138.425781 248.503906 141.378906 250.144531 L 338.558594 363.988281 C 380.878906 388.269531 407.125 433.871094 407.125 482.425781 L 407.125 710.117188 C 406.796875 713.726562 404.175781 716.679688 400.894531 716.679688 Z M 400.894531 716.679688 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 459.949219 248.503906 C 441.902344 258.675781 441.902344 275.40625 459.949219 285.90625 C 477.992188 296.078125 507.191406 296.078125 525.238281 285.90625 C 543.28125 275.734375 543.28125 259.003906 525.238281 248.503906 C 507.191406 238.003906 477.992188 238.003906 459.949219 248.503906 Z M 437.308594 298.703125 C 419.265625 288.53125 390.066406 288.53125 372.023438 298.703125 C 353.976562 308.871094 353.976562 325.605469 372.023438 336.101562 C 390.066406 346.273438 419.265625 346.273438 437.308594 336.101562 C 455.355469 325.605469 455.355469 308.871094 437.308594 298.703125 Z M 437.308594 97.914062 C 419.265625 87.742188 390.066406 87.742188 372.023438 97.914062 C 353.976562 108.085938 353.976562 124.816406 372.023438 135.316406 C 390.066406 145.488281 419.265625 145.488281 437.308594 135.316406 C 455.355469 124.816406 455.355469 108.085938 437.308594 97.914062 Z M 261.785156 235.382812 C 279.832031 225.210938 279.832031 208.476562 261.785156 197.980469 C 243.742188 187.808594 214.542969 187.808594 196.496094 197.980469 C 178.453125 208.148438 178.453125 224.882812 196.496094 235.382812 C 214.871094 245.878906 244.070312 245.878906 261.785156 235.382812 Z M 612.835938 235.382812 C 630.878906 225.210938 630.878906 208.476562 612.835938 197.980469 C 594.789062 187.808594 565.589844 187.808594 547.546875 197.980469 C 529.5 208.148438 529.5 224.882812 547.546875 235.382812 C 565.917969 245.878906 595.117188 245.878906 612.835938 235.382812 Z M 284.425781 148.109375 C 266.378906 158.28125 266.378906 175.015625 284.425781 185.511719 C 302.46875 195.683594 331.667969 195.683594 349.710938 185.511719 C 367.757812 175.34375 367.757812 158.609375 349.710938 148.109375 C 331.667969 137.613281 302.46875 137.613281 284.425781 148.109375 Z M 284.425781 148.109375 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 567.558594 462.085938 C 549.84375 472.257812 535.40625 496.863281 535.734375 517.203125 C 536.0625 537.546875 550.5 546.074219 568.214844 535.90625 C 585.933594 525.734375 600.367188 501.128906 600.039062 480.785156 C 599.710938 460.445312 585.277344 451.914062 567.558594 462.085938 Z M 567.558594 462.085938 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 480.617188 485.707031 C 498.332031 475.539062 512.769531 450.929688 512.441406 430.589844 C 512.113281 410.25 497.675781 401.71875 479.960938 411.890625 C 462.246094 422.058594 447.808594 446.667969 448.136719 467.007812 C 448.464844 487.347656 462.902344 495.550781 480.617188 485.707031 Z M 480.617188 485.707031 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 655.484375 586.429688 C 673.203125 576.257812 687.636719 551.652344 687.308594 531.3125 C 686.980469 510.972656 672.546875 502.441406 654.828125 512.609375 C 637.113281 522.78125 622.675781 547.386719 623.003906 567.730469 C 623.332031 588.070312 637.769531 596.601562 655.484375 586.429688 Z M 655.484375 586.429688 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 358.570312 469.304688 C 358.570312 448.636719 343.808594 423.371094 326.089844 412.875 C 308.046875 402.375 293.609375 410.90625 293.609375 431.574219 C 293.609375 452.242188 308.375 477.507812 326.089844 488.003906 C 344.136719 498.175781 358.570312 489.972656 358.570312 469.304688 Z M 184.03125 570.027344 C 184.03125 549.355469 169.265625 524.09375 151.550781 513.59375 C 133.503906 503.097656 119.070312 511.625 119.070312 532.296875 C 119.070312 552.964844 133.832031 578.226562 151.550781 588.726562 C 169.59375 598.898438 184.359375 590.695312 184.03125 570.027344 Z M 150.894531 311.167969 C 132.851562 300.667969 118.414062 309.199219 118.414062 329.867188 C 118.414062 350.539062 133.179688 375.800781 150.894531 386.300781 C 168.9375 396.796875 183.375 388.269531 183.375 367.597656 C 183.375 346.929688 168.9375 321.667969 150.894531 311.167969 Z M 326.417969 614.972656 C 308.375 604.472656 293.9375 613.003906 293.9375 633.671875 C 293.9375 654.34375 308.703125 679.605469 326.417969 690.105469 C 344.464844 700.601562 358.898438 692.074219 358.898438 671.402344 C 358.898438 650.734375 344.464844 625.472656 326.417969 614.972656 Z M 326.417969 614.972656 " fill-opacity="1" fill-rule="nonzero"/></svg>
                         </button>
                         <div class="flex-1 grid grid-cols-2 gap-3">
-                            <div id="dice-1" class="w-full aspect-square rounded-lg flex items-center justify-center text-4xl text-gray-400" aria-label="First dice">?</div>
-                            <div id="dice-2" class="w-full aspect-square rounded-lg flex items-center justify-center text-4xl text-gray-400" aria-label="Second dice">?</div>
+                            <div id="dice-1" class="w-full aspect-square rounded-lg flex items-center justify-center text-4xl text-gray-400" aria-label="First dice"></div>
+                            <div id="dice-2" class="w-full aspect-square rounded-lg flex items-center justify-center text-4xl text-gray-400" aria-label="Second dice"></div>
                         </div>
                     </div>
                     <h3 class="text-xs font-semibold uppercase tracking-wider text-center mt-4 mb-2" style="color: var(--text-secondary);">
@@ -625,6 +694,7 @@
         </div>
     </main>
 
+    <!-- Modals (same as before) -->
     <div id="game-over-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden">
         <div class="modal-content w-full max-w-md glass-card rounded-2xl p-8 text-center relative">
             <button id="close-modal-btn" class="absolute top-4 right-4 w-8 h-8 rounded-full text-xl flex items-center justify-center font-bold text-gray-500 hover:bg-gray-200/50" aria-label="Close">
@@ -689,7 +759,7 @@
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-2xl font-bold" style="color: var(--accent);">Select Edition</h2>
                 <button id="close-edition-select-modal-btn" class="w-10 h-10 rounded-full text-xl flex items-center justify-center font-bold" aria-label="Close">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
             </div>
             <div id="edition-options" class="flex flex-col gap-3 max-h-64 overflow-y-auto"></div>
@@ -716,7 +786,8 @@
     <div id="toast-container"></div>
 
     <script>
-        // ===== FULL SCRIPT WITH MANUAL CANVAS RENDERING =====
+        // ===== COMPLETE GAME WITH ALL ANIMATIONS =====
+        
         const NotificationSystem = {
             show(message, type = 'success', duration = 3000) {
                 const container = document.getElementById('toast-container');
@@ -749,7 +820,7 @@
                     const value = localStorage.getItem(key);
                     return value !== null ? JSON.parse(value) : fallback;
                 } catch (e) {
-                    ErrorHandler.handle(e, 'Storage.get', 'Could not load saved data.');
+                    ErrorHandler.handle(e, 'Storage.get');
                     return fallback;
                 }
             }
@@ -758,7 +829,7 @@
                     localStorage.setItem(key, JSON.stringify(value));
                     return true;
                 } catch (e) {
-                    ErrorHandler.handle(e, 'Storage.set', 'Could not save progress.');
+                    ErrorHandler.handle(e, 'Storage.set');
                     return false;
                 }
             }
@@ -778,7 +849,7 @@
                         if (this.cache.has(src) || this.failedImages.has(src)) return;
                         const promise = new Promise((resolve) => {
                             const img = new Image();
-                            img.crossOrigin = 'anonymous'; // Important for canvas rendering
+                            img.crossOrigin = 'anonymous';
                             img.onload = () => { this.cache.set(src, img); resolve({ success: true, src }); };
                             img.onerror = () => { this.failedImages.add(src); resolve({ success: false, src }); };
                             img.src = src;
@@ -787,8 +858,6 @@
                     });
                 });
                 const results = await Promise.all(promises);
-                const failed = results.filter(r => !r.success);
-                if (failed.length > 0) console.warn(`Failed to load ${failed.length} images`);
                 return results;
             }
 
@@ -947,7 +1016,7 @@
                 if (navigator.clipboard) {
                     navigator.clipboard.writeText(text)
                         .then(() => NotificationSystem.show(successMessage))
-                        .catch(err => ErrorHandler.handle(err, 'copyToClipboard', 'Could not copy to clipboard.'));
+                        .catch(err => ErrorHandler.handle(err, 'copyToClipboard'));
                 } else {
                     alert('Copying to clipboard is not supported on this browser.');
                 }
@@ -973,12 +1042,6 @@
                     content.appendChild(badge);
                 });
                 modal.classList.remove('hidden');
-                 const closeHandler = e => {
-                    if (!e.target.closest('.badge-card')) {
-                        document.querySelectorAll('.badge-card.show-description').forEach(b => b.classList.remove('show-description'));
-                    }
-                };
-                modal.addEventListener('click', closeHandler, { once: true });
             }
         };
 
@@ -1008,15 +1071,12 @@
                     rotateBtn: 'rotate-btn', swapBtn: 'swap-btn', exchangeBtn: 'exchange-btn',
                     moveBtn: 'move-btn', exchangeModal: 'exchange-modal', exchangeOptions: 'exchange-options',
                     closeExchangeModalBtn: 'close-exchange-modal-btn', helpModalContent: 'help-modal-content',
-                    gameOverStats: 'game-over-stats', confirmRestartModal: 'confirm-restart-modal',
-                    confirmRestartCancelBtn: 'confirm-restart-cancel-btn', confirmRestartOkBtn: 'confirm-restart-ok-btn',
-                    gameOverTitle: 'game-over-title', helpTitle: 'help-title', helpSubtitle: 'help-subtitle'
+                    gameOverStats: 'game-over-stats', confirmRestartModal: 'confirm-restart-modal'
                 };
                 const elements = {};
                 for (const key in elementMap) {
-                    const id = elementMap[key];
-                    const element = document.getElementById(id);
-                    if (!element) throw new Error(`Missing critical DOM element: #${id}`);
+                    const element = document.getElementById(elementMap[key]);
+                    if (!element) throw new Error(`Missing element: #${elementMap[key]}`);
                     elements[key] = element;
                 }
                 return elements;
@@ -1039,7 +1099,7 @@
                 this.stats = { perfectShapes: 0, highestScoringPattern: { name: 'None', score: 0 }, badgesUnlocked: 0 };
                 
                 this.DOMElements.gameBoard.innerHTML = '';
-                ImageLoader.preloadImages(this.config, this.IMAGE_PATH).catch(err => ErrorHandler.handle(err, 'ImageLoader'));
+                ImageLoader.preloadImages(this.config, this.IMAGE_PATH);
 
                 for (let i = 0; i < this.GRID_SIZE * this.GRID_SIZE; i++) {
                     const cell = document.createElement('div');
@@ -1308,6 +1368,86 @@
                 });
                 this.DOMElements.exchangeModal.classList.remove('hidden');
             }
+
+            // NEW: Particle Burst Effect
+            createParticleBurst(cellElement) {
+                const rect = cellElement.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                const colors = ['#6a11cb', '#2575fc', '#c4b5fd', '#a78bfa', '#fbbf24'];
+                
+                for (let i = 0; i < 12; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.style.cssText = `
+                        width: ${6 + Math.random() * 6}px;
+                        height: ${6 + Math.random() * 6}px;
+                        background: ${colors[Math.floor(Math.random() * colors.length)]};
+                        left: ${centerX}px;
+                        top: ${centerY}px;
+                    `;
+                    
+                    const angle = (Math.PI * 2 * i) / 12 + (Math.random() - 0.5) * 0.5;
+                    const velocity = 40 + Math.random() * 60;
+                    const tx = Math.cos(angle) * velocity;
+                    const ty = Math.sin(angle) * velocity;
+                    
+                    particle.style.setProperty('--tx', `${tx}px`);
+                    particle.style.setProperty('--ty', `${ty}px`);
+                    
+                    document.body.appendChild(particle);
+                    setTimeout(() => particle.remove(), 800);
+                }
+            }
+
+            // NEW: Flying Score Animation
+            createFlyingScore(points, fromElement, toElement) {
+                const fromRect = fromElement.getBoundingClientRect();
+                const toRect = toElement.getBoundingClientRect();
+                
+                const flyingScore = document.createElement('div');
+                flyingScore.className = 'flying-score';
+                flyingScore.textContent = `+${points}`;
+                flyingScore.style.left = `${fromRect.left + fromRect.width / 2}px`;
+                flyingScore.style.top = `${fromRect.top + fromRect.height / 2}px`;
+                
+                const tx = toRect.left - fromRect.left;
+                const ty = toRect.top - fromRect.top;
+                
+                flyingScore.style.setProperty('--tx', `${tx}px`);
+                flyingScore.style.setProperty('--ty', `${ty}px`);
+                
+                document.body.appendChild(flyingScore);
+                setTimeout(() => flyingScore.remove(), 1000);
+            }
+
+            // NEW: Achievement Notification
+            showAchievement(achievement) {
+                this.stats.badgesUnlocked++;
+                
+                const badgesBtn = document.getElementById('badges-btn');
+                const rect = badgesBtn.getBoundingClientRect();
+                
+                const notification = document.createElement('div');
+                notification.className = 'achievement-notification';
+                notification.style.top = `${rect.top}px`;
+                notification.style.right = '20px';
+                
+                notification.innerHTML = `
+                    <div class="achievement-icon">${achievement.icon}</div>
+                    <div class="achievement-content">
+                        <div class="achievement-title">Badge Unlocked!</div>
+                        <div class="achievement-description">${achievement.name}</div>
+                    </div>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.classList.add('hiding');
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+            }
             
             calculateTotalScore() {
                 try {
@@ -1315,33 +1455,220 @@
                     const scoredPieces = new Set();
                     const scoringCells = new Set();
                     this.stats.perfectShapes = 0;
-                    for (let r = 0; r < this.GRID_SIZE - 1; r++) { for (let c = 0; c < this.GRID_SIZE - 1; c++) { const indices = [r * this.GRID_SIZE + c, r * this.GRID_SIZE + c + 1, (r + 1) * this.GRID_SIZE + c, (r + 1) * this.GRID_SIZE + c + 1]; if (indices.some(i => scoredPieces.has(i))) continue; const [tl, tr, bl, br] = indices.map(i => this.gridState[i]); if (tl?.quadrant === 'TL' && tr?.quadrant === 'TR' && bl?.quadrant === 'BL' && br?.quadrant === 'BR') { const symbols = [tl.symbol, tr.symbol, bl.symbol, br.symbol]; const allSameColor = new Set(symbols).size === 1; const score = allSameColor ? 40 : 20; scoreBreakdown.perfectShape += score; indices.forEach(i => { scoredPieces.add(i); scoringCells.add(i); }); this.stats.perfectShapes++; if (score > this.stats.highestScoringPattern.score) this.stats.highestScoringPattern = { name: 'Perfect Shape', score }; } } }
-                    for (let r = 0; r < this.GRID_SIZE - 1; r++) { for (let c = 0; c < this.GRID_SIZE - 1; c++) { const positions = [{ idx: r * this.GRID_SIZE + c, correctQuadrant: 'TL' }, { idx: r * this.GRID_SIZE + c + 1, correctQuadrant: 'TR' }, { idx: (r + 1) * this.GRID_SIZE + c, correctQuadrant: 'BL' }, { idx: (r + 1) * this.GRID_SIZE + c + 1, correctQuadrant: 'BR' }]; const correctlyPositioned = positions.filter(pos => { const piece = this.gridState[pos.idx]; return piece && piece.quadrant === pos.correctQuadrant && !scoredPieces.has(pos.idx); }); if (correctlyPositioned.length === 3) { const pieces = correctlyPositioned.map(pos => this.gridState[pos.idx]); const allSameColor = new Set(pieces.map(p => p.symbol)).size === 1; const score = allSameColor ? 20 : 15; scoreBreakdown.almostThere += score; correctlyPositioned.forEach(pos => { scoredPieces.add(pos.idx); scoringCells.add(pos.idx); }); if (score > this.stats.highestScoringPattern.score) this.stats.highestScoringPattern = { name: 'Almost There', score }; } } }
-                    for (let r = 0; r < this.GRID_SIZE; r++) { for (let c = 0; c < this.GRID_SIZE; c++) { const p1_idx = r * this.GRID_SIZE + c; if (!this.gridState[p1_idx] || scoredPieces.has(p1_idx)) continue; const p2_idx_h = r * this.GRID_SIZE + c + 1; if (c < this.GRID_SIZE - 1 && this.gridState[p2_idx_h] && !scoredPieces.has(p2_idx_h)) { const q1 = this.gridState[p1_idx].quadrant, q2 = this.gridState[p2_idx_h].quadrant; if ((q1 === 'TL' && q2 === 'TR') || (q1 === 'BL' && q2 === 'BR')) { const sameColor = this.gridState[p1_idx].symbol === this.gridState[p2_idx_h].symbol; const score = sameColor ? 10 : 5; scoreBreakdown.halfBaked += score; scoredPieces.add(p1_idx); scoredPieces.add(p2_idx_h); scoringCells.add(p1_idx); scoringCells.add(p2_idx_h); if (score > this.stats.highestScoringPattern.score) this.stats.highestScoringPattern = { name: 'Half Baked', score }; continue; } } const p2_idx_v = (r + 1) * this.GRID_SIZE + c; if (r < this.GRID_SIZE - 1 && this.gridState[p2_idx_v] && !scoredPieces.has(p2_idx_v)) { const q1 = this.gridState[p1_idx].quadrant, q2 = this.gridState[p2_idx_v].quadrant; if ((q1 === 'TL' && q2 === 'BL') || (q1 === 'TR' && q2 === 'BR')) { const sameColor = this.gridState[p1_idx].symbol === this.gridState[p2_idx_v].symbol; const score = sameColor ? 10 : 5; scoreBreakdown.halfBaked += score; scoredPieces.add(p1_idx); scoredPieces.add(p2_idx_v); scoringCells.add(p1_idx); scoringCells.add(p2_idx_v); if (score > this.stats.highestScoringPattern.score) this.stats.highestScoringPattern = { name: 'Half Baked', score }; } } } }
-                    for (let r = 0; r < this.GRID_SIZE - 1; r++) { for (let c = 0; c < this.GRID_SIZE - 1; c++) { const [tl, tr, bl, br] = [this.gridState[r * this.GRID_SIZE + c], this.gridState[r * this.GRID_SIZE + c + 1], this.gridState[(r + 1) * this.GRID_SIZE + c], this.gridState[(r + 1) * this.GRID_SIZE + c + 1]]; if (tl?.quadrant === 'BR' && tr?.quadrant === 'BL' && bl?.quadrant === 'TR' && br?.quadrant === 'TL') scoreBreakdown.diamondHeist -= 10; } }
-                    const visited = Array(this.GRID_SIZE * this.GRID_SIZE).fill(false); for (let i = 0; i < this.GRID_SIZE * this.GRID_SIZE; i++) { if (this.gridState[i] && !visited[i]) { const blob = [], queue = [i]; visited[i] = true; const symbol = this.gridState[i].symbol; while (queue.length > 0) { const currentIdx = queue.shift(); blob.push(currentIdx); const r = Math.floor(currentIdx / this.GRID_SIZE), c = currentIdx % this.GRID_SIZE; [[r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1]].forEach(([nr, nc]) => { const neighborIdx = nr * this.GRID_SIZE + nc; if (nr >= 0 && nr < this.GRID_SIZE && nc >= 0 && nc < this.GRID_SIZE && this.gridState[neighborIdx]?.symbol === symbol && !visited[neighborIdx]) { visited[neighborIdx] = true; queue.push(neighborIdx); } }); } if (blob.length > 1) { scoreBreakdown.greatSequence += blob.length; blob.forEach(idx => scoringCells.add(idx)); if (blob.length > this.stats.highestScoringPattern.score) this.stats.highestScoringPattern = { name: 'Great Sequence', score: blob.length }; } } }
-                    for (let r = 0; r < this.GRID_SIZE; r++) { const firstPiece = this.gridState[r * this.GRID_SIZE]; if (firstPiece) { const rowPieces = this.gridState.slice(r * this.GRID_SIZE, (r + 1) * this.GRID_SIZE); if (rowPieces.every(p => p?.symbol === firstPiece.symbol)) { scoreBreakdown.lineMaster += 10; for (let c = 0; c < this.GRID_SIZE; c++) scoringCells.add(r * this.GRID_SIZE + c); if (10 > this.stats.highestScoringPattern.score) this.stats.highestScoringPattern = { name: 'Line Master', score: 10 }; } } }
-                    for (let c = 0; c < this.GRID_SIZE; c++) { const firstPiece = this.gridState[c]; if (firstPiece) { let isLineMaster = true; for (let r = 1; r < this.GRID_SIZE; r++) { if (this.gridState[r * this.GRID_SIZE + c]?.symbol !== firstPiece.symbol) { isLineMaster = false; break; } } if (isLineMaster) { scoreBreakdown.lineMaster += 10; for (let r = 0; r < this.GRID_SIZE; r++) scoringCells.add(r * this.GRID_SIZE + c); if (10 > this.stats.highestScoringPattern.score) this.stats.highestScoringPattern = { name: 'Line Master', score: 10 }; } } }
+                    
+                    // Perfect Shape scoring
+                    for (let r = 0; r < this.GRID_SIZE - 1; r++) {
+                        for (let c = 0; c < this.GRID_SIZE - 1; c++) {
+                            const indices = [r * this.GRID_SIZE + c, r * this.GRID_SIZE + c + 1, (r + 1) * this.GRID_SIZE + c, (r + 1) * this.GRID_SIZE + c + 1];
+                            if (indices.some(i => scoredPieces.has(i))) continue;
+                            const [tl, tr, bl, br] = indices.map(i => this.gridState[i]);
+                            if (tl?.quadrant === 'TL' && tr?.quadrant === 'TR' && bl?.quadrant === 'BL' && br?.quadrant === 'BR') {
+                                const symbols = [tl.symbol, tr.symbol, bl.symbol, br.symbol];
+                                const allSameColor = new Set(symbols).size === 1;
+                                const score = allSameColor ? 40 : 20;
+                                scoreBreakdown.perfectShape += score;
+                                indices.forEach(i => { scoredPieces.add(i); scoringCells.add(i); });
+                                this.stats.perfectShapes++;
+                                if (score > this.stats.highestScoringPattern.score) {
+                                    this.stats.highestScoringPattern = { name: 'Perfect Shape', score };
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Almost There scoring
+                    for (let r = 0; r < this.GRID_SIZE - 1; r++) {
+                        for (let c = 0; c < this.GRID_SIZE - 1; c++) {
+                            const positions = [
+                                { idx: r * this.GRID_SIZE + c, correctQuadrant: 'TL' },
+                                { idx: r * this.GRID_SIZE + c + 1, correctQuadrant: 'TR' },
+                                { idx: (r + 1) * this.GRID_SIZE + c, correctQuadrant: 'BL' },
+                                { idx: (r + 1) * this.GRID_SIZE + c + 1, correctQuadrant: 'BR' }
+                            ];
+                            const correctlyPositioned = positions.filter(pos => {
+                                const piece = this.gridState[pos.idx];
+                                return piece && piece.quadrant === pos.correctQuadrant && !scoredPieces.has(pos.idx);
+                            });
+                            if (correctlyPositioned.length === 3) {
+                                const pieces = correctlyPositioned.map(pos => this.gridState[pos.idx]);
+                                const allSameColor = new Set(pieces.map(p => p.symbol)).size === 1;
+                                const score = allSameColor ? 20 : 15;
+                                scoreBreakdown.almostThere += score;
+                                correctlyPositioned.forEach(pos => { scoredPieces.add(pos.idx); scoringCells.add(pos.idx); });
+                                if (score > this.stats.highestScoringPattern.score) {
+                                    this.stats.highestScoringPattern = { name: 'Almost There', score };
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Half Baked scoring
+                    for (let r = 0; r < this.GRID_SIZE; r++) {
+                        for (let c = 0; c < this.GRID_SIZE; c++) {
+                            const p1_idx = r * this.GRID_SIZE + c;
+                            if (!this.gridState[p1_idx] || scoredPieces.has(p1_idx)) continue;
+                            
+                            const p2_idx_h = r * this.GRID_SIZE + c + 1;
+                            if (c < this.GRID_SIZE - 1 && this.gridState[p2_idx_h] && !scoredPieces.has(p2_idx_h)) {
+                                const q1 = this.gridState[p1_idx].quadrant, q2 = this.gridState[p2_idx_h].quadrant;
+                                if ((q1 === 'TL' && q2 === 'TR') || (q1 === 'BL' && q2 === 'BR')) {
+                                    const sameColor = this.gridState[p1_idx].symbol === this.gridState[p2_idx_h].symbol;
+                                    const score = sameColor ? 10 : 5;
+                                    scoreBreakdown.halfBaked += score;
+                                    scoredPieces.add(p1_idx); scoredPieces.add(p2_idx_h);
+                                    scoringCells.add(p1_idx); scoringCells.add(p2_idx_h);
+                                    if (score > this.stats.highestScoringPattern.score) {
+                                        this.stats.highestScoringPattern = { name: 'Half Baked', score };
+                                    }
+                                    continue;
+                                }
+                            }
+                            
+                            const p2_idx_v = (r + 1) * this.GRID_SIZE + c;
+                            if (r < this.GRID_SIZE - 1 && this.gridState[p2_idx_v] && !scoredPieces.has(p2_idx_v)) {
+                                const q1 = this.gridState[p1_idx].quadrant, q2 = this.gridState[p2_idx_v].quadrant;
+                                if ((q1 === 'TL' && q2 === 'BL') || (q1 === 'TR' && q2 === 'BR')) {
+                                    const sameColor = this.gridState[p1_idx].symbol === this.gridState[p2_idx_v].symbol;
+                                    const score = sameColor ? 10 : 5;
+                                    scoreBreakdown.halfBaked += score;
+                                    scoredPieces.add(p1_idx); scoredPieces.add(p2_idx_v);
+                                    scoringCells.add(p1_idx); scoringCells.add(p2_idx_v);
+                                    if (score > this.stats.highestScoringPattern.score) {
+                                        this.stats.highestScoringPattern = { name: 'Half Baked', score };
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Diamond Heist penalty
+                    for (let r = 0; r < this.GRID_SIZE - 1; r++) {
+                        for (let c = 0; c < this.GRID_SIZE - 1; c++) {
+                            const [tl, tr, bl, br] = [
+                                this.gridState[r * this.GRID_SIZE + c],
+                                this.gridState[r * this.GRID_SIZE + c + 1],
+                                this.gridState[(r + 1) * this.GRID_SIZE + c],
+                                this.gridState[(r + 1) * this.GRID_SIZE + c + 1]
+                            ];
+                            if (tl?.quadrant === 'BR' && tr?.quadrant === 'BL' && bl?.quadrant === 'TR' && br?.quadrant === 'TL') {
+                                scoreBreakdown.diamondHeist -= 10;
+                            }
+                        }
+                    }
+                    
+                    // Great Sequence scoring
+                    const visited = Array(this.GRID_SIZE * this.GRID_SIZE).fill(false);
+                    for (let i = 0; i < this.GRID_SIZE * this.GRID_SIZE; i++) {
+                        if (this.gridState[i] && !visited[i]) {
+                            const blob = [], queue = [i];
+                            visited[i] = true;
+                            const symbol = this.gridState[i].symbol;
+                            while (queue.length > 0) {
+                                const currentIdx = queue.shift();
+                                blob.push(currentIdx);
+                                const r = Math.floor(currentIdx / this.GRID_SIZE), c = currentIdx % this.GRID_SIZE;
+                                [[r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1]].forEach(([nr, nc]) => {
+                                    const neighborIdx = nr * this.GRID_SIZE + nc;
+                                    if (nr >= 0 && nr < this.GRID_SIZE && nc >= 0 && nc < this.GRID_SIZE && 
+                                        this.gridState[neighborIdx]?.symbol === symbol && !visited[neighborIdx]) {
+                                        visited[neighborIdx] = true;
+                                        queue.push(neighborIdx);
+                                    }
+                                });
+                            }
+                            if (blob.length > 1) {
+                                scoreBreakdown.greatSequence += blob.length;
+                                blob.forEach(idx => scoringCells.add(idx));
+                                if (blob.length > this.stats.highestScoringPattern.score) {
+                                    this.stats.highestScoringPattern = { name: 'Great Sequence', score: blob.length };
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Line Master scoring
+                    for (let r = 0; r < this.GRID_SIZE; r++) {
+                        const firstPiece = this.gridState[r * this.GRID_SIZE];
+                        if (firstPiece) {
+                            const rowPieces = this.gridState.slice(r * this.GRID_SIZE, (r + 1) * this.GRID_SIZE);
+                            if (rowPieces.every(p => p?.symbol === firstPiece.symbol)) {
+                                scoreBreakdown.lineMaster += 10;
+                                for (let c = 0; c < this.GRID_SIZE; c++) scoringCells.add(r * this.GRID_SIZE + c);
+                                if (10 > this.stats.highestScoringPattern.score) {
+                                    this.stats.highestScoringPattern = { name: 'Line Master', score: 10 };
+                                }
+                            }
+                        }
+                    }
+                    
+                    for (let c = 0; c < this.GRID_SIZE; c++) {
+                        const firstPiece = this.gridState[c];
+                        if (firstPiece) {
+                            let isLineMaster = true;
+                            for (let r = 1; r < this.GRID_SIZE; r++) {
+                                if (this.gridState[r * this.GRID_SIZE + c]?.symbol !== firstPiece.symbol) {
+                                    isLineMaster = false;
+                                    break;
+                                }
+                            }
+                            if (isLineMaster) {
+                                scoreBreakdown.lineMaster += 10;
+                                for (let r = 0; r < this.GRID_SIZE; r++) scoringCells.add(r * this.GRID_SIZE + c);
+                                if (10 > this.stats.highestScoringPattern.score) {
+                                    this.stats.highestScoringPattern = { name: 'Line Master', score: 10 };
+                                }
+                            }
+                        }
+                    }
+                    
                     const totalScore = Object.values(scoreBreakdown).reduce((a, b) => a + b, 0);
+                    const scoreDiff = totalScore - this.score;
                     this.score = totalScore;
-                    this.highlightScoringCells(scoringCells);
+                    
+                    this.highlightScoringCells(scoringCells, scoreDiff);
                     this.checkAchievements(scoreBreakdown);
                     this.updateScoreUI(scoreBreakdown);
-                } catch (error) { ErrorHandler.handle(error, 'calculateTotalScore'); }
+                } catch (error) {
+                    ErrorHandler.handle(error, 'calculateTotalScore');
+                }
             }
             
-            highlightScoringCells(cells) {
+            highlightScoringCells(cells, scoreDiff) {
                 document.querySelectorAll('.score-highlight').forEach(cell => cell.classList.remove('score-highlight'));
                 cells.forEach(index => {
                     const cell = this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`);
-                    if (cell) cell.classList.add('score-highlight');
+                    if (cell) {
+                        cell.classList.add('score-highlight');
+                        // NEW: Create particle burst for scoring cells
+                        if (scoreDiff > 0) {
+                            setTimeout(() => this.createParticleBurst(cell), Math.random() * 200);
+                        }
+                    }
                 });
+                
+                // NEW: Flying score animation
+                if (scoreDiff > 0 && cells.size > 0) {
+                    const firstCell = this.DOMElements.gameBoard.querySelector(`[data-index='${Array.from(cells)[0]}']`);
+                    const totalScoreEl = this.DOMElements.totalScore;
+                    if (firstCell && totalScoreEl) {
+                        this.createFlyingScore(scoreDiff, firstCell, totalScoreEl);
+                    }
+                }
             }
 
             checkAchievements(breakdown) {
-                if (breakdown.perfectShape > 0) { const a = this.achievements.check('firstPerfectShape'); if (a) this.showAchievement(a); }
-                if (this.score >= 500) { const a = this.achievements.check('score500'); if (a) this.showAchievement(a); }
-                if (breakdown.lineMaster > 0) { const a = this.achievements.check('lineMaster'); if (a) this.showAchievement(a); }
+                if (breakdown.perfectShape > 0) {
+                    const a = this.achievements.check('firstPerfectShape');
+                    if (a) this.showAchievement(a);
+                }
+                if (this.score >= 500) {
+                    const a = this.achievements.check('score500');
+                    if (a) this.showAchievement(a);
+                }
+                if (breakdown.lineMaster > 0) {
+                    const a = this.achievements.check('lineMaster');
+                    if (a) this.showAchievement(a);
+                }
             }
             
             updateScoreUI(breakdown) {
@@ -1376,6 +1703,8 @@
             }
 
             updateDiceDisplay() {
+                const diceSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 810 810" style="width: 100%; height: 100%;"><defs><clipPath id="e22954cc75"><path d="M 76.496094 46 L 733.496094 46 L 733.496094 764 L 76.496094 764 Z M 76.496094 46 " clip-rule="nonzero"/></clipPath></defs><g clip-path="url(#e22954cc75)"><path fill="#1d2a89" d="M 470.445312 746.207031 L 667.625 632.363281 C 708.308594 609.066406 733.242188 565.761719 733.242188 518.84375 L 733.242188 291.15625 C 733.242188 244.238281 708.308594 201.261719 667.625 177.636719 L 470.445312 63.792969 C 429.765625 40.5 379.894531 40.5 339.542969 63.792969 L 142.363281 177.636719 C 101.683594 201.261719 76.746094 244.566406 76.746094 291.15625 L 76.746094 518.84375 C 76.746094 565.761719 101.683594 608.738281 142.363281 632.363281 L 339.542969 746.207031 C 379.894531 769.5 429.765625 769.5 470.445312 746.207031 Z M 470.445312 746.207031 " fill-opacity="1" fill-rule="nonzero"/></g><path fill="#ffffff" d="M 400.894531 392.859375 C 377.269531 392.859375 353.648438 386.628906 332.324219 374.488281 L 135.472656 260.644531 C 132.523438 259.003906 131.539062 255.394531 133.179688 252.441406 C 134.816406 249.488281 138.425781 248.503906 141.378906 250.144531 L 338.558594 363.988281 C 377.269531 386.300781 424.84375 386.300781 463.558594 363.988281 L 660.734375 250.472656 C 663.6875 248.832031 667.296875 249.816406 668.9375 252.769531 C 670.578125 255.722656 669.59375 259.332031 666.640625 260.972656 L 469.460938 374.488281 C 448.464844 386.957031 424.515625 392.859375 400.894531 392.859375 Z M 400.894531 392.859375 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 400.894531 716.679688 C 397.613281 716.679688 394.988281 714.054688 394.988281 710.773438 L 394.988281 482.753906 C 394.988281 433.871094 421.234375 388.597656 463.558594 364.316406 L 660.734375 250.472656 C 663.6875 248.832031 667.296875 249.816406 668.9375 252.769531 C 670.578125 255.722656 669.59375 259.332031 666.640625 260.972656 L 469.460938 374.488281 C 430.75 396.796875 406.796875 438.136719 406.796875 482.753906 L 406.796875 710.445312 C 406.796875 713.726562 404.175781 716.679688 400.894531 716.679688 Z M 400.894531 716.679688 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 400.894531 716.679688 C 397.613281 716.679688 394.988281 714.054688 394.988281 710.773438 L 394.988281 482.753906 C 394.988281 438.136719 371.039062 396.796875 332.324219 374.488281 L 135.472656 260.644531 C 132.523438 259.003906 131.539062 255.394531 133.179688 252.441406 C 134.816406 249.488281 138.425781 248.503906 141.378906 250.144531 L 338.558594 363.988281 C 380.878906 388.269531 407.125 433.871094 407.125 482.425781 L 407.125 710.117188 C 406.796875 713.726562 404.175781 716.679688 400.894531 716.679688 Z M 400.894531 716.679688 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 459.949219 248.503906 C 441.902344 258.675781 441.902344 275.40625 459.949219 285.90625 C 477.992188 296.078125 507.191406 296.078125 525.238281 285.90625 C 543.28125 275.734375 543.28125 259.003906 525.238281 248.503906 C 507.191406 238.003906 477.992188 238.003906 459.949219 248.503906 Z M 437.308594 298.703125 C 419.265625 288.53125 390.066406 288.53125 372.023438 298.703125 C 353.976562 308.871094 353.976562 325.605469 372.023438 336.101562 C 390.066406 346.273438 419.265625 346.273438 437.308594 336.101562 C 455.355469 325.605469 455.355469 308.871094 437.308594 298.703125 Z M 437.308594 97.914062 C 419.265625 87.742188 390.066406 87.742188 372.023438 97.914062 C 353.976562 108.085938 353.976562 124.816406 372.023438 135.316406 C 390.066406 145.488281 419.265625 145.488281 437.308594 135.316406 C 455.355469 124.816406 455.355469 108.085938 437.308594 97.914062 Z M 261.785156 235.382812 C 279.832031 225.210938 279.832031 208.476562 261.785156 197.980469 C 243.742188 187.808594 214.542969 187.808594 196.496094 197.980469 C 178.453125 208.148438 178.453125 224.882812 196.496094 235.382812 C 214.871094 245.878906 244.070312 245.878906 261.785156 235.382812 Z M 612.835938 235.382812 C 630.878906 225.210938 630.878906 208.476562 612.835938 197.980469 C 594.789062 187.808594 565.589844 187.808594 547.546875 197.980469 C 529.5 208.148438 529.5 224.882812 547.546875 235.382812 C 565.917969 245.878906 595.117188 245.878906 612.835938 235.382812 Z M 284.425781 148.109375 C 266.378906 158.28125 266.378906 175.015625 284.425781 185.511719 C 302.46875 195.683594 331.667969 195.683594 349.710938 185.511719 C 367.757812 175.34375 367.757812 158.609375 349.710938 148.109375 C 331.667969 137.613281 302.46875 137.613281 284.425781 148.109375 Z M 284.425781 148.109375 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 567.558594 462.085938 C 549.84375 472.257812 535.40625 496.863281 535.734375 517.203125 C 536.0625 537.546875 550.5 546.074219 568.214844 535.90625 C 585.933594 525.734375 600.367188 501.128906 600.039062 480.785156 C 599.710938 460.445312 585.277344 451.914062 567.558594 462.085938 Z M 567.558594 462.085938 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 480.617188 485.707031 C 498.332031 475.539062 512.769531 450.929688 512.441406 430.589844 C 512.113281 410.25 497.675781 401.71875 479.960938 411.890625 C 462.246094 422.058594 447.808594 446.667969 448.136719 467.007812 C 448.464844 487.347656 462.902344 495.550781 480.617188 485.707031 Z M 480.617188 485.707031 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 655.484375 586.429688 C 673.203125 576.257812 687.636719 551.652344 687.308594 531.3125 C 686.980469 510.972656 672.546875 502.441406 654.828125 512.609375 C 637.113281 522.78125 622.675781 547.386719 623.003906 567.730469 C 623.332031 588.070312 637.769531 596.601562 655.484375 586.429688 Z M 655.484375 586.429688 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 358.570312 469.304688 C 358.570312 448.636719 343.808594 423.371094 326.089844 412.875 C 308.046875 402.375 293.609375 410.90625 293.609375 431.574219 C 293.609375 452.242188 308.375 477.507812 326.089844 488.003906 C 344.136719 498.175781 358.570312 489.972656 358.570312 469.304688 Z M 184.03125 570.027344 C 184.03125 549.355469 169.265625 524.09375 151.550781 513.59375 C 133.503906 503.097656 119.070312 511.625 119.070312 532.296875 C 119.070312 552.964844 133.832031 578.226562 151.550781 588.726562 C 169.59375 598.898438 184.359375 590.695312 184.03125 570.027344 Z M 150.894531 311.167969 C 132.851562 300.667969 118.414062 309.199219 118.414062 329.867188 C 118.414062 350.539062 133.179688 375.800781 150.894531 386.300781 C 168.9375 396.796875 183.375 388.269531 183.375 367.597656 C 183.375 346.929688 168.9375 321.667969 150.894531 311.167969 Z M 326.417969 614.972656 C 308.375 604.472656 293.9375 613.003906 293.9375 633.671875 C 293.9375 654.34375 308.703125 679.605469 326.417969 690.105469 C 344.464844 700.601562 358.898438 692.074219 358.898438 671.402344 C 358.898438 650.734375 344.464844 625.472656 326.417969 614.972656 Z M 326.417969 614.972656 " fill-opacity="1" fill-rule="nonzero"/></svg>`;
+                
                 [this.DOMElements.dice1El, this.DOMElements.dice2El].forEach((el, i) => {
                     el.innerHTML = '';
                     if (this.currentRoll[i]) {
@@ -1385,10 +1714,11 @@
                         img.alt = `${piece.symbol} ${piece.quadrant}`;
                         el.appendChild(img);
                     } else {
-                        const questionMark = document.createElement('span');
-                        questionMark.textContent = '?';
-                        questionMark.className = 'dice-empty-state';
-                        el.appendChild(questionMark);
+                        // NEW: Show greyed out dice instead of "?"
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'dice-empty-state';
+                        wrapper.innerHTML = diceSVG;
+                        el.appendChild(wrapper);
                     }
                 });
             }
@@ -1412,7 +1742,9 @@
             }
 
             renderCell(row, col) {
-                const index = row * this.GRID_SIZE + col, cell = this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`), piece = this.gridState[index];
+                const index = row * this.GRID_SIZE + col;
+                const cell = this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`);
+                const piece = this.gridState[index];
                 if (!cell) return;
                 const tooltip = cell.querySelector('.premium-tooltip');
                 cell.innerHTML = '';
@@ -1437,11 +1769,25 @@
                 setTimeout(() => cell.classList.remove('placing'), 500);
             }
 
-            generateRandomAlo() { return { symbol: this.SYMBOLS[Math.floor(Math.random()*this.SYMBOLS.length)], quadrant: this.QUADRANTS[Math.floor(Math.random()*this.QUADRANTS.length)] }; }
+            generateRandomAlo() {
+                return {
+                    symbol: this.SYMBOLS[Math.floor(Math.random() * this.SYMBOLS.length)],
+                    quadrant: this.QUADRANTS[Math.floor(Math.random() * this.QUADRANTS.length)]
+                };
+            }
             
             checkGameOver() {
                 if (!this.gridState.includes(null)) return true;
-                for (let r = 0; r < this.GRID_SIZE; r++) { for (let c = 0; c < this.GRID_SIZE; c++) { if (!this.gridState[r * this.GRID_SIZE + c]) { if ((c < this.GRID_SIZE - 1 && !this.gridState[r * this.GRID_SIZE + c + 1]) || (r < this.GRID_SIZE - 1 && !this.gridState[(r + 1) * this.GRID_SIZE + c])) return false; } } }
+                for (let r = 0; r < this.GRID_SIZE; r++) {
+                    for (let c = 0; c < this.GRID_SIZE; c++) {
+                        if (!this.gridState[r * this.GRID_SIZE + c]) {
+                            if ((c < this.GRID_SIZE - 1 && !this.gridState[r * this.GRID_SIZE + c + 1]) ||
+                                (r < this.GRID_SIZE - 1 && !this.gridState[(r + 1) * this.GRID_SIZE + c])) {
+                                return false;
+                            }
+                        }
+                    }
+                }
                 return true;
             }
 
@@ -1449,8 +1795,14 @@
                 this.isGameOver = true;
                 if (this.activeSuperpower) this.cancelSuperpower();
                 this.updateSuperpowerUI();
-                if (this.usedSuperpowers.size === 0) { const a = this.achievements.check('noMistakes'); if (a) this.showAchievement(a); }
-                if (!this.gridState.includes(null)) { const a = this.achievements.check('fillBoard'); if (a) this.showAchievement(a); }
+                if (this.usedSuperpowers.size === 0) {
+                    const a = this.achievements.check('noMistakes');
+                    if (a) this.showAchievement(a);
+                }
+                if (!this.gridState.includes(null)) {
+                    const a = this.achievements.check('fillBoard');
+                    if (a) this.showAchievement(a);
+                }
                 
                 setTimeout(() => {
                     this.DOMElements.finalScore.textContent = this.score;
@@ -1463,10 +1815,6 @@
                     this.DOMElements.gameOverModal.classList.remove('hidden');
                     this.DOMElements.rollDiceBtn.disabled = true;
                 }, 500);
-            }
-
-            showAchievement(achievement) {
-                this.stats.badgesUnlocked++;
             }
 
             celebrateNewHighScore() {
@@ -1483,12 +1831,18 @@
                     const velocity = 100 + Math.random() * 100;
                     const tx = Math.cos(angle) * velocity;
                     const ty = Math.sin(angle) * velocity;
-                    particle.animate([{ transform: 'translate(0, 0) scale(1)', opacity: 1 }, { transform: `translate(${tx}px, ${ty}px) scale(0)`, opacity: 0 }], { duration: 800, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' }).onfinish = () => particle.remove();
+                    particle.animate([
+                        { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+                        { transform: `translate(${tx}px, ${ty}px) scale(0)`, opacity: 0 }
+                    ], {
+                        duration: 800,
+                        easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+                    }).onfinish = () => particle.remove();
                 }
             }
 
             async createBoardCanvas() {
-                const SCALE = 3; // Render at 3x for higher resolution
+                const SCALE = 3;
                 const boardElement = this.DOMElements.gameBoard;
                 const cellSize = boardElement.offsetWidth / this.GRID_SIZE;
                 const canvasSize = cellSize * this.GRID_SIZE * SCALE;
@@ -1497,7 +1851,6 @@
                 canvas.height = canvasSize;
                 const ctx = canvas.getContext('2d');
 
-                // Draw white background and grid lines
                 ctx.fillStyle = '#FFFFFF';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.strokeStyle = 'rgba(106, 17, 203, 0.1)';
@@ -1519,7 +1872,6 @@
                         const size = cellSize * SCALE;
                         const imgSrc = ImageLoader.getImageSrc(piece.symbol, piece.quadrant, this.IMAGE_PATH);
                         
-                        // Use cached image if available, otherwise load it
                         let img = ImageLoader.getImage(imgSrc);
                         if (img) {
                              ctx.drawImage(img, x, y, size, size);
@@ -1531,7 +1883,7 @@
                                     ctx.drawImage(newImg, x, y, size, size);
                                     resolve();
                                 };
-                                newImg.onerror = () => resolve(); // Don't block if one fails
+                                newImg.onerror = () => resolve();
                                 newImg.src = imgSrc;
                             });
                             imagePromises.push(promise);
@@ -1549,7 +1901,7 @@
                 gameManager.init();
             } catch (error) {
                 ErrorHandler.handle(error, 'GameInitialization');
-                document.body.innerHTML = '<div class="flex items-center justify-center min-h-screen"><div class="text-center p-8 glass-card rounded-2xl"><h1 class="text-2xl font-bold mb-4" style="color: var(--accent);">Error Loading Game</h1><p style="color: var(--text-secondary);">A critical element is missing. Please refresh the page.</p></div></div>';
+                document.body.innerHTML = '<div class="flex items-center justify-center min-h-screen"><div class="text-center p-8 glass-card rounded-2xl"><h1 class="text-2xl font-bold mb-4" style="color: var(--accent);">Error Loading Game</h1><p style="color: var(--text-secondary);">Please refresh the page.</p></div></div>';
             }
         });
     </script>
