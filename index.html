@@ -291,6 +291,8 @@
             height: 70%;
             object-fit: contain;
             mix-blend-mode: multiply;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
         }
 
         #dice-1:has(img), #dice-2:has(img) {
@@ -516,6 +518,13 @@
             animation: modal-fade-in 0.3s;
         }
 
+        /* Premium Font for Headers */
+        .premium-header {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+        }
+
         /* Badge styles */
         .badge-icon {
             filter: grayscale(100%);
@@ -533,6 +542,58 @@
             0% { transform: scale(0) rotate(-180deg); }
             60% { transform: scale(1.2) rotate(10deg); }
             100% { transform: scale(1) rotate(0deg); }
+        }
+
+        /* Badge card with hidden description */
+        .badge-card {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .badge-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .badge-description {
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .badge-card:hover .badge-description,
+        .badge-card.show-description .badge-description {
+            opacity: 1;
+            max-height: 100px;
+        }
+
+        /* Share button styles */
+        .share-button {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .share-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .share-button:active {
+            transform: translateY(0);
         }
     </style>
 </head>
@@ -643,11 +704,17 @@
     <div id="game-over-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden">
         <div class="modal-content w-full max-w-sm glass-card rounded-2xl p-8 text-center relative">
             <button id="close-modal-btn" class="absolute top-4 right-4 w-8 h-8 rounded-full text-xl flex items-center justify-center font-bold text-gray-500 hover:bg-gray-200/50" aria-label="Close">×</button>
-            <h2 class="text-2xl font-bold mb-4" style="color: var(--accent);">Game Over</h2>
+            <h2 class="text-3xl font-bold mb-4 premium-header" style="color: var(--accent);">MatchAlo Game Over!</h2>
             <p class="mb-6" style="color: var(--text-secondary);">You can no longer make a move.</p>
-            <p class="text-sm" style="color: var(--text-secondary);">Final Score</p>
-            <div id="final-score" class="text-6xl font-bold my-2" style="color: var(--accent);">0</div>
-            <button id="restart-modal-btn" class="themed-button primary w-full py-2.5 px-4 text-white text-sm mt-4">Play Again</button>
+            <p class="text-sm font-semibold" style="color: var(--text-secondary);">Final Score</p>
+            <div id="final-score" class="text-6xl font-bold my-4 premium-header" style="color: var(--accent);">0</div>
+            <button id="share-score-btn" class="share-button w-full mb-3">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/>
+                </svg>
+                Share My Score
+            </button>
+            <button id="restart-modal-btn" class="themed-button primary w-full py-2.5 px-4 text-white text-sm">Play Again</button>
         </div>
     </div>
 
@@ -684,11 +751,19 @@
 
     <div id="badges-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden">
         <div class="modal-content w-full max-w-md glass-card rounded-2xl p-6 relative">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-2xl font-bold" style="color: var(--accent);">🏆 Achievements</h2>
-                <button id="close-badges-modal-btn" class="w-10 h-10 rounded-full text-xl flex items-center justify-center font-bold" aria-label="Close">×</button>
+            <div class="flex justify-between items-center mb-2">
+                <div class="flex-1"></div>
+                <h2 class="text-2xl font-bold premium-header text-center flex-1" style="color: var(--accent);">Collect Alo Badges</h2>
+                <button id="close-badges-modal-btn" class="w-10 h-10 rounded-full text-xl flex items-center justify-center font-bold flex-shrink-0" aria-label="Close">×</button>
             </div>
-            <div id="badges-content" class="grid grid-cols-2 gap-4"></div>
+            <p class="text-center text-sm mb-4" style="color: var(--text-secondary);">Click a badge to see how to unlock it.</p>
+            <div id="badges-content" class="grid grid-cols-2 gap-4 mb-4"></div>
+            <button id="share-badges-btn" class="share-button w-full">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/>
+                </svg>
+                Share My Collection
+            </button>
         </div>
     </div>
 
@@ -948,6 +1023,57 @@
                 document.getElementById('close-badges-modal-btn').addEventListener('click', () => {
                     document.getElementById('badges-modal').classList.add('hidden');
                 });
+
+                // Share buttons
+                document.getElementById('share-score-btn').addEventListener('click', () => {
+                    this.shareScore();
+                });
+                document.getElementById('share-badges-btn').addEventListener('click', () => {
+                    this.shareBadges();
+                });
+            },
+
+            shareScore() {
+                const score = this.currentGame.score;
+                const message = `✨ I scored ${score} in MatchAlo! ✨\nThink you can beat my score in MatchAlo? 🎲\nPlay now: https://abhimanyulodha.github.io/matchalo/`;
+                
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'MatchAlo Score',
+                        text: message
+                    }).catch(err => console.log('Share cancelled'));
+                } else {
+                    // Fallback for desktop
+                    this.copyToClipboard(message);
+                }
+            },
+
+            shareBadges() {
+                const unlockedBadges = Object.values(this.currentGame.achievements.achievements)
+                    .filter(a => a.unlocked)
+                    .map(a => a.icon)
+                    .join(' ');
+                const message = `🏆 Check out my Badge Collection in MatchAlo! 🏆\n${unlockedBadges || 'Just started my journey!'}\nPlay now: https://abhimanyulodha.github.io/matchalo/`;
+                
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'MatchAlo Badges',
+                        text: message
+                    }).catch(err => console.log('Share cancelled'));
+                } else {
+                    // Fallback for desktop
+                    this.copyToClipboard(message);
+                }
+            },
+
+            copyToClipboard(text) {
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        alert('Copied to clipboard! Share it anywhere you like.');
+                    });
+                } else {
+                    alert('Sharing is not supported on this browser. Copy this:\n\n' + text);
+                }
             },
 
             showBadgesModal() {
@@ -958,16 +1084,38 @@
                 const achievements = this.currentGame.achievements.getAll();
                 achievements.forEach(achievement => {
                     const badge = document.createElement('div');
-                    badge.className = 'glass-card p-4 rounded-xl text-center';
+                    badge.className = 'glass-card p-4 rounded-xl text-center badge-card';
                     badge.innerHTML = `
                         <div class="text-5xl mb-2 badge-icon ${achievement.unlocked ? 'unlocked' : ''}">${achievement.icon}</div>
                         <div class="font-bold text-sm mb-1" style="color: var(--accent);">${achievement.name}</div>
-                        <div class="text-xs" style="color: var(--text-secondary);">${achievement.description}</div>
+                        <div class="badge-description text-xs" style="color: var(--text-secondary);">${achievement.description}</div>
                     `;
+                    
+                    // Toggle description on click/tap
+                    badge.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        // Remove show-description from all other badges
+                        document.querySelectorAll('.badge-card').forEach(b => {
+                            if (b !== badge) b.classList.remove('show-description');
+                        });
+                        // Toggle current badge
+                        badge.classList.toggle('show-description');
+                    });
+                    
                     content.appendChild(badge);
                 });
 
                 modal.classList.remove('hidden');
+
+                // Close badge descriptions when clicking outside
+                const closeDescriptions = (e) => {
+                    if (!e.target.closest('.badge-card')) {
+                        document.querySelectorAll('.badge-card').forEach(b => {
+                            b.classList.remove('show-description');
+                        });
+                    }
+                };
+                modal.addEventListener('click', closeDescriptions);
             }
         };
 
@@ -1803,9 +1951,6 @@
 
             showGameOver() {
                 this.isGameOver = true;
-                this.DOMElements.finalScore.textContent = this.score;
-                this.DOMElements.gameOverModal.classList.remove('hidden');
-                this.DOMElements.rollDiceBtn.disabled = true;
 
                 // Cancel any active superpowers
                 if (this.activeSuperpower) {
@@ -1815,11 +1960,27 @@
                 // Update UI to disable all superpowers
                 this.updateSuperpowerUI();
 
-                // Check no mistakes achievement
+                // Check and show achievements first
                 if (this.usedSuperpowers.size === 0) {
                     const achievement = this.achievements.check('noMistakes');
-                    if (achievement) this.showAchievement(achievement);
+                    if (achievement) {
+                        this.showAchievement(achievement);
+                    }
                 }
+
+                if (!this.gridState.includes(null)) {
+                    const achievement = this.achievements.check('fillBoard');
+                    if (achievement) {
+                        this.showAchievement(achievement);
+                    }
+                }
+
+                // Delay game over modal by 500ms to let achievements show first
+                setTimeout(() => {
+                    this.DOMElements.finalScore.textContent = this.score;
+                    this.DOMElements.gameOverModal.classList.remove('hidden');
+                    this.DOMElements.rollDiceBtn.disabled = true;
+                }, 500);
             }
 
             updateProgressBar() {
@@ -1836,6 +1997,9 @@
                         const img = document.createElement('img');
                         img.src = ImageLoader.getImageSrc(piece.symbol, piece.quadrant);
                         img.alt = `${piece.symbol} ${piece.quadrant}`;
+                        img.style.width = '100%';
+                        img.style.height = '100%';
+                        img.style.objectFit = 'contain';
                         el.appendChild(img);
                     } else {
                         el.textContent = '?';
@@ -1884,7 +2048,7 @@
 
             showAchievement(achievement) {
                 const notification = document.createElement('div');
-                notification.className = 'fixed top-20 right-4 glass-card rounded-xl p-4 z-[100] transform translate-x-0 transition-all duration-300 min-w-[250px]';
+                notification.className = 'fixed top-20 right-4 glass-card rounded-xl p-4 z-[150] transform translate-x-0 transition-all duration-300 min-w-[250px]';
                 notification.innerHTML = `
                     <div class="text-center">
                         <div class="text-5xl mb-2">${achievement.icon}</div>
