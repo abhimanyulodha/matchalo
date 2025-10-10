@@ -6,6 +6,7 @@
     <title>MATCHALO</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     
@@ -529,6 +530,22 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* NEW: Iteration 2 Animations */
+        .particle {
+            position: fixed;
+            pointer-events: none;
+            border-radius: 50%;
+            z-index: 5000;
+        }
+        .achievement-notification {
+            position: fixed;
+            z-index: 5000;
+            padding: 1rem;
+            min-width: 250px;
+            text-align: center;
+            transform-origin: bottom center;
+        }
     </style>
 </head>
 <body class="p-2 lg:p-4 flex items-center justify-center min-h-screen">
@@ -750,7 +767,6 @@
         class ImageLoader {
             static cache = new Map();
             static failedImages = new Set();
-            static dataURLCache = new Map();
 
             static async preloadImages(config, imagePath) {
                 const promises = [];
@@ -762,6 +778,7 @@
                         if (this.cache.has(src) || this.failedImages.has(src)) return;
                         const promise = new Promise((resolve) => {
                             const img = new Image();
+                            img.crossOrigin = 'anonymous'; // Important for canvas rendering
                             img.onload = () => { this.cache.set(src, img); resolve({ success: true, src }); };
                             img.onerror = () => { this.failedImages.add(src); resolve({ success: false, src }); };
                             img.src = src;
@@ -773,6 +790,10 @@
                 const failed = results.filter(r => !r.success);
                 if (failed.length > 0) console.warn(`Failed to load ${failed.length} images`);
                 return results;
+            }
+
+            static getImage(src) {
+                return this.cache.get(src);
             }
 
             static getImageSrc(symbol, quadrant, imagePath) {
@@ -890,85 +911,7 @@
                 const title = 'My MatchAlo Score!';
 
                 try {
-                    // Manual canvas rendering at 3x resolution
-                    const SCALE = 3;
-                    const GRID_SIZE = 8;
-                    const boardElement = document.getElementById('game-board');
-                    const cellSize = boardElement.offsetWidth / GRID_SIZE;
-                    const canvasSize = cellSize * GRID_SIZE * SCALE;
-                    const padding = 20 * SCALE;
-
-                    const canvas = document.createElement('canvas');
-                    canvas.width = canvasSize + padding * 2;
-                    canvas.height = canvasSize + padding * 2;
-                    const ctx = canvas.getContext('2d');
-
-                    // Draw white background
-                    ctx.fillStyle = '#ffffff';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                    // Translate to add padding
-                    ctx.save();
-                    ctx.translate(padding, padding);
-
-                    // Draw grid lines
-                    ctx.strokeStyle = 'rgba(106, 17, 203, 0.1)';
-                    ctx.lineWidth = 1 * SCALE;
-                    for (let i = 0; i <= GRID_SIZE; i++) {
-                        const pos = i * cellSize * SCALE;
-                        // Vertical lines
-                        ctx.beginPath();
-                        ctx.moveTo(pos, 0);
-                        ctx.lineTo(pos, canvasSize);
-                        ctx.stroke();
-                        // Horizontal lines
-                        ctx.beginPath();
-                        ctx.moveTo(0, pos);
-                        ctx.lineTo(canvasSize, pos);
-                        ctx.stroke();
-                    }
-
-                    // Load and draw each piece
-                    const imagePromises = [];
-                    for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
-                        const piece = this.currentGame.gridState[i];
-                        if (piece) {
-                            const row = Math.floor(i / GRID_SIZE);
-                            const col = i % GRID_SIZE;
-                            const x = col * cellSize * SCALE;
-                            const y = row * cellSize * SCALE;
-                            const size = cellSize * SCALE;
-
-                            const imgSrc = ImageLoader.getImageSrc(piece.symbol, piece.quadrant, this.currentGame.IMAGE_PATH);
-                            
-                            const promise = new Promise((resolve, reject) => {
-                                const img = new Image();
-                                img.crossOrigin = 'anonymous';
-                                img.onload = () => {
-                                    try {
-                                        ctx.drawImage(img, x, y, size, size);
-                                        resolve();
-                                    } catch (e) {
-                                        console.warn(`Failed to draw image at ${row},${col}:`, e);
-                                        resolve(); // Continue even if one fails
-                                    }
-                                };
-                                img.onerror = (e) => {
-                                    console.warn(`Failed to load image: ${imgSrc}`);
-                                    resolve(); // Continue even if image fails to load
-                                };
-                                img.src = imgSrc;
-                            });
-                            imagePromises.push(promise);
-                        }
-                    }
-
-                    // Wait for all images to load and draw
-                    await Promise.all(imagePromises);
-
-                    ctx.restore();
-
-                    // Export as high-quality PNG
+                    const canvas = await this.currentGame.createBoardCanvas();
                     const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png', 1.0));
                     const file = new File([blob], 'matchalo-board.png', { type: 'image/png' });
                     
@@ -976,15 +919,12 @@
 
                     if (navigator.canShare && navigator.canShare(shareData)) {
                         await navigator.share(shareData);
-                        NotificationSystem.show('Board shared successfully!', 'success');
                     } else {
                         throw new Error('File sharing not supported');
                     }
                 } catch (err) {
-                    console.error('Share error:', err);
                     try {
                         await navigator.share({ title, text: message });
-                        NotificationSystem.show('Score shared!', 'success');
                     } catch (textErr) {
                         this.copyToClipboard(message, 'Score copied to clipboard!');
                     }
@@ -1545,6 +1485,62 @@
                     const ty = Math.sin(angle) * velocity;
                     particle.animate([{ transform: 'translate(0, 0) scale(1)', opacity: 1 }, { transform: `translate(${tx}px, ${ty}px) scale(0)`, opacity: 0 }], { duration: 800, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' }).onfinish = () => particle.remove();
                 }
+            }
+
+            async createBoardCanvas() {
+                const SCALE = 3; // Render at 3x for higher resolution
+                const boardElement = this.DOMElements.gameBoard;
+                const cellSize = boardElement.offsetWidth / this.GRID_SIZE;
+                const canvasSize = cellSize * this.GRID_SIZE * SCALE;
+                const canvas = document.createElement('canvas');
+                canvas.width = canvasSize;
+                canvas.height = canvasSize;
+                const ctx = canvas.getContext('2d');
+
+                // Draw white background and grid lines
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.strokeStyle = 'rgba(106, 17, 203, 0.1)';
+                ctx.lineWidth = 1 * SCALE;
+                for (let i = 0; i <= this.GRID_SIZE; i++) {
+                    const pos = i * cellSize * SCALE;
+                    ctx.beginPath(); ctx.moveTo(pos, 0); ctx.lineTo(pos, canvasSize); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(0, pos); ctx.lineTo(canvasSize, pos); ctx.stroke();
+                }
+
+                const imagePromises = [];
+                for (let i = 0; i < this.GRID_SIZE * this.GRID_SIZE; i++) {
+                    const piece = this.gridState[i];
+                    if (piece) {
+                        const row = Math.floor(i / this.GRID_SIZE);
+                        const col = i % this.GRID_SIZE;
+                        const x = col * cellSize * SCALE;
+                        const y = row * cellSize * SCALE;
+                        const size = cellSize * SCALE;
+                        const imgSrc = ImageLoader.getImageSrc(piece.symbol, piece.quadrant, this.IMAGE_PATH);
+                        
+                        // Use cached image if available, otherwise load it
+                        let img = ImageLoader.getImage(imgSrc);
+                        if (img) {
+                             ctx.drawImage(img, x, y, size, size);
+                        } else {
+                            const promise = new Promise((resolve) => {
+                                const newImg = new Image();
+                                newImg.crossOrigin = 'anonymous';
+                                newImg.onload = () => {
+                                    ctx.drawImage(newImg, x, y, size, size);
+                                    resolve();
+                                };
+                                newImg.onerror = () => resolve(); // Don't block if one fails
+                                newImg.src = imgSrc;
+                            });
+                            imagePromises.push(promise);
+                        }
+                    }
+                }
+
+                await Promise.all(imagePromises);
+                return canvas;
             }
         }
 
