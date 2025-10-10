@@ -28,62 +28,121 @@
             --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        body { font-family: 'Quicksand', sans-serif; font-weight: 500; background: var(--bg); color: var(--text); }
-        .glass-card { background: var(--card); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); box-shadow: var(--shadow-soft), 0 0 0 1px var(--glass-border), inset 0 1px 0 rgba(255, 255, 255, 0.3); border: none !important; }
-        .themed-button { font-weight: 600; border-radius: 12px; transition: all 0.3s var(--ease-smooth); border: none; }
-        .themed-button.primary { background: var(--accent-gradient); }
-        .themed-button.secondary { background: var(--accent-light); color: var(--accent); }
-        .themed-button.tertiary { background: none; color: var(--text-secondary); }
-        #select-edition-btn { background: var(--accent-gradient-shaded); }
-        .themed-button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: var(--shadow-medium); }
-        .progress-bar-container { background: var(--accent-light); }
-        .progress-bar-fill { background: var(--accent-gradient); }
-        .grid-cell.empty { box-shadow: inset 0 0 0 1px var(--grid-line-color); }
-        hr { border-color: var(--faint-border); }
-        .superpower-btn--active { background-color: var(--accent-light) !important; box-shadow: 0 0 0 2px var(--accent); }
-        .pulsing-cell { animation: pulse 1.5s infinite; }
-
-        /* Enhanced pulse with better performance */
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(106, 17, 203, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(106, 17, 203, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(106, 17, 203, 0); }
+        body { 
+            font-family: 'Quicksand', sans-serif; 
+            font-weight: 500; 
+            background: var(--bg); 
+            color: var(--text);
+            overflow-x: hidden;
         }
-
-        /* Score animation */
-        @keyframes score-pop {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
-        }
-
-        .score-change {
-            animation: score-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        /* Glow pulse for active superpowers */
-        @keyframes glow-pulse {
-            0%, 100% {
-                box-shadow: 0 0 0 2px var(--accent), 0 0 20px rgba(106, 17, 203, 0.3);
-            }
-            50% {
-                box-shadow: 0 0 0 2px var(--accent), 0 0 30px rgba(106, 17, 203, 0.5);
-            }
-        }
-
-        .superpower-btn--active {
-            animation: glow-pulse 2s ease-in-out infinite;
-        }
-
-        /* Progress bar shimmer */
-        @keyframes shimmer {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
-
-        .progress-bar-fill {
+        
+        /* Enhanced Glass Card */
+        .glass-card { 
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.95) 0%, 
+                rgba(255, 255, 255, 0.85) 100%);
+            backdrop-filter: blur(25px) saturate(200%);
+            -webkit-backdrop-filter: blur(25px) saturate(200%);
+            box-shadow: 
+                0 8px 32px rgba(106, 17, 203, 0.12),
+                0 2px 8px rgba(106, 17, 203, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+            border: none !important;
             position: relative;
             overflow: hidden;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(106, 17, 203, 0.03) 0%, transparent 70%);
+            animation: rotate-subtle 20s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes rotate-subtle {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Premium Buttons */
+        .themed-button { 
+            font-weight: 600; 
+            border-radius: 12px; 
+            transition: all 0.3s var(--ease-smooth); 
+            border: none;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .themed-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+            z-index: -1;
+        }
+
+        .themed-button:active::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .themed-button.primary { 
+            background: var(--accent-gradient);
+            box-shadow: 0 4px 15px rgba(106, 17, 203, 0.3);
+        }
+        
+        .themed-button.secondary { 
+            background: var(--accent-light); 
+            color: var(--accent);
+        }
+        
+        .themed-button.tertiary { 
+            background: rgba(255, 255, 255, 0.5); 
+            color: var(--text-secondary);
+        }
+        
+        #select-edition-btn { 
+            background: var(--accent-gradient-shaded);
+        }
+        
+        .themed-button:hover:not(:disabled) { 
+            transform: translateY(-2px) scale(1.02); 
+            box-shadow: var(--shadow-medium);
+        }
+
+        .themed-button:active:not(:disabled) {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .themed-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Progress Bar */
+        .progress-bar-container { 
+            background: var(--accent-light);
+        }
+        
+        .progress-bar-fill { 
+            background: var(--accent-gradient);
+            position: relative;
+            overflow: hidden;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .progress-bar-fill::after {
@@ -100,7 +159,153 @@
             animation: shimmer 2s infinite;
         }
 
-        /* Modal animations */
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        /* Grid Cells */
+        .grid-cell {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+
+        .grid-cell.empty { 
+            box-shadow: inset 0 0 0 1px var(--grid-line-color);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .grid-cell::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, 
+                rgba(106, 17, 203, 0.08) 0%, 
+                transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .grid-cell:hover::after {
+            opacity: 1;
+        }
+
+        .grid-cell.empty:hover {
+            background: linear-gradient(135deg, 
+                rgba(106, 17, 203, 0.05) 0%, 
+                rgba(106, 17, 203, 0.12) 100%);
+            box-shadow: inset 0 0 0 2px var(--accent-light);
+            transform: scale(1.05);
+        }
+
+        .grid-cell img {
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .grid-cell:hover img {
+            transform: scale(1.08) rotate(2deg);
+        }
+
+        .grid-cell.placing {
+            animation: place-bounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes place-bounce {
+            0% { transform: scale(0.5) rotate(-10deg); opacity: 0; }
+            60% { transform: scale(1.1) rotate(2deg); }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        .grid-cell.score-highlight {
+            animation: score-pulse 0.8s ease-out;
+        }
+
+        @keyframes score-pulse {
+            0%, 100% { box-shadow: inset 0 0 0 1px var(--grid-line-color); }
+            50% { box-shadow: inset 0 0 0 3px var(--accent), 0 0 20px rgba(106, 17, 203, 0.5); }
+        }
+        
+        hr { 
+            border-color: var(--faint-border);
+        }
+        
+        /* Superpowers */
+        .superpower-btn--active { 
+            background: var(--accent-light) !important; 
+            animation: glow-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes glow-pulse {
+            0%, 100% {
+                box-shadow: 0 0 0 2px var(--accent), 0 0 20px rgba(106, 17, 203, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 0 2px var(--accent), 0 0 30px rgba(106, 17, 203, 0.5);
+            }
+        }
+        
+        .pulsing-cell { 
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(106, 17, 203, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(106, 17, 203, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(106, 17, 203, 0); }
+        }
+
+        /* Score Animations */
+        @keyframes score-pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.25); }
+            100% { transform: scale(1); }
+        }
+
+        .score-change {
+            animation: score-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            color: var(--accent);
+        }
+
+        .score-increase {
+            animation: score-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Dice Enhancement */
+        #dice-1, #dice-2 {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.9) 0%, 
+                rgba(255, 255, 255, 0.6) 100%);
+            box-shadow: 
+                inset 0 2px 8px rgba(0, 0, 0, 0.08),
+                0 2px 12px rgba(106, 17, 203, 0.1);
+            transition: all 0.3s;
+        }
+
+        #dice-1:has(img), #dice-2:has(img) {
+            box-shadow: 
+                inset 0 2px 8px rgba(0, 0, 0, 0.08),
+                0 4px 20px rgba(106, 17, 203, 0.15);
+        }
+
+        .dice-tumble {
+            animation: dice-roll 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes dice-roll {
+            0% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(90deg) scale(0.8); }
+            50% { transform: rotate(180deg) scale(1.1); }
+            75% { transform: rotate(270deg) scale(0.9); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        /* Modal Animations */
         @keyframes modal-fade-in {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -119,111 +324,210 @@
 
         .modal-overlay {
             animation: modal-fade-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            background: rgba(0, 0, 0, 0.5);
         }
 
         .modal-content {
             animation: modal-slide-up 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        /* Enhanced button effects */
-        .themed-button {
-            position: relative;
-            overflow: hidden;
+        /* Loading State */
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--accent-light);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
 
-        .themed-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, 
-                transparent, 
-                rgba(255, 255, 255, 0.3), 
-                transparent);
-            transition: left 0.5s;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
-        .themed-button:hover::before {
-            left: 100%;
-        }
-
-        .themed-button:active {
-            transform: translateY(0) scale(0.98);
-        }
-
-        /* Grid cell hover effects */
-        .grid-cell {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .grid-cell::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at center, 
-                rgba(106, 17, 203, 0.05) 0%, 
-                transparent 70%);
-            opacity: 0;
-            transition: opacity 0.3s;
+        /* Combo Indicator */
+        .combo-multiplier {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            font-weight: 700;
+            z-index: 100;
             pointer-events: none;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(106, 17, 203, 0.5);
+            animation: combo-bounce 2s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        .grid-cell:hover::after {
+        @keyframes combo-bounce {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.3); }
+            40% { transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -60%) scale(0.8); }
+        }
+
+        /* Floating Animation for Dice Button */
+        #roll-dice-btn {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Premium Tooltip */
+        .premium-tooltip {
+            position: absolute;
+            bottom: 110%;
+            left: 50%;
+            transform: translateX(-50%) scale(0.9);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            z-index: 10;
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .premium-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: rgba(0, 0, 0, 0.9);
+        }
+
+        .grid-cell:hover .premium-tooltip {
             opacity: 1;
+            transform: translateX(-50%) scale(1);
         }
 
-        .grid-cell.empty:hover {
-            background: linear-gradient(135deg, 
-                rgba(106, 17, 203, 0.03) 0%, 
-                rgba(106, 17, 203, 0.08) 100%);
-            box-shadow: inset 0 0 0 2px var(--accent-light);
+        /* Stagger Grid Animation */
+        @keyframes stagger-in {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
 
-        .grid-cell img {
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        .grid-cell {
+            animation: stagger-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
         }
 
-        .grid-cell:hover img {
-            transform: scale(1.05);
+        /* Score Preview Hint */
+        .score-preview {
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            background: var(--accent-gradient);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(106, 17, 203, 0.4);
+            animation: preview-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 5;
         }
 
-        /* Enhanced glass card */
-        .glass-card {
-            background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.95) 0%, 
-                rgba(255, 255, 255, 0.85) 100%);
-            backdrop-filter: blur(25px) saturate(200%);
-            -webkit-backdrop-filter: blur(25px) saturate(200%);
-            box-shadow: 
-                0 8px 32px rgba(106, 17, 203, 0.12),
-                0 2px 8px rgba(106, 17, 203, 0.08),
-                inset 0 1px 0 rgba(255, 255, 255, 0.5),
-                inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+        @keyframes preview-pop {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
         }
 
-        /* Dice enhancement */
-        #dice-1, #dice-2 {
-            background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.9) 0%, 
-                rgba(255, 255, 255, 0.6) 100%);
-            box-shadow: 
-                inset 0 2px 8px rgba(0, 0, 0, 0.08),
-                0 2px 12px rgba(106, 17, 203, 0.1);
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .combo-multiplier {
+                font-size: 2rem;
+            }
+            
+            .glass-card {
+                backdrop-filter: blur(15px) saturate(150%);
+                -webkit-backdrop-filter: blur(15px) saturate(150%);
+            }
+        }
+
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        /* High Score Celebration */
+        @keyframes celebrate {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.1) rotate(-5deg); }
+            75% { transform: scale(1.1) rotate(5deg); }
+        }
+
+        .celebrating {
+            animation: celebrate 0.5s ease-in-out;
+        }
+
+        /* Tutorial Highlight */
+        .tutorial-highlight {
+            position: relative;
+            z-index: 1001;
+            box-shadow: 0 0 0 4px var(--accent), 0 0 0 8px rgba(106, 17, 203, 0.3) !important;
+            animation: tutorial-pulse 2s infinite;
+        }
+
+        @keyframes tutorial-pulse {
+            0%, 100% { box-shadow: 0 0 0 4px var(--accent), 0 0 0 8px rgba(106, 17, 203, 0.3); }
+            50% { box-shadow: 0 0 0 4px var(--accent), 0 0 0 16px rgba(106, 17, 203, 0.1); }
+        }
+
+        .tutorial-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            animation: modal-fade-in 0.3s;
+        }
+
+        /* Badge styles */
+        .badge-icon {
+            filter: grayscale(100%);
+            opacity: 0.3;
             transition: all 0.3s;
         }
 
-        #dice-1:has(img), #dice-2:has(img) {
-            box-shadow: 
-                inset 0 2px 8px rgba(0, 0, 0, 0.08),
-                0 4px 20px rgba(106, 17, 203, 0.15);
+        .badge-icon.unlocked {
+            filter: grayscale(0%);
+            opacity: 1;
+            animation: badge-unlock 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        .debug-tooltip { position: absolute; bottom: 105%; left: 50%; transform: translateX(-50%); background-color: black; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; white-space: nowrap; z-index: 10; pointer-events: none; opacity: 0; transition: opacity 0.2s ease-in-out; }
-    
+        @keyframes badge-unlock {
+            0% { transform: scale(0) rotate(-180deg); }
+            60% { transform: scale(1.2) rotate(10deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
     </style>
 </head>
 <body class="p-2 lg:p-4 flex items-center justify-center min-h-screen">
@@ -240,26 +544,38 @@
                 
                 <div class="p-4 rounded-2xl border" style="border-color: var(--faint-border); background: rgba(255,255,255,0.5);">
                     <div class="flex justify-center items-center gap-4">
-                        <button id="roll-dice-btn" class="text-6xl transition-transform hover:scale-110 focus:outline-none">🎲</button>
+                        <button id="roll-dice-btn" class="text-6xl transition-transform hover:scale-110 focus:outline-none" aria-label="Roll dice">🎲</button>
                         <div class="flex-1 grid grid-cols-2 gap-3">
-                            <div id="dice-1" class="w-full aspect-square bg-white/60 rounded-lg flex items-center justify-center text-4xl text-gray-400 border border-gray-200/50 shadow-inner">?</div>
-                            <div id="dice-2" class="w-full aspect-square bg-white/60 rounded-lg flex items-center justify-center text-4xl text-gray-400 border border-gray-200/50 shadow-inner">?</div>
+                            <div id="dice-1" class="w-full aspect-square bg-white/60 rounded-lg flex items-center justify-center text-4xl text-gray-400 border border-gray-200/50 shadow-inner" aria-label="First dice">?</div>
+                            <div id="dice-2" class="w-full aspect-square bg-white/60 rounded-lg flex items-center justify-center text-4xl text-gray-400 border border-gray-200/50 shadow-inner" aria-label="Second dice">?</div>
                         </div>
                     </div>
                     <h3 class="text-xs font-semibold uppercase tracking-wider text-center mt-4 mb-2" style="color: var(--text-secondary);">
                         Alo Superpowers <span id="sp-charge-1">✨</span><span id="sp-charge-2">✨</span>
                     </h3>
                     <div class="grid grid-cols-4 gap-1 text-center">
-                        <button id="rotate-btn" class="superpower-btn themed-button tertiary text-xs p-1 relative">Rotate<div class="superpower-used-overlay hidden absolute inset-0 text-red-500 text-4xl font-extrabold flex items-center justify-center opacity-70">X</div></button>
-                        <button id="swap-btn" class="superpower-btn themed-button tertiary text-xs p-1 relative">Swap<div class="superpower-used-overlay hidden absolute inset-0 text-red-500 text-4xl font-extrabold flex items-center justify-center opacity-70">X</div></button>
-                        <button id="exchange-btn" class="superpower-btn themed-button tertiary text-xs p-1 relative">Exchange<div class="superpower-used-overlay hidden absolute inset-0 text-red-500 text-4xl font-extrabold flex items-center justify-center opacity-70">X</div></button>
-                        <button id="move-btn" class="superpower-btn themed-button tertiary text-xs p-1 relative">Move<div class="superpower-used-overlay hidden absolute inset-0 text-red-500 text-4xl font-extrabold flex items-center justify-center opacity-70">X</div></button>
+                        <button id="rotate-btn" class="superpower-btn themed-button tertiary text-xs p-1 relative" aria-label="Rotate superpower">
+                            Rotate
+                            <div class="superpower-used-overlay hidden absolute inset-0 text-red-500 text-4xl font-extrabold flex items-center justify-center opacity-70">X</div>
+                        </button>
+                        <button id="swap-btn" class="superpower-btn themed-button tertiary text-xs p-1 relative" aria-label="Swap superpower">
+                            Swap
+                            <div class="superpower-used-overlay hidden absolute inset-0 text-red-500 text-4xl font-extrabold flex items-center justify-center opacity-70">X</div>
+                        </button>
+                        <button id="exchange-btn" class="superpower-btn themed-button tertiary text-xs p-1 relative" aria-label="Exchange superpower">
+                            Exchange
+                            <div class="superpower-used-overlay hidden absolute inset-0 text-red-500 text-4xl font-extrabold flex items-center justify-center opacity-70">X</div>
+                        </button>
+                        <button id="move-btn" class="superpower-btn themed-button tertiary text-xs p-1 relative" aria-label="Move superpower">
+                            Move
+                            <div class="superpower-used-overlay hidden absolute inset-0 text-red-500 text-4xl font-extrabold flex items-center justify-center opacity-70">X</div>
+                        </button>
                     </div>
                 </div>
 
                 <div class="p-3 rounded-xl border" style="border-color: var(--faint-border); background: rgba(255,255,255,0.5);">
                     <div class="relative w-full h-2 progress-bar-container rounded-full">
-                        <div id="progress-bar-fill" class="progress-bar-fill h-full rounded-full"></div>
+                        <div id="progress-bar-fill" class="progress-bar-fill h-full rounded-full" style="width: 0%"></div>
                     </div>
                 </div>
 
@@ -276,59 +592,145 @@
                 
                 <div class="p-4 rounded-2xl border flex-1" style="border-color: var(--faint-border); background: rgba(255,255,255,0.5);">
                     <div class="grid grid-cols-2 gap-4 text-center">
-                        <div><h3 class="text-xs font-semibold uppercase tracking-wider mb-1" style="color: var(--text-secondary);">Total Score</h3><div id="total-score" class="text-3xl font-bold" style="color: var(--accent);">0</div></div>
-                        <div><h3 class="text-xs font-semibold uppercase tracking-wider mb-1" style="color: var(--text-secondary);">High Score</h3><div id="high-score" class="text-3xl font-bold text-amber-500">0</div></div>
+                        <div>
+                            <h3 class="text-xs font-semibold uppercase tracking-wider mb-1" style="color: var(--text-secondary);">Total Score</h3>
+                            <div id="total-score" class="text-3xl font-bold" style="color: var(--accent);">0</div>
+                        </div>
+                        <div>
+                            <h3 class="text-xs font-semibold uppercase tracking-wider mb-1" style="color: var(--text-secondary);">High Score</h3>
+                            <div id="high-score" class="text-3xl font-bold text-amber-500">0</div>
+                        </div>
                     </div>
                     <hr class="border-t my-3">
                     <div class="grid grid-cols-3 gap-y-3 text-center">
-                        <div class="score-item border-r" style="border-color: var(--faint-border);"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Perfect<br>Shape</h3><div id="score-perfect-shape" class="text-lg font-bold">0</div></div>
-                        <div class="score-item border-r" style="border-color: var(--faint-border);"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Half<br>Baked</h3><div id="score-half-baked" class="text-lg font-bold">0</div></div>
-                        <div class="score-item"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Almost<br>There</h3><div id="score-almost-there" class="text-lg font-bold">0</div></div>
-                        <div class="score-item border-r pt-3 border-t" style="border-color: var(--faint-border);"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Great<br>Sequence</h3><div id="score-great-sequence" class="text-lg font-bold">0</div></div>
-                        <div class="score-item border-r pt-3 border-t" style="border-color: var(--faint-border);"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Line<br>Master</h3><div id="score-line-master" class="text-lg font-bold">0</div></div>
-                        <div class="score-item pt-3 border-t" style="border-color: var(--faint-border);"><h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Diamond<br>Heist</h3><div id="score-diamond-heist" class="text-lg font-bold text-red-600">0</div></div>
+                        <div class="score-item border-r" style="border-color: var(--faint-border);">
+                            <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Perfect<br>Shape</h3>
+                            <div id="score-perfect-shape" class="text-lg font-bold">0</div>
+                        </div>
+                        <div class="score-item border-r" style="border-color: var(--faint-border);">
+                            <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Half<br>Baked</h3>
+                            <div id="score-half-baked" class="text-lg font-bold">0</div>
+                        </div>
+                        <div class="score-item">
+                            <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Almost<br>There</h3>
+                            <div id="score-almost-there" class="text-lg font-bold">0</div>
+                        </div>
+                        <div class="score-item border-r pt-3 border-t" style="border-color: var(--faint-border);">
+                            <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Great<br>Sequence</h3>
+                            <div id="score-great-sequence" class="text-lg font-bold">0</div>
+                        </div>
+                        <div class="score-item border-r pt-3 border-t" style="border-color: var(--faint-border);">
+                            <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Line<br>Master</h3>
+                            <div id="score-line-master" class="text-lg font-bold">0</div>
+                        </div>
+                        <div class="score-item pt-3 border-t" style="border-color: var(--faint-border);">
+                            <h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-secondary);">Diamond<br>Heist</h3>
+                            <div id="score-diamond-heist" class="text-lg font-bold text-red-600">0</div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <div id="game-over-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden"><div class="modal-content w-full max-w-sm glass-card rounded-2xl p-8 text-center relative"><button id="close-modal-btn" class="absolute top-4 right-4 w-8 h-8 rounded-full text-xl flex items-center justify-center font-bold text-gray-500 hover:bg-gray-200/50">×</button><h2 class="text-2xl font-bold mb-4" style="color: var(--accent);">Game Over</h2><p class="mb-6" style="color: var(--text-secondary);">You can no longer make a move.</p><p class="text-sm" style="color: var(--text-secondary);">Final Score</p><div id="final-score" class="text-6xl font-bold my-2" style="color: var(--accent);">0</div><button id="restart-modal-btn" class="themed-button primary w-full py-2.5 px-4 text-white text-sm mt-4">Play Again</button></div></div>
-    <div id="exchange-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden"><div class="modal-content w-full max-w-md glass-card rounded-2xl p-6 text-center relative"><button id="close-exchange-modal-btn" class="absolute top-2 right-2 w-8 h-8 rounded-full text-xl flex items-center justify-center font-bold text-gray-500 hover:bg-gray-200/50">×</button><h2 class="text-xl font-bold mb-4" style="color: var(--accent);">Exchange Alo</h2><div id="exchange-options" class="grid grid-cols-4 gap-2"></div></div></div>
-    <div id="help-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden"><div class="modal-content w-full max-w-lg glass-card rounded-2xl p-6 relative"><div class="flex justify-between items-start mb-4"><div class="flex-grow"><h2 class="text-3xl font-bold" style="color: var(--accent);">How to Play Matchalo</h2><p class="text-sm mt-2 font-bold" style="color: var(--text-secondary);">A fun and simple block based artwork game from Abhimanyu Lodha</p></div><button id="close-help-modal-btn" class="w-10 h-10 rounded-full text-xl flex items-center justify-center font-bold flex-shrink-0">×</button></div><div id="help-modal-content" class="space-y-4 text-sm max-h-[60vh] overflow-y-auto pr-2" style="color: var(--text-secondary)"></div></div></div>
-    <div id="edition-select-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden"><div class="modal-content w-full max-w-sm glass-card rounded-2xl p-6 relative"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold" style="color: var(--accent);">Select Edition</h2><button id="close-edition-select-modal-btn" class="w-10 h-10 rounded-full text-xl flex items-center justify-center font-bold">×</button></div><div id="edition-options" class="flex flex-col gap-3 max-h-64 overflow-y-auto"></div></div></div>
-    
-    <script>
+    <!-- Modals -->
+    <div id="game-over-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden">
+        <div class="modal-content w-full max-w-sm glass-card rounded-2xl p-8 text-center relative">
+            <button id="close-modal-btn" class="absolute top-4 right-4 w-8 h-8 rounded-full text-xl flex items-center justify-center font-bold text-gray-500 hover:bg-gray-200/50" aria-label="Close">×</button>
+            <h2 class="text-2xl font-bold mb-4" style="color: var(--accent);">Game Over</h2>
+            <p class="mb-6" style="color: var(--text-secondary);">You can no longer make a move.</p>
+            <p class="text-sm" style="color: var(--text-secondary);">Final Score</p>
+            <div id="final-score" class="text-6xl font-bold my-2" style="color: var(--accent);">0</div>
+            <button id="restart-modal-btn" class="themed-button primary w-full py-2.5 px-4 text-white text-sm mt-4">Play Again</button>
+        </div>
+    </div>
 
-        // ===== ERROR HANDLING & UTILITIES =====
+    <div id="exchange-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden">
+        <div class="modal-content w-full max-w-md glass-card rounded-2xl p-6 text-center relative">
+            <button id="close-exchange-modal-btn" class="absolute top-2 right-2 w-8 h-8 rounded-full text-xl flex items-center justify-center font-bold text-gray-500 hover:bg-gray-200/50" aria-label="Close">×</button>
+            <h2 class="text-xl font-bold mb-4" style="color: var(--accent);">Exchange Alo</h2>
+            <div id="exchange-options" class="grid grid-cols-4 gap-2"></div>
+        </div>
+    </div>
+
+    <div id="help-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden">
+        <div class="modal-content w-full max-w-lg glass-card rounded-2xl p-6 relative">
+            <div class="flex justify-between items-start mb-4">
+                <div class="flex-grow">
+                    <h2 class="text-3xl font-bold" style="color: var(--accent);">How to Play Matchalo</h2>
+                    <p class="text-sm mt-2 font-bold" style="color: var(--text-secondary);">A fun and simple block based artwork game</p>
+                </div>
+                <button id="close-help-modal-btn" class="w-10 h-10 rounded-full text-xl flex items-center justify-center font-bold flex-shrink-0" aria-label="Close">×</button>
+            </div>
+            <div id="help-modal-content" class="space-y-4 text-sm max-h-[60vh] overflow-y-auto pr-2" style="color: var(--text-secondary)"></div>
+        </div>
+    </div>
+
+    <div id="edition-select-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden">
+        <div class="modal-content w-full max-w-sm glass-card rounded-2xl p-6 relative">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold" style="color: var(--accent);">Select Edition</h2>
+                <button id="close-edition-select-modal-btn" class="w-10 h-10 rounded-full text-xl flex items-center justify-center font-bold" aria-label="Close">×</button>
+            </div>
+            <div id="edition-options" class="flex flex-col gap-3 max-h-64 overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <div id="badges-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden">
+        <div class="modal-content w-full max-w-md glass-card rounded-2xl p-6 relative">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold" style="color: var(--accent);">🏆 Achievements</h2>
+                <button id="close-badges-modal-btn" class="w-10 h-10 rounded-full text-xl flex items-center justify-center font-bold" aria-label="Close">×</button>
+            </div>
+            <div id="badges-content" class="grid grid-cols-2 gap-4"></div>
+        </div>
+    </div>
+
+    <script>
+        // ===== IMPROVED ERROR HANDLING & UTILITIES =====
         class ErrorHandler {
             static handle(error, context) {
                 console.error(`Error in ${context}:`, error);
+                // In production, send to error tracking service
+                this.showUserFriendlyError(context);
+            }
+
+            static showUserFriendlyError(context) {
+                const messages = {
+                    'Storage': 'Unable to save game progress',
+                    'ImageLoader': 'Some images failed to load',
+                    'default': 'Something went wrong'
+                };
+                const message = messages[context] || messages.default;
+                // Don't show error for every small issue, only critical ones
+                if (context === 'Storage' || context === 'Game') {
+                    NotificationSystem.show(message, 'warning');
+                }
             }
         }
 
+        // Memory-based storage (no localStorage)
         class Storage {
+            static data = new Map();
+
             static get(key, fallback = null) {
-                try {
-                    return localStorage.getItem(key) || fallback;
-                } catch (e) {
-                    ErrorHandler.handle(e, 'Storage.get');
-                    return fallback;
-                }
+                return this.data.get(key) ?? fallback;
             }
             
             static set(key, value) {
-                try {
-                    localStorage.setItem(key, value);
-                    return true;
-                } catch (e) {
-                    ErrorHandler.handle(e, 'Storage.set');
-                    return false;
-                }
+                this.data.set(key, value);
+                return true;
+            }
+
+            static clear() {
+                this.data.clear();
             }
         }
 
         class ImageLoader {
+            static cache = new Map();
+            static failedImages = new Set();
+
             static async preloadImages(config) {
                 const promises = [];
                 const symbols = config.symbols;
@@ -336,32 +738,108 @@
                 
                 symbols.forEach(symbol => {
                     quadrants.forEach(quadrant => {
+                        const src = `images/${symbol.toLowerCase()}_${quadrant}.svg`;
+                        if (this.cache.has(src) || this.failedImages.has(src)) return;
+                        
                         const promise = new Promise((resolve) => {
                             const img = new Image();
-                            img.onload = () => resolve({ success: true, src: img.src });
-                            img.onerror = () => resolve({ success: false, src: img.src });
-                            img.src = `images/${symbol.toLowerCase()}_${quadrant}.svg`;
+                            img.onload = () => {
+                                this.cache.set(src, img);
+                                resolve({ success: true, src });
+                            };
+                            img.onerror = () => {
+                                this.failedImages.add(src);
+                                resolve({ success: false, src });
+                            };
+                            img.src = src;
                         });
                         promises.push(promise);
                     });
                 });
                 
-                return Promise.all(promises);
+                const results = await Promise.all(promises);
+                const failed = results.filter(r => !r.success);
+                
+                if (failed.length > 0) {
+                    console.warn(`Failed to load ${failed.length} images`);
+                }
+                
+                return results;
+            }
+
+            static getImageSrc(symbol, quadrant) {
+                return `images/${symbol.toLowerCase()}_${quadrant}.svg`;
             }
         }
 
         const debounce = (func, wait) => {
             let timeout;
             return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
                 clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
+                timeout = setTimeout(() => func(...args), wait);
             };
         };
 
+        const throttle = (func, wait) => {
+            let inThrottle;
+            return function(...args) {
+                if (!inThrottle) {
+                    func.apply(this, args);
+                    inThrottle = true;
+                    setTimeout(() => inThrottle = false, wait);
+                }
+            };
+        };
+
+        // Enhanced Notification System
+        class NotificationSystem {
+            static queue = [];
+            static showing = false;
+
+            static show(message, type = 'info', duration = 3000) {
+                this.queue.push({ message, type, duration });
+                if (!this.showing) {
+                    this.showNext();
+                }
+            }
+
+            static showNext() {
+                if (this.queue.length === 0) {
+                    this.showing = false;
+                    return;
+                }
+
+                this.showing = true;
+                const { message, type, duration } = this.queue.shift();
+                
+                const notification = document.createElement('div');
+                const bgColor = type === 'error' ? 'rgba(239, 68, 68, 0.95)' : 
+                                type === 'warning' ? 'rgba(251, 191, 36, 0.95)' : 
+                                type === 'success' ? 'rgba(34, 197, 94, 0.95)' :
+                                'rgba(59, 130, 246, 0.95)';
+                
+                notification.className = 'fixed top-4 right-4 px-6 py-3 rounded-xl z-[100] transform translate-x-0 transition-all duration-300 text-white font-semibold shadow-xl';
+                notification.style.background = bgColor;
+                notification.style.backdropFilter = 'blur(10px)';
+                notification.textContent = message;
+                document.body.appendChild(notification);
+                
+                requestAnimationFrame(() => {
+                    notification.style.transform = 'translateX(0)';
+                });
+                
+                setTimeout(() => {
+                    notification.style.transform = 'translateX(400px)';
+                    notification.style.opacity = '0';
+                    setTimeout(() => {
+                        notification.remove();
+                        this.showNext();
+                    }, 300);
+                }, duration);
+            }
+        }
+
+        // Combo System
         class ComboTracker {
             constructor() {
                 this.combo = 0;
@@ -392,15 +870,53 @@
                 if (this.combo >= 3) return 1.5;
                 return 1.0;
             }
+
+            reset() {
+                this.combo = 0;
+                this.lastScoreTime = 0;
+            }
         }
 
+        // Achievement System
         class AchievementSystem {
             constructor() {
                 this.achievements = {
-                    firstPerfectShape: { name: 'Perfect Start', icon: '🎯', unlocked: false },
-                    combo5: { name: 'Combo Master', icon: '🔥', unlocked: false },
-                    score500: { name: 'High Roller', icon: '💎', unlocked: false },
-                    fillBoard: { name: 'Completionist', icon: '👑', unlocked: false },
+                    firstPerfectShape: { 
+                        name: 'Perfect Start', 
+                        icon: '🎯', 
+                        description: 'Score your first Perfect Shape',
+                        unlocked: false 
+                    },
+                    combo5: { 
+                        name: 'Combo Master', 
+                        icon: '🔥', 
+                        description: 'Achieve a 5x combo',
+                        unlocked: false 
+                    },
+                    score500: { 
+                        name: 'High Roller', 
+                        icon: '💎', 
+                        description: 'Reach a score of 500',
+                        unlocked: false 
+                    },
+                    fillBoard: { 
+                        name: 'Completionist', 
+                        icon: '👑', 
+                        description: 'Fill the entire board',
+                        unlocked: false 
+                    },
+                    lineMaster: {
+                        name: 'Line Master',
+                        icon: '📏',
+                        description: 'Create a full line of same color',
+                        unlocked: false
+                    },
+                    noMistakes: {
+                        name: 'Perfectionist',
+                        icon: '✨',
+                        description: 'Complete a game without using superpowers',
+                        unlocked: false
+                    }
                 };
                 this.loadProgress();
             }
@@ -416,9 +932,8 @@
             
             loadProgress() {
                 try {
-                    const saved = localStorage.getItem('matchalo_achievements');
-                    if (saved) {
-                        const progress = JSON.parse(saved);
+                    const progress = Storage.get('matchalo_achievements');
+                    if (progress) {
                         Object.keys(progress).forEach(key => {
                             if (this.achievements[key]) {
                                 this.achievements[key].unlocked = progress[key];
@@ -426,7 +941,7 @@
                         });
                     }
                 } catch (e) {
-                    console.error('Failed to load achievements', e);
+                    ErrorHandler.handle(e, 'AchievementSystem.load');
                 }
             }
             
@@ -436,123 +951,812 @@
                     Object.keys(this.achievements).forEach(key => {
                         progress[key] = this.achievements[key].unlocked;
                     });
-                    localStorage.setItem('matchalo_achievements', JSON.stringify(progress));
+                    Storage.set('matchalo_achievements', progress);
                 } catch (e) {
-                    console.error('Failed to save achievements', e);
+                    ErrorHandler.handle(e, 'AchievementSystem.save');
                 }
+            }
+
+            getAll() {
+                return Object.values(this.achievements);
             }
         }
 
+        // Game Manager
         const gameManager = {
-            currentGame: null, activeEditionId: 'circles',
+            currentGame: null,
+            activeEditionId: 'circles',
             editionConfigs: {
-                circles: { id: 'circles', name: 'Circles', symbols: ['navy', 'red', 'blue', 'grey'] },
-                rings: { id: 'rings', name: 'Rings', symbols: ['ringa', 'ringb', 'ringc', 'ringd'] }
+                circles: { 
+                    id: 'circles', 
+                    name: 'Circles', 
+                    symbols: ['navy', 'red', 'blue', 'grey'] 
+                },
+                rings: { 
+                    id: 'rings', 
+                    name: 'Rings', 
+                    symbols: ['ringa', 'ringb', 'ringc', 'ringd'] 
+                }
             },
-            init() { this.switchEdition(this.activeEditionId); this.populateEditionModal(); this.attachGlobalListeners(); },
-            switchEdition(editionId) { this.activeEditionId = editionId; const config = this.editionConfigs[editionId]; this.currentGame = new Game(config); document.getElementById('select-edition-btn').innerHTML = `Edition: ${config.name} <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w.3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`; },
-            populateEditionModal() { const container = document.getElementById('edition-options'); container.innerHTML = ''; Object.values(this.editionConfigs).forEach(config => { const button = document.createElement('button'); button.className = 'w-full text-left p-3 rounded-lg font-semibold flex justify-between items-center transition-colors hover:bg-gray-200/50'; if (config.id === this.activeEditionId) button.classList.add('edition-selected'); button.textContent = config.name; button.addEventListener('click', () => { this.switchEdition(config.id); document.getElementById('edition-select-modal').classList.add('hidden'); this.populateEditionModal(); }); container.appendChild(button); }); },
-            attachGlobalListeners() { document.getElementById('help-btn').addEventListener('click', () => document.getElementById('help-modal').classList.remove('hidden')); document.getElementById('close-help-modal-btn').addEventListener('click', () => document.getElementById('help-modal').classList.add('hidden')); document.getElementById('select-edition-btn').addEventListener('click', () => document.getElementById('edition-select-modal').classList.remove('hidden')); document.getElementById('close-edition-select-modal-btn').addEventListener('click', () => document.getElementById('edition-select-modal').classList.add('hidden')); }
+
+            init() {
+                this.switchEdition(this.activeEditionId);
+                this.populateEditionModal();
+                this.attachGlobalListeners();
+            },
+
+            switchEdition(editionId) {
+                // Cleanup previous game
+                if (this.currentGame) {
+                    this.currentGame.cleanup();
+                }
+
+                this.activeEditionId = editionId;
+                const config = this.editionConfigs[editionId];
+                this.currentGame = new Game(config);
+
+                const btn = document.getElementById('select-edition-btn');
+                btn.innerHTML = `Edition: ${config.name} <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+            },
+
+            populateEditionModal() {
+                const container = document.getElementById('edition-options');
+                container.innerHTML = '';
+
+                Object.values(this.editionConfigs).forEach(config => {
+                    const button = document.createElement('button');
+                    button.className = 'w-full text-left p-3 rounded-lg font-semibold flex justify-between items-center transition-all hover:bg-gray-200/50';
+                    
+                    if (config.id === this.activeEditionId) {
+                        button.style.background = 'var(--accent-light)';
+                        button.style.color = 'var(--accent)';
+                    }
+
+                    button.textContent = config.name;
+                    button.addEventListener('click', () => {
+                        this.switchEdition(config.id);
+                        document.getElementById('edition-select-modal').classList.add('hidden');
+                        this.populateEditionModal();
+                        NotificationSystem.show(`Switched to ${config.name} edition`, 'success');
+                    });
+
+                    container.appendChild(button);
+                });
+            },
+
+            attachGlobalListeners() {
+                // Help Modal
+                document.getElementById('help-btn').addEventListener('click', () => {
+                    document.getElementById('help-modal').classList.remove('hidden');
+                });
+                document.getElementById('close-help-modal-btn').addEventListener('click', () => {
+                    document.getElementById('help-modal').classList.add('hidden');
+                });
+
+                // Edition Modal
+                document.getElementById('select-edition-btn').addEventListener('click', () => {
+                    document.getElementById('edition-select-modal').classList.remove('hidden');
+                });
+                document.getElementById('close-edition-select-modal-btn').addEventListener('click', () => {
+                    document.getElementById('edition-select-modal').classList.add('hidden');
+                });
+
+                // Badges Modal
+                document.getElementById('badges-btn').addEventListener('click', () => {
+                    this.showBadgesModal();
+                });
+                document.getElementById('close-badges-modal-btn').addEventListener('click', () => {
+                    document.getElementById('badges-modal').classList.add('hidden');
+                });
+            },
+
+            showBadgesModal() {
+                const modal = document.getElementById('badges-modal');
+                const content = document.getElementById('badges-content');
+                content.innerHTML = '';
+
+                const achievements = this.currentGame.achievements.getAll();
+                achievements.forEach(achievement => {
+                    const badge = document.createElement('div');
+                    badge.className = 'glass-card p-4 rounded-xl text-center';
+                    badge.innerHTML = `
+                        <div class="text-5xl mb-2 badge-icon ${achievement.unlocked ? 'unlocked' : ''}">${achievement.icon}</div>
+                        <div class="font-bold text-sm mb-1" style="color: var(--accent);">${achievement.name}</div>
+                        <div class="text-xs" style="color: var(--text-secondary);">${achievement.description}</div>
+                    `;
+                    content.appendChild(badge);
+                });
+
+                modal.classList.remove('hidden');
+            }
         };
 
+        // Main Game Class
         class Game {
-            constructor(config) { this.config = config; this.DOMElements = this.getDOMElements(); this.GRID_SIZE = 8; this.QUADRANTS = ['TL', 'TR', 'BL', 'BR']; this.IMAGE_PATH = 'images/'; this.SUPERPOWERS = { ROTATE: 'rotate', SWAP: 'swap', EXCHANGE: 'exchange', MOVE: 'move' }; this.comboTracker = new ComboTracker(); this.achievements = new AchievementSystem(); this.previousScore = 0; this.init(); }
-            getDOMElements() { return { gameBoard: document.getElementById('game-board'), rollDiceBtn: document.getElementById('roll-dice-btn'), resetBtn: document.getElementById('reset-btn'), dice1El: document.getElementById('dice-1'), dice2El: document.getElementById('dice-2'), progressBarFill: document.getElementById('progress-bar-fill'), totalScore: document.getElementById('total-score'), highScore: document.getElementById('high-score'), scorePerfectShape: document.getElementById('score-perfect-shape'), scoreHalfBaked: document.getElementById('score-half-baked'), scoreAlmostThere: document.getElementById('score-almost-there'), scoreGreatSequence: document.getElementById('score-great-sequence'), scoreLineMaster: document.getElementById('score-line-master'), scoreDiamondHeist: document.getElementById('score-diamond-heist'), gameOverModal: document.getElementById('game-over-modal'), finalScore: document.getElementById('final-score'), restartModalBtn: document.getElementById('restart-modal-btn'), closeModalBtn: document.getElementById('close-modal-btn'), spCharge1: document.getElementById('sp-charge-1'), spCharge2: document.getElementById('sp-charge-2'), rotateBtn: document.getElementById('rotate-btn'), swapBtn: document.getElementById('swap-btn'), exchangeBtn: document.getElementById('exchange-btn'), moveBtn: document.getElementById('move-btn'), exchangeModal: document.getElementById('exchange-modal'), exchangeOptions: document.getElementById('exchange-options'), closeExchangeModalBtn: document.getElementById('close-exchange-modal-btn'), helpModalContent: document.getElementById('help-modal-content'), }; }
+            constructor(config) {
+                this.config = config;
+                this.DOMElements = this.getDOMElements();
+                this.GRID_SIZE = 8;
+                this.QUADRANTS = ['TL', 'TR', 'BL', 'BR'];
+                this.IMAGE_PATH = 'images/';
+                this.SUPERPOWERS = {
+                    ROTATE: 'rotate',
+                    SWAP: 'swap',
+                    EXCHANGE: 'exchange',
+                    MOVE: 'move'
+                };
+                
+                this.comboTracker = new ComboTracker();
+                this.achievements = new AchievementSystem();
+                this.previousScore = 0;
+                this.animationFrames = [];
+                this.eventListeners = [];
+                
+                this.init();
+            }
+
+            getDOMElements() {
+                return {
+                    gameBoard: document.getElementById('game-board'),
+                    rollDiceBtn: document.getElementById('roll-dice-btn'),
+                    resetBtn: document.getElementById('reset-btn'),
+                    dice1El: document.getElementById('dice-1'),
+                    dice2El: document.getElementById('dice-2'),
+                    progressBarFill: document.getElementById('progress-bar-fill'),
+                    totalScore: document.getElementById('total-score'),
+                    highScore: document.getElementById('high-score'),
+                    scorePerfectShape: document.getElementById('score-perfect-shape'),
+                    scoreHalfBaked: document.getElementById('score-half-baked'),
+                    scoreAlmostThere: document.getElementById('score-almost-there'),
+                    scoreGreatSequence: document.getElementById('score-great-sequence'),
+                    scoreLineMaster: document.getElementById('score-line-master'),
+                    scoreDiamondHeist: document.getElementById('score-diamond-heist'),
+                    gameOverModal: document.getElementById('game-over-modal'),
+                    finalScore: document.getElementById('final-score'),
+                    restartModalBtn: document.getElementById('restart-modal-btn'),
+                    closeModalBtn: document.getElementById('close-modal-btn'),
+                    spCharge1: document.getElementById('sp-charge-1'),
+                    spCharge2: document.getElementById('sp-charge-2'),
+                    rotateBtn: document.getElementById('rotate-btn'),
+                    swapBtn: document.getElementById('swap-btn'),
+                    exchangeBtn: document.getElementById('exchange-btn'),
+                    moveBtn: document.getElementById('move-btn'),
+                    exchangeModal: document.getElementById('exchange-modal'),
+                    exchangeOptions: document.getElementById('exchange-options'),
+                    closeExchangeModalBtn: document.getElementById('close-exchange-modal-btn'),
+                    helpModalContent: document.getElementById('help-modal-content'),
+                };
+            }
+
             init() {
-                this.SYMBOLS = this.config.symbols; this.gridState = Array(this.GRID_SIZE * this.GRID_SIZE).fill(null); this.currentRoll = []; this.firstPieceLocation = null; this.placementState = 'AWAITING_ROLL'; this.score = 0; this.highScore = Storage.get(`matchaloHighScore_${this.config.id}`, 0); this.previousScore = 0; this.lastClick = { time: 0, row: -1, col: -1 }; this.usedSuperpowers = new Set(); this.activeSuperpower = null; this.superpowerState = {};
-                this.DOMElements.gameBoard.innerHTML = '';
-                // Preload images
-                ImageLoader.preloadImages(this.config).then(results => {
-                    const failed = results.filter(r => !r.success);
-                    if (failed.length > 0) {
-                        console.warn('Some images failed to load:', failed);
+                try {
+                    this.SYMBOLS = this.config.symbols;
+                    this.gridState = Array(this.GRID_SIZE * this.GRID_SIZE).fill(null);
+                    this.currentRoll = [];
+                    this.firstPieceLocation = null;
+                    this.placementState = 'AWAITING_ROLL';
+                    this.score = 0;
+                    this.highScore = Storage.get(`matchaloHighScore_${this.config.id}`, 0);
+                    this.previousScore = 0;
+                    this.lastClick = { time: 0, row: -1, col: -1 };
+                    this.usedSuperpowers = new Set();
+                    this.activeSuperpower = null;
+                    this.superpowerState = {};
+                    this.isGameOver = false;
+
+                    this.DOMElements.gameBoard.innerHTML = '';
+
+                    // Preload images
+                    ImageLoader.preloadImages(this.config).catch(err => {
+                        ErrorHandler.handle(err, 'ImageLoader');
+                    });
+
+                    // Create grid with stagger animation
+                    for (let i = 0; i < this.GRID_SIZE * this.GRID_SIZE; i++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'grid-cell empty relative';
+                        cell.dataset.index = i;
+                        
+                        const row = Math.floor(i / this.GRID_SIZE);
+                        const col = i % this.GRID_SIZE;
+                        cell.dataset.row = row;
+                        cell.dataset.col = col;
+
+                        // Stagger animation
+                        cell.style.animationDelay = `${(row + col) * 0.02}s`;
+
+                        const tooltip = document.createElement('div');
+                        tooltip.className = 'premium-tooltip';
+                        cell.appendChild(tooltip);
+
+                        const clickHandler = () => this.onCellClick(row, col);
+                        cell.addEventListener('click', clickHandler);
+                        this.eventListeners.push({ element: cell, event: 'click', handler: clickHandler });
+
+                        const mouseenterHandler = () => {
+                            const piece = this.gridState[i];
+                            if (piece) {
+                                tooltip.textContent = `${piece.symbol} ${piece.quadrant}`;
+                            }
+                        };
+                        cell.addEventListener('mouseenter', mouseenterHandler);
+                        this.eventListeners.push({ element: cell, event: 'mouseenter', handler: mouseenterHandler });
+
+                        this.DOMElements.gameBoard.appendChild(cell);
                     }
-                }).catch(err => {
-                    ErrorHandler.handle(err, 'ImageLoader');
-                });
-                for (let i = 0; i < this.GRID_SIZE * this.GRID_SIZE; i++) { const cell = document.createElement('div'); cell.className = 'grid-cell empty relative'; cell.dataset.index = i; const row = Math.floor(i / this.GRID_SIZE), col = i % this.GRID_SIZE; cell.dataset.row = row; cell.dataset.col = col; const tooltip = document.createElement('div'); tooltip.className = 'debug-tooltip'; cell.appendChild(tooltip); cell.addEventListener('click', () => this.onCellClick(row, col)); cell.addEventListener('mouseenter', () => { const piece = this.gridState[i]; if (piece) { tooltip.textContent = `S: ${piece.symbol}, Q: ${piece.quadrant}`; tooltip.style.opacity = 1; } }); cell.addEventListener('mouseleave', () => { tooltip.style.opacity = 0; }); this.DOMElements.gameBoard.appendChild(cell); }
-                this.populateHelpModal(); this.calculateTotalScore(); this.updateProgressBar(); this.updateDiceDisplay(); this.updateSuperpowerUI();
-                this.DOMElements.gameOverModal.classList.add('hidden'); this.DOMElements.rollDiceBtn.disabled = false;
-                const oldResetBtn = this.DOMElements.resetBtn; const newResetBtn = oldResetBtn.cloneNode(true); oldResetBtn.parentNode.replaceChild(newResetBtn, oldResetBtn); this.DOMElements.resetBtn = newResetBtn;
+
+                    this.populateHelpModal();
+                    this.calculateTotalScore();
+                    this.updateProgressBar();
+                    this.updateDiceDisplay();
+                    this.updateSuperpowerUI();
+                    this.DOMElements.gameOverModal.classList.add('hidden');
+                    this.DOMElements.rollDiceBtn.disabled = false;
+
+                    // Setup event listeners
+                    this.setupEventListeners();
+
+                } catch (error) {
+                    ErrorHandler.handle(error, 'Game.init');
+                }
+            }
+
+            setupEventListeners() {
+                // Remove old listeners
+                const oldResetBtn = this.DOMElements.resetBtn;
+                const newResetBtn = oldResetBtn.cloneNode(true);
+                oldResetBtn.parentNode.replaceChild(newResetBtn, oldResetBtn);
+                this.DOMElements.resetBtn = newResetBtn;
+
+                // Setup new listeners
                 this.DOMElements.rollDiceBtn.onclick = () => this.handleRollDice();
-                this.DOMElements.resetBtn.onclick = () => gameManager.switchEdition(gameManager.activeEditionId);
+                this.DOMElements.resetBtn.onclick = () => {
+                    if (confirm('Start a new game? Current progress will be lost.')) {
+                        gameManager.switchEdition(gameManager.activeEditionId);
+                    }
+                };
                 this.DOMElements.restartModalBtn.onclick = () => gameManager.switchEdition(gameManager.activeEditionId);
                 this.DOMElements.closeModalBtn.onclick = () => this.DOMElements.gameOverModal.classList.add('hidden');
                 this.DOMElements.rotateBtn.onclick = () => this.activateSuperpower(this.SUPERPOWERS.ROTATE);
                 this.DOMElements.swapBtn.onclick = () => this.activateSuperpower(this.SUPERPOWERS.SWAP);
                 this.DOMElements.exchangeBtn.onclick = () => this.activateSuperpower(this.SUPERPOWERS.EXCHANGE);
                 this.DOMElements.moveBtn.onclick = () => this.activateSuperpower(this.SUPERPOWERS.MOVE);
-                if(this.DOMElements.closeExchangeModalBtn) this.DOMElements.closeExchangeModalBtn.onclick = () => this.DOMElements.exchangeModal.classList.add('hidden');
+                
+                if (this.DOMElements.closeExchangeModalBtn) {
+                    this.DOMElements.closeExchangeModalBtn.onclick = () => {
+                        this.DOMElements.exchangeModal.classList.add('hidden');
+                    };
+                }
             }
-            populateHelpModal() { this.DOMElements.helpModalContent.innerHTML = `<h3 class="font-bold text-lg" style="color: var(--accent);">🎯 The Goal</h3><p>Fill the 8x8 grid by placing pairs of 'Alos' (quadrant pieces). Score points by forming valuable patterns and sequences.</p><h3 class="font-bold text-lg mt-4" style="color: var(--accent);">🕹️ How to Play</h3><ol class="list-decimal list-inside space-y-1"><li><b>Roll the Dice:</b> Click the '🎲' icon to get two random Alos.</li><li><b>Place Your Pair:</b> Place the first Alo on any empty square. Place the second in an empty square directly next to it (not diagonally).</li><li><b>Mistake?</b> Before placing the second Alo, you can double-click the first one to pick it up and move it.</li></ol><h3 class="font-bold text-lg mt-4" style="color: var(--accent);">✨ Superpowers</h3><p>You can use any <strong>two different</strong> superpowers once per game, only between turns.</p><ul class="list-disc list-inside space-y-1"><li><b>Rotate:</b> Click an Alo on the board to rotate it 90° clockwise.</li><li><b>Swap:</b> Click two adjacent Alos on the board to swap their positions.</li><li><b>Exchange:</b> Click an Alo, then choose a new one from a selection to replace it.</li><li><b>Move:</b> Click an Alo, then click any empty square to move it there.</li></ul><h3 class="font-bold text-lg mt-4" style="color: var(--accent);">📈 Scoring</h3><ul class="list-disc list-inside space-y-1"><li><b>Perfect Shape (4 pcs):</b> 40 pts (same color), 20 pts (different colors)</li><li><b>Almost There (3 pcs):</b> 20 pts (same color), 15 pts (different colors)</li><li><b>Half Baked (2 pcs):</b> 10 pts (same color), 5 pts (different colors)</li><li><b>Great Sequence:</b> 1 pt for each Alo in a group of 2 or more same-colored, touching Alos.</li><li><b>Line Master:</b> 10 pts for a full row or column of the same color.</li><li><b>Diamond Heist (Penalty):</b> -10 pts for creating a diamond-shaped empty space with four Alos.</li></ul>`; }
-            onCellClick(row, col) { const now = new Date().getTime(); if (now - this.lastClick.time < 300 && this.lastClick.row === row && this.lastClick.col === col) { this.handleDoubleClick(row, col); this.lastClick = { time: 0, row: -1, col: -1 }; return; } this.lastClick = { time: now, row, col }; if (this.activeSuperpower) this.handleSuperpowerClick(row, col); else this.handlePlacementClick(row, col); }
-            handleDoubleClick(row, col) { if (this.placementState === 'AWAITING_SECOND_PLACEMENT' && this.firstPieceLocation.row === row && this.firstPieceLocation.col === col) { this.gridState[row * this.GRID_SIZE + col] = null; this.renderCell(row, col); this.firstPieceLocation = null; this.placementState = 'AWAITING_FIRST_PLACEMENT'; } }
-            handlePlacementClick(row, col) { const index = row * this.GRID_SIZE + col; if (this.placementState === 'AWAITING_FIRST_PLACEMENT' && !this.gridState[index]) { this.placePiece(row, col, 0); this.firstPieceLocation = { row, col }; this.placementState = 'AWAITING_SECOND_PLACEMENT'; } else if (this.placementState === 'AWAITING_SECOND_PLACEMENT') { const isAdjacent = Math.abs(this.firstPieceLocation.row - row) + Math.abs(this.firstPieceLocation.col - col) === 1; if (isAdjacent && !this.gridState[index]) { this.placePiece(row, col, 1); this.endTurn(); } } }
-            endTurn() { this.firstPieceLocation = null; this.placementState = 'AWAITING_ROLL'; this.currentRoll = []; this.DOMElements.rollDiceBtn.disabled = false; this.calculateTotalScore(); this.updateProgressBar(); this.updateDiceDisplay(); this.updateSuperpowerUI(); if (this.isGameOver()) this.showGameOver(); }
-            handleRollDice() { if (this.activeSuperpower) this.cancelSuperpower(); if (this.placementState !== 'AWAITING_ROLL') return; this.DOMElements.rollDiceBtn.disabled = true; this.DOMElements.dice1El.classList.add('dice-tumble'); this.DOMElements.dice2El.classList.add('dice-tumble'); setTimeout(() => { const piece1 = this.generateRandomAlo(); let piece2 = this.generateRandomAlo(); while (piece2.quadrant === piece1.quadrant) { piece2 = this.generateRandomAlo(); } this.currentRoll = [piece1, piece2]; this.placementState = 'AWAITING_FIRST_PLACEMENT'; this.updateDiceDisplay(); this.updateSuperpowerUI(); this.DOMElements.dice1El.classList.remove('dice-tumble'); this.DOMElements.dice2El.classList.remove('dice-tumble'); }, 600); }
-            activateSuperpower(powerName) { if (this.placementState !== 'AWAITING_ROLL' || this.usedSuperpowers.size >= 2 || this.usedSuperpowers.has(powerName)) return; if (this.activeSuperpower === powerName) this.cancelSuperpower(); else { this.activeSuperpower = powerName; this.superpowerState = {}; this.updateSuperpowerUI(); } }
-            cancelSuperpower() { this.activeSuperpower = null; this.superpowerState = {}; document.querySelectorAll('.pulsing-cell').forEach(c => c.classList.remove('pulsing-cell')); this.updateSuperpowerUI(); }
-            consumeSuperpower(powerName) { this.usedSuperpowers.add(powerName); this.cancelSuperpower(); this.calculateTotalScore(); this.updateSuperpowerUI(); }
+
+            cleanup() {
+                // Cancel all animation frames
+                this.animationFrames.forEach(id => cancelAnimationFrame(id));
+                this.animationFrames = [];
+
+                // Remove event listeners
+                this.eventListeners.forEach(({ element, event, handler }) => {
+                    element.removeEventListener(event, handler);
+                });
+                this.eventListeners = [];
+
+                // Clear board
+                if (this.DOMElements.gameBoard) {
+                    this.DOMElements.gameBoard.innerHTML = '';
+                }
+            }
+
+            populateHelpModal() {
+                this.DOMElements.helpModalContent.innerHTML = `
+                    <h3 class="font-bold text-lg" style="color: var(--accent);">🎯 The Goal</h3>
+                    <p>Fill the 8x8 grid by placing pairs of 'Alos' (quadrant pieces). Score points by forming valuable patterns and sequences.</p>
+                    
+                    <h3 class="font-bold text-lg mt-4" style="color: var(--accent);">🕹️ How to Play</h3>
+                    <ol class="list-decimal list-inside space-y-2">
+                        <li><b>Roll the Dice:</b> Click the '🎲' icon to get two random Alos.</li>
+                        <li><b>Place Your Pair:</b> Place the first Alo on any empty square. Place the second in an empty square directly next to it (not diagonally).</li>
+                        <li><b>Mistake?</b> Before placing the second Alo, double-click the first one to pick it up and move it.</li>
+                    </ol>
+                    
+                    <h3 class="font-bold text-lg mt-4" style="color: var(--accent);">✨ Superpowers</h3>
+                    <p>You can use any <strong>two different</strong> superpowers once per game, only between turns.</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li><b>Rotate:</b> Click an Alo to rotate it 90° clockwise.</li>
+                        <li><b>Swap:</b> Click two adjacent Alos to swap their positions.</li>
+                        <li><b>Exchange:</b> Click an Alo, then choose a new one to replace it.</li>
+                        <li><b>Move:</b> Click an Alo, then click any empty square to move it there.</li>
+                    </ul>
+                    
+                    <h3 class="font-bold text-lg mt-4" style="color: var(--accent);">📈 Scoring</h3>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li><b>Perfect Shape (4 pcs):</b> 40 pts (same color), 20 pts (different colors)</li>
+                        <li><b>Almost There (3 pcs):</b> 20 pts (same color), 15 pts (different colors)</li>
+                        <li><b>Half Baked (2 pcs):</b> 10 pts (same color), 5 pts (different colors)</li>
+                        <li><b>Great Sequence:</b> 1 pt for each Alo in a group of 2+ same-colored, touching Alos.</li>
+                        <li><b>Line Master:</b> 10 pts for a full row or column of the same color.</li>
+                        <li><b>Diamond Heist (Penalty):</b> -10 pts for creating a diamond-shaped empty space.</li>
+                    </ul>
+
+                    <h3 class="font-bold text-lg mt-4" style="color: var(--accent);">🔥 Combo System</h3>
+                    <p>Score multiple times within 5 seconds to build combos! 3x combo = 1.5x multiplier, 5x combo = 2x multiplier.</p>
+                `;
+            }
+
+            onCellClick(row, col) {
+                // Prevent any clicks when game is over
+                if (this.isGameOver) return;
+
+                const now = Date.now();
+                
+                // Double-click detection
+                if (now - this.lastClick.time < 300 && 
+                    this.lastClick.row === row && 
+                    this.lastClick.col === col) {
+                    this.handleDoubleClick(row, col);
+                    this.lastClick = { time: 0, row: -1, col: -1 };
+                    return;
+                }
+
+                this.lastClick = { time: now, row, col };
+
+                if (this.activeSuperpower) {
+                    this.handleSuperpowerClick(row, col);
+                } else {
+                    this.handlePlacementClick(row, col);
+                }
+            }
+
+            handleDoubleClick(row, col) {
+                if (this.placementState === 'AWAITING_SECOND_PLACEMENT' && 
+                    this.firstPieceLocation.row === row && 
+                    this.firstPieceLocation.col === col) {
+                    
+                    this.gridState[row * this.GRID_SIZE + col] = null;
+                    this.renderCell(row, col);
+                    this.firstPieceLocation = null;
+                    this.placementState = 'AWAITING_FIRST_PLACEMENT';
+                    NotificationSystem.show('Piece picked up', 'info', 1500);
+                }
+            }
+
+            handlePlacementClick(row, col) {
+                const index = row * this.GRID_SIZE + col;
+
+                if (this.placementState === 'AWAITING_FIRST_PLACEMENT' && !this.gridState[index]) {
+                    this.placePiece(row, col, 0);
+                    this.firstPieceLocation = { row, col };
+                    this.placementState = 'AWAITING_SECOND_PLACEMENT';
+                } else if (this.placementState === 'AWAITING_SECOND_PLACEMENT') {
+                    const isAdjacent = Math.abs(this.firstPieceLocation.row - row) + 
+                                      Math.abs(this.firstPieceLocation.col - col) === 1;
+                    
+                    if (isAdjacent && !this.gridState[index]) {
+                        this.placePiece(row, col, 1);
+                        this.endTurn();
+                    } else if (!isAdjacent) {
+                        NotificationSystem.show('Pieces must be adjacent', 'warning', 2000);
+                    }
+                }
+            }
+
+            endTurn() {
+                this.firstPieceLocation = null;
+                this.placementState = 'AWAITING_ROLL';
+                this.currentRoll = [];
+                this.DOMElements.rollDiceBtn.disabled = false;
+                
+                this.calculateTotalScore();
+                this.updateProgressBar();
+                this.updateDiceDisplay();
+                this.updateSuperpowerUI();
+
+                if (this.checkGameOver()) {
+                    this.showGameOver();
+                }
+            }
+
+            handleRollDice() {
+                if (this.isGameOver) return;
+
+                if (this.activeSuperpower) {
+                    this.cancelSuperpower();
+                }
+                
+                if (this.placementState !== 'AWAITING_ROLL') return;
+
+                this.DOMElements.rollDiceBtn.disabled = true;
+                this.DOMElements.dice1El.classList.add('dice-tumble');
+                this.DOMElements.dice2El.classList.add('dice-tumble');
+
+                setTimeout(() => {
+                    const piece1 = this.generateRandomAlo();
+                    let piece2 = this.generateRandomAlo();
+                    
+                    // Ensure different quadrants
+                    while (piece2.quadrant === piece1.quadrant) {
+                        piece2 = this.generateRandomAlo();
+                    }
+
+                    this.currentRoll = [piece1, piece2];
+                    this.placementState = 'AWAITING_FIRST_PLACEMENT';
+                    
+                    this.updateDiceDisplay();
+                    this.updateSuperpowerUI();
+                    
+                    this.DOMElements.dice1El.classList.remove('dice-tumble');
+                    this.DOMElements.dice2El.classList.remove('dice-tumble');
+                }, 600);
+            }
+
+            activateSuperpower(powerName) {
+                if (this.isGameOver || 
+                    this.placementState !== 'AWAITING_ROLL' || 
+                    this.usedSuperpowers.size >= 2 || 
+                    this.usedSuperpowers.has(powerName)) {
+                    return;
+                }
+
+                if (this.activeSuperpower === powerName) {
+                    this.cancelSuperpower();
+                } else {
+                    this.activeSuperpower = powerName;
+                    this.superpowerState = {};
+                    this.updateSuperpowerUI();
+                    NotificationSystem.show(`${powerName} activated - Click on the board`, 'info', 2000);
+                }
+            }
+
+            cancelSuperpower() {
+                this.activeSuperpower = null;
+                this.superpowerState = {};
+                document.querySelectorAll('.pulsing-cell').forEach(c => c.classList.remove('pulsing-cell'));
+                this.updateSuperpowerUI();
+            }
+
+            consumeSuperpower(powerName) {
+                this.usedSuperpowers.add(powerName);
+                this.cancelSuperpower();
+                this.calculateTotalScore();
+                this.updateSuperpowerUI();
+                NotificationSystem.show(`${powerName} used!`, 'success', 2000);
+            }
+
             handleSuperpowerClick(row, col) {
                 const index = row * this.GRID_SIZE + col;
                 const piece = this.gridState[index];
-                switch (this.activeSuperpower) {
-                    case this.SUPERPOWERS.ROTATE: if (!piece) return; const order = ['TL', 'TR', 'BR', 'BL']; piece.quadrant = order[(order.indexOf(piece.quadrant) + 1) % 4]; this.renderCellWithAnimation(row, col); this.consumeSuperpower(this.SUPERPOWERS.ROTATE); break;
-                    case this.SUPERPOWERS.MOVE: if (!this.superpowerState.source) { if (!piece) return; this.superpowerState.source = { row, col }; this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`).classList.add('pulsing-cell'); } else { if (piece) return; const srcIdx = this.superpowerState.source.row * this.GRID_SIZE + this.superpowerState.source.col; this.gridState[index] = this.gridState[srcIdx]; this.gridState[srcIdx] = null; this.renderCell(this.superpowerState.source.row, this.superpowerState.source.col); this.renderCellWithAnimation(row, col); this.consumeSuperpower(this.SUPERPOWERS.MOVE); } break;
-                    case this.SUPERPOWERS.SWAP: if (!this.superpowerState.source) { if (!piece) return; this.superpowerState.source = { row, col }; this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`).classList.add('pulsing-cell'); } else { if (!piece || Math.abs(this.superpowerState.source.row - row) + Math.abs(this.superpowerState.source.col - col) !== 1) return; const srcIdx = this.superpowerState.source.row * this.GRID_SIZE + this.superpowerState.source.col; const temp = this.gridState[srcIdx]; this.gridState[srcIdx] = this.gridState[index]; this.gridState[index] = temp; this.renderCell(this.superpowerState.source.row, this.superpowerState.source.col); this.renderCellWithAnimation(row, col); this.consumeSuperpower(this.SUPERPOWERS.SWAP); } break;
-                    case this.SUPERPOWERS.EXCHANGE:
-                        if (!piece) return;
-                        this.superpowerState.source = { row, col };
-                        this.DOMElements.exchangeOptions.innerHTML = '';
-                        const allAlos = this.SYMBOLS.flatMap(s => this.QUADRANTS.map(q => ({ symbol: s, quadrant: q })));
-                        allAlos.forEach(alo => {
-                            const option = document.createElement('div');
-                            option.className = 'w-16 h-16 p-1 cursor-pointer hover:bg-white/50 rounded-lg transition-colors';
-                            const img = document.createElement('img');
-                            img.src = `${this.IMAGE_PATH}${alo.symbol.toLowerCase()}_${alo.quadrant}.svg`;
-                            option.appendChild(img);
-                            if (alo.symbol === piece.symbol && alo.quadrant === piece.quadrant) {
-                                option.classList.add('opacity-30', 'cursor-not-allowed');
+
+                try {
+                    switch (this.activeSuperpower) {
+                        case this.SUPERPOWERS.ROTATE:
+                            if (!piece) return;
+                            const order = ['TL', 'TR', 'BR', 'BL'];
+                            piece.quadrant = order[(order.indexOf(piece.quadrant) + 1) % 4];
+                            this.renderCellWithAnimation(row, col);
+                            this.consumeSuperpower(this.SUPERPOWERS.ROTATE);
+                            break;
+
+                        case this.SUPERPOWERS.MOVE:
+                            if (!this.superpowerState.source) {
+                                if (!piece) return;
+                                this.superpowerState.source = { row, col };
+                                this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`).classList.add('pulsing-cell');
                             } else {
-                                option.onclick = () => {
-                                    this.gridState[this.superpowerState.source.row * this.GRID_SIZE + this.superpowerState.source.col] = alo;
-                                    this.renderCell(this.superpowerState.source.row, this.superpowerState.source.col);
-                                    this.DOMElements.exchangeModal.classList.add('hidden');
-                                    this.consumeSuperpower(this.SUPERPOWERS.EXCHANGE);
-                                };
+                                if (piece) return;
+                                const srcIdx = this.superpowerState.source.row * this.GRID_SIZE + this.superpowerState.source.col;
+                                this.gridState[index] = this.gridState[srcIdx];
+                                this.gridState[srcIdx] = null;
+                                this.renderCell(this.superpowerState.source.row, this.superpowerState.source.col);
+                                this.renderCellWithAnimation(row, col);
+                                this.consumeSuperpower(this.SUPERPOWERS.MOVE);
                             }
-                            this.DOMElements.exchangeOptions.appendChild(option);
-                        });
-                        this.DOMElements.exchangeModal.classList.remove('hidden');
-                        break;
+                            break;
+
+                        case this.SUPERPOWERS.SWAP:
+                            if (!this.superpowerState.source) {
+                                if (!piece) return;
+                                this.superpowerState.source = { row, col };
+                                this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`).classList.add('pulsing-cell');
+                            } else {
+                                const isAdjacent = Math.abs(this.superpowerState.source.row - row) + 
+                                                 Math.abs(this.superpowerState.source.col - col) === 1;
+                                if (!piece || !isAdjacent) return;
+                                
+                                const srcIdx = this.superpowerState.source.row * this.GRID_SIZE + this.superpowerState.source.col;
+                                const temp = this.gridState[srcIdx];
+                                this.gridState[srcIdx] = this.gridState[index];
+                                this.gridState[index] = temp;
+                                
+                                this.renderCell(this.superpowerState.source.row, this.superpowerState.source.col);
+                                this.renderCellWithAnimation(row, col);
+                                this.consumeSuperpower(this.SUPERPOWERS.SWAP);
+                            }
+                            break;
+
+                        case this.SUPERPOWERS.EXCHANGE:
+                            if (!piece) return;
+                            this.superpowerState.source = { row, col };
+                            this.showExchangeModal(piece);
+                            break;
+                    }
+                } catch (error) {
+                    ErrorHandler.handle(error, 'Superpower');
+                    this.cancelSuperpower();
                 }
             }
+
+            showExchangeModal(currentPiece) {
+                this.DOMElements.exchangeOptions.innerHTML = '';
+                const allAlos = this.SYMBOLS.flatMap(s => 
+                    this.QUADRANTS.map(q => ({ symbol: s, quadrant: q }))
+                );
+
+                allAlos.forEach(alo => {
+                    const option = document.createElement('div');
+                    option.className = 'w-16 h-16 p-1 cursor-pointer hover:bg-white/50 rounded-lg transition-all';
+                    
+                    const img = document.createElement('img');
+                    img.src = ImageLoader.getImageSrc(alo.symbol, alo.quadrant);
+                    img.alt = `${alo.symbol} ${alo.quadrant}`;
+                    option.appendChild(img);
+
+                    if (alo.symbol === currentPiece.symbol && alo.quadrant === currentPiece.quadrant) {
+                        option.classList.add('opacity-30', 'cursor-not-allowed');
+                    } else {
+                        option.onclick = () => {
+                            const idx = this.superpowerState.source.row * this.GRID_SIZE + 
+                                       this.superpowerState.source.col;
+                            this.gridState[idx] = alo;
+                            this.renderCell(this.superpowerState.source.row, this.superpowerState.source.col);
+                            this.DOMElements.exchangeModal.classList.add('hidden');
+                            this.consumeSuperpower(this.SUPERPOWERS.EXCHANGE);
+                        };
+                    }
+
+                    this.DOMElements.exchangeOptions.appendChild(option);
+                });
+
+                this.DOMElements.exchangeModal.classList.remove('hidden');
+            }
+
             calculateTotalScore() {
-                let scoreBreakdown = { perfectShape: 0, halfBaked: 0, almostThere: 0, greatSequence: 0, lineMaster: 0, diamondHeist: 0 };
-                const scoredPieces = new Set();
-                for (let r = 0; r < this.GRID_SIZE - 1; r++) { for (let c = 0; c < this.GRID_SIZE - 1; c++) { const indices = [r * this.GRID_SIZE + c, r * this.GRID_SIZE + c + 1, (r + 1) * this.GRID_SIZE + c, (r + 1) * this.GRID_SIZE + c + 1]; if (indices.some(i => scoredPieces.has(i))) continue; const tl = this.gridState[indices[0]], tr = this.gridState[indices[1]], bl = this.gridState[indices[2]], br = this.gridState[indices[3]]; if (tl?.quadrant === 'TL' && tr?.quadrant === 'TR' && bl?.quadrant === 'BL' && br?.quadrant === 'BR') { const symbols = [tl.symbol, tr.symbol, bl.symbol, br.symbol]; const allSameColor = new Set(symbols).size === 1; scoreBreakdown.perfectShape += allSameColor ? 40 : 20; indices.forEach(i => scoredPieces.add(i)); } } }
-                for (let r = 0; r < this.GRID_SIZE - 1; r++) { for (let c = 0; c < this.GRID_SIZE - 1; c++) { const positions = [ { idx: r * this.GRID_SIZE + c, correctQuadrant: 'TL' }, { idx: r * this.GRID_SIZE + c + 1, correctQuadrant: 'TR' }, { idx: (r + 1) * this.GRID_SIZE + c, correctQuadrant: 'BL' }, { idx: (r + 1) * this.GRID_SIZE + c + 1, correctQuadrant: 'BR' } ]; const correctlyPositioned = positions.filter(pos => { const piece = this.gridState[pos.idx]; return piece && piece.quadrant === pos.correctQuadrant && !scoredPieces.has(pos.idx); }); if (correctlyPositioned.length === 3) { const pieces = correctlyPositioned.map(pos => this.gridState[pos.idx]); const allSameColor = new Set(pieces.map(p => p.symbol)).size === 1; scoreBreakdown.almostThere += allSameColor ? 20 : 15; correctlyPositioned.forEach(pos => scoredPieces.add(pos.idx)); } } }
-                for (let r = 0; r < this.GRID_SIZE; r++) { for (let c = 0; c < this.GRID_SIZE; c++) { const p1_idx = r * this.GRID_SIZE + c; if (!this.gridState[p1_idx] || scoredPieces.has(p1_idx)) continue; const p2_idx_h = r * this.GRID_SIZE + c + 1; if (c < this.GRID_SIZE - 1 && this.gridState[p2_idx_h] && !scoredPieces.has(p2_idx_h)) { const q1 = this.gridState[p1_idx].quadrant, q2 = this.gridState[p2_idx_h].quadrant; if ((q1 === 'TL' && q2 === 'TR') || (q1 === 'BL' && q2 === 'BR')) { const sameColor = this.gridState[p1_idx].symbol === this.gridState[p2_idx_h].symbol; scoreBreakdown.halfBaked += sameColor ? 10 : 5; scoredPieces.add(p1_idx); scoredPieces.add(p2_idx_h); continue; } } const p2_idx_v = (r + 1) * this.GRID_SIZE + c; if (r < this.GRID_SIZE - 1 && this.gridState[p2_idx_v] && !scoredPieces.has(p2_idx_v)) { const q1 = this.gridState[p1_idx].quadrant, q2 = this.gridState[p2_idx_v].quadrant; if ((q1 === 'TL' && q2 === 'BL') || (q1 === 'TR' && q2 === 'BR')) { const sameColor = this.gridState[p1_idx].symbol === this.gridState[p2_idx_v].symbol; scoreBreakdown.halfBaked += sameColor ? 10 : 5; scoredPieces.add(p1_idx); scoredPieces.add(p2_idx_v); } } } }
-                for (let r = 0; r < this.GRID_SIZE - 1; r++) { for (let c = 0; c < this.GRID_SIZE - 1; c++) { const tl = this.gridState[r * this.GRID_SIZE + c], tr = this.gridState[r * this.GRID_SIZE + c + 1], bl = this.gridState[(r + 1) * this.GRID_SIZE + c], br = this.gridState[(r + 1) * this.GRID_SIZE + c + 1]; if (tl?.quadrant === 'BR' && tr?.quadrant === 'BL' && bl?.quadrant === 'TR' && br?.quadrant === 'TL') { scoreBreakdown.diamondHeist -= 10; } } }
-                const visited = Array(this.GRID_SIZE * this.GRID_SIZE).fill(false); for (let i = 0; i < this.GRID_SIZE * this.GRID_SIZE; i++) { if (this.gridState[i] && !visited[i]) { const blob = [], queue = [i]; visited[i] = true; const symbol = this.gridState[i].symbol; while (queue.length > 0) { const currentIdx = queue.shift(); blob.push(currentIdx); const r = Math.floor(currentIdx / this.GRID_SIZE), c = currentIdx % this.GRID_SIZE; [[r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1]].forEach(([nr, nc]) => { const neighborIdx = nr * this.GRID_SIZE + nc; if (nr >= 0 && nr < this.GRID_SIZE && nc >= 0 && nc < this.GRID_SIZE && this.gridState[neighborIdx]?.symbol === symbol && !visited[neighborIdx]) { visited[neighborIdx] = true; queue.push(neighborIdx); } }); } if (blob.length > 1) { scoreBreakdown.greatSequence += blob.length; } } }
-                for (let r = 0; r < this.GRID_SIZE; r++) { const firstPiece = this.gridState[r * this.GRID_SIZE]; if (firstPiece) { const rowPieces = this.gridState.slice(r * this.GRID_SIZE, (r + 1) * this.GRID_SIZE); if (rowPieces.every(p => p?.symbol === firstPiece.symbol)) { scoreBreakdown.lineMaster += 10; } } }
-                for (let c = 0; c < this.GRID_SIZE; c++) { const firstPiece = this.gridState[c]; if (firstPiece) { let isLineMaster = true; for (let r = 1; r < this.GRID_SIZE; r++) { if (this.gridState[r * this.GRID_SIZE + c]?.symbol !== firstPiece.symbol) { isLineMaster = false; break; } } if (isLineMaster) { scoreBreakdown.lineMaster += 10; } } }
+                try {
+                    let scoreBreakdown = {
+                        perfectShape: 0,
+                        halfBaked: 0,
+                        almostThere: 0,
+                        greatSequence: 0,
+                        lineMaster: 0,
+                        diamondHeist: 0
+                    };
 
-                const rawScore = Object.values(scoreBreakdown).reduce((a, b) => a + b, 0);
-                const scoreThisTurn = rawScore - this.previousScore;
-                const combo = this.comboTracker.recordScore(scoreThisTurn);
-                const multiplier = this.comboTracker.getMultiplier();
+                    const scoredPieces = new Set();
+                    const scoringCells = new Set();
 
-                this.score = Math.floor(rawScore * multiplier);
-                this.previousScore = rawScore;
+                    // Perfect Shapes (2x2)
+                    for (let r = 0; r < this.GRID_SIZE - 1; r++) {
+                        for (let c = 0; c < this.GRID_SIZE - 1; c++) {
+                            const indices = [
+                                r * this.GRID_SIZE + c,
+                                r * this.GRID_SIZE + c + 1,
+                                (r + 1) * this.GRID_SIZE + c,
+                                (r + 1) * this.GRID_SIZE + c + 1
+                            ];
 
-                // Show combo UI if active
-                if (combo > 1) {
-                    this.showComboIndicator(combo, multiplier);
+                            if (indices.some(i => scoredPieces.has(i))) continue;
+
+                            const [tl, tr, bl, br] = indices.map(i => this.gridState[i]);
+
+                            if (tl?.quadrant === 'TL' && tr?.quadrant === 'TR' && 
+                                bl?.quadrant === 'BL' && br?.quadrant === 'BR') {
+                                const symbols = [tl.symbol, tr.symbol, bl.symbol, br.symbol];
+                                const allSameColor = new Set(symbols).size === 1;
+                                scoreBreakdown.perfectShape += allSameColor ? 40 : 20;
+                                indices.forEach(i => {
+                                    scoredPieces.add(i);
+                                    scoringCells.add(i);
+                                });
+                            }
+                        }
+                    }
+
+                    // Almost There (3/4 correct)
+                    for (let r = 0; r < this.GRID_SIZE - 1; r++) {
+                        for (let c = 0; c < this.GRID_SIZE - 1; c++) {
+                            const positions = [
+                                { idx: r * this.GRID_SIZE + c, correctQuadrant: 'TL' },
+                                { idx: r * this.GRID_SIZE + c + 1, correctQuadrant: 'TR' },
+                                { idx: (r + 1) * this.GRID_SIZE + c, correctQuadrant: 'BL' },
+                                { idx: (r + 1) * this.GRID_SIZE + c + 1, correctQuadrant: 'BR' }
+                            ];
+
+                            const correctlyPositioned = positions.filter(pos => {
+                                const piece = this.gridState[pos.idx];
+                                return piece && piece.quadrant === pos.correctQuadrant && !scoredPieces.has(pos.idx);
+                            });
+
+                            if (correctlyPositioned.length === 3) {
+                                const pieces = correctlyPositioned.map(pos => this.gridState[pos.idx]);
+                                const allSameColor = new Set(pieces.map(p => p.symbol)).size === 1;
+                                scoreBreakdown.almostThere += allSameColor ? 20 : 15;
+                                correctlyPositioned.forEach(pos => {
+                                    scoredPieces.add(pos.idx);
+                                    scoringCells.add(pos.idx);
+                                });
+                            }
+                        }
+                    }
+
+                    // Half Baked (2 adjacent correct)
+                    for (let r = 0; r < this.GRID_SIZE; r++) {
+                        for (let c = 0; c < this.GRID_SIZE; c++) {
+                            const p1_idx = r * this.GRID_SIZE + c;
+                            if (!this.gridState[p1_idx] || scoredPieces.has(p1_idx)) continue;
+
+                            // Horizontal check
+                            const p2_idx_h = r * this.GRID_SIZE + c + 1;
+                            if (c < this.GRID_SIZE - 1 && this.gridState[p2_idx_h] && !scoredPieces.has(p2_idx_h)) {
+                                const q1 = this.gridState[p1_idx].quadrant;
+                                const q2 = this.gridState[p2_idx_h].quadrant;
+                                if ((q1 === 'TL' && q2 === 'TR') || (q1 === 'BL' && q2 === 'BR')) {
+                                    const sameColor = this.gridState[p1_idx].symbol === this.gridState[p2_idx_h].symbol;
+                                    scoreBreakdown.halfBaked += sameColor ? 10 : 5;
+                                    scoredPieces.add(p1_idx);
+                                    scoredPieces.add(p2_idx_h);
+                                    scoringCells.add(p1_idx);
+                                    scoringCells.add(p2_idx_h);
+                                    continue;
+                                }
+                            }
+
+                            // Vertical check
+                            const p2_idx_v = (r + 1) * this.GRID_SIZE + c;
+                            if (r < this.GRID_SIZE - 1 && this.gridState[p2_idx_v] && !scoredPieces.has(p2_idx_v)) {
+                                const q1 = this.gridState[p1_idx].quadrant;
+                                const q2 = this.gridState[p2_idx_v].quadrant;
+                                if ((q1 === 'TL' && q2 === 'BL') || (q1 === 'TR' && q2 === 'BR')) {
+                                    const sameColor = this.gridState[p1_idx].symbol === this.gridState[p2_idx_v].symbol;
+                                    scoreBreakdown.halfBaked += sameColor ? 10 : 5;
+                                    scoredPieces.add(p1_idx);
+                                    scoredPieces.add(p2_idx_v);
+                                    scoringCells.add(p1_idx);
+                                    scoringCells.add(p2_idx_v);
+                                }
+                            }
+                        }
+                    }
+
+                    // Diamond Heist (penalty)
+                    for (let r = 0; r < this.GRID_SIZE - 1; r++) {
+                        for (let c = 0; c < this.GRID_SIZE - 1; c++) {
+                            const [tl, tr, bl, br] = [
+                                this.gridState[r * this.GRID_SIZE + c],
+                                this.gridState[r * this.GRID_SIZE + c + 1],
+                                this.gridState[(r + 1) * this.GRID_SIZE + c],
+                                this.gridState[(r + 1) * this.GRID_SIZE + c + 1]
+                            ];
+
+                            if (tl?.quadrant === 'BR' && tr?.quadrant === 'BL' && 
+                                bl?.quadrant === 'TR' && br?.quadrant === 'TL') {
+                                scoreBreakdown.diamondHeist -= 10;
+                            }
+                        }
+                    }
+
+                    // Great Sequence (connected same-color blobs)
+                    const visited = Array(this.GRID_SIZE * this.GRID_SIZE).fill(false);
+                    for (let i = 0; i < this.GRID_SIZE * this.GRID_SIZE; i++) {
+                        if (this.gridState[i] && !visited[i]) {
+                            const blob = [];
+                            const queue = [i];
+                            visited[i] = true;
+                            const symbol = this.gridState[i].symbol;
+
+                            while (queue.length > 0) {
+                                const currentIdx = queue.shift();
+                                blob.push(currentIdx);
+
+                                const r = Math.floor(currentIdx / this.GRID_SIZE);
+                                const c = currentIdx % this.GRID_SIZE;
+
+                                [[r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1]].forEach(([nr, nc]) => {
+                                    const neighborIdx = nr * this.GRID_SIZE + nc;
+                                    if (nr >= 0 && nr < this.GRID_SIZE && 
+                                        nc >= 0 && nc < this.GRID_SIZE && 
+                                        this.gridState[neighborIdx]?.symbol === symbol && 
+                                        !visited[neighborIdx]) {
+                                        visited[neighborIdx] = true;
+                                        queue.push(neighborIdx);
+                                    }
+                                });
+                            }
+
+                            if (blob.length > 1) {
+                                scoreBreakdown.greatSequence += blob.length;
+                                blob.forEach(idx => scoringCells.add(idx));
+                            }
+                        }
+                    }
+
+                    // Line Master (full row/column of same color)
+                    for (let r = 0; r < this.GRID_SIZE; r++) {
+                        const firstPiece = this.gridState[r * this.GRID_SIZE];
+                        if (firstPiece) {
+                            const rowPieces = this.gridState.slice(
+                                r * this.GRID_SIZE, 
+                                (r + 1) * this.GRID_SIZE
+                            );
+                            if (rowPieces.every(p => p?.symbol === firstPiece.symbol)) {
+                                scoreBreakdown.lineMaster += 10;
+                                for (let c = 0; c < this.GRID_SIZE; c++) {
+                                    scoringCells.add(r * this.GRID_SIZE + c);
+                                }
+                            }
+                        }
+                    }
+
+                    for (let c = 0; c < this.GRID_SIZE; c++) {
+                        const firstPiece = this.gridState[c];
+                        if (firstPiece) {
+                            let isLineMaster = true;
+                            for (let r = 1; r < this.GRID_SIZE; r++) {
+                                if (this.gridState[r * this.GRID_SIZE + c]?.symbol !== firstPiece.symbol) {
+                                    isLineMaster = false;
+                                    break;
+                                }
+                            }
+                            if (isLineMaster) {
+                                scoreBreakdown.lineMaster += 10;
+                                for (let r = 0; r < this.GRID_SIZE; r++) {
+                                    scoringCells.add(r * this.GRID_SIZE + c);
+                                }
+                            }
+                        }
+                    }
+
+                    // Calculate score with combo multiplier
+                    const rawScore = Object.values(scoreBreakdown).reduce((a, b) => a + b, 0);
+                    const scoreThisTurn = rawScore - this.previousScore;
+                    const combo = this.comboTracker.recordScore(scoreThisTurn);
+                    const multiplier = this.comboTracker.getMultiplier();
+
+                    this.score = Math.floor(rawScore * multiplier);
+                    this.previousScore = rawScore;
+
+                    // Highlight scoring cells
+                    this.highlightScoringCells(scoringCells);
+
+                    // Show combo UI
+                    if (combo > 1) {
+                        this.showComboIndicator(combo, multiplier);
+                    }
+
+                    // Check achievements
+                    this.checkAchievements(scoreBreakdown, combo);
+
+                    this.updateScoreUI(scoreBreakdown);
+
+                } catch (error) {
+                    ErrorHandler.handle(error, 'calculateTotalScore');
                 }
+            }
 
-                // Check achievements
-                if (scoreBreakdown.perfectShape >= 40 && combo === 1) {
+            highlightScoringCells(cells) {
+                // Remove previous highlights
+                document.querySelectorAll('.score-highlight').forEach(cell => {
+                    cell.classList.remove('score-highlight');
+                });
+
+                // Add new highlights
+                cells.forEach(index => {
+                    const cell = this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`);
+                    if (cell) {
+                        cell.classList.add('score-highlight');
+                    }
+                });
+            }
+
+            checkAchievements(breakdown, combo) {
+                if (breakdown.perfectShape >= 40) {
                     const achievement = this.achievements.check('firstPerfectShape');
                     if (achievement) this.showAchievement(achievement);
                 }
@@ -567,9 +1771,17 @@
                     if (achievement) this.showAchievement(achievement);
                 }
 
-                this.updateScoreUI(scoreBreakdown);
+                if (!this.gridState.includes(null)) {
+                    const achievement = this.achievements.check('fillBoard');
+                    if (achievement) this.showAchievement(achievement);
+                }
+
+                if (breakdown.lineMaster > 0) {
+                    const achievement = this.achievements.check('lineMaster');
+                    if (achievement) this.showAchievement(achievement);
+                }
             }
-            
+
             updateScoreUI(breakdown) {
                 const animateScore = (element, newValue) => {
                     const oldValue = parseInt(element.textContent) || 0;
@@ -579,7 +1791,7 @@
                     }
                     element.textContent = newValue;
                 };
-                
+
                 animateScore(this.DOMElements.totalScore, this.score);
                 animateScore(this.DOMElements.scorePerfectShape, breakdown.perfectShape);
                 animateScore(this.DOMElements.scoreHalfBaked, breakdown.halfBaked);
@@ -587,76 +1799,178 @@
                 animateScore(this.DOMElements.scoreGreatSequence, breakdown.greatSequence);
                 animateScore(this.DOMElements.scoreLineMaster, breakdown.lineMaster);
                 animateScore(this.DOMElements.scoreDiamondHeist, breakdown.diamondHeist);
-                
-                const wasHighScore = this.score > this.highScore;
-                
-                if (wasHighScore) {
+
+                if (this.score > this.highScore) {
                     this.highScore = this.score;
                     Storage.set(`matchaloHighScore_${this.config.id}`, this.highScore);
                     this.celebrateNewHighScore();
                 }
-                
+
                 this.DOMElements.highScore.textContent = this.highScore;
             }
-            
-            updateSuperpowerUI() { const canUsePower = this.placementState === 'AWAITING_ROLL' && this.usedSuperpowers.size < 2; [this.DOMElements.rotateBtn, this.DOMElements.swapBtn, this.DOMElements.exchangeBtn, this.DOMElements.moveBtn].forEach(btn => { const powerName = btn.id.replace('-btn', ''); const isUsed = this.usedSuperpowers.has(powerName); btn.disabled = !canUsePower || isUsed; btn.classList.toggle('opacity-50', !canUsePower || isUsed); btn.querySelector('.superpower-used-overlay').classList.toggle('hidden', !isUsed); btn.classList.toggle('superpower-btn--active', this.activeSuperpower === powerName); }); this.DOMElements.spCharge1.classList.toggle('opacity-30', this.usedSuperpowers.size >= 1); this.DOMElements.spCharge2.classList.toggle('opacity-30', this.usedSuperpowers.size >= 2); }
-            placePiece(row, col, rollIndex) { this.gridState[row * this.GRID_SIZE + col] = this.currentRoll[rollIndex]; this.renderCellWithAnimation(row, col); }
-            renderCell(row, col) { const index = row * this.GRID_SIZE + col, cell = this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`), piece = this.gridState[index]; cell.innerHTML = ''; if (piece) { cell.classList.remove('empty'); const img = document.createElement('img'); img.src = `${this.IMAGE_PATH}${piece.symbol.toLowerCase()}_${piece.quadrant}.svg`; cell.appendChild(img); } else { cell.classList.add('empty'); } }
-            generateRandomAlo() { const symbol = this.SYMBOLS[Math.floor(Math.random() * this.SYMBOLS.length)], quadrant = this.QUADRANTS[Math.floor(Math.random() * this.QUADRANTS.length)]; return { symbol, quadrant }; }
-            isGameOver() { if (!this.gridState.includes(null)) return true; for (let r = 0; r < this.GRID_SIZE; r++) { for (let c = 0; c < this.GRID_SIZE; c++) { if (!this.gridState[r * this.GRID_SIZE + c]) { if ((c < this.GRID_SIZE - 1 && !this.gridState[r * this.GRID_SIZE + c + 1]) || (r < this.GRID_SIZE - 1 && !this.gridState[(r + 1) * this.GRID_SIZE + c])) return false; } } } return true; }
-            showGameOver() { this.DOMElements.finalScore.textContent = this.score; this.DOMElements.gameOverModal.classList.remove('hidden'); this.DOMElements.rollDiceBtn.disabled = true; this.DOMElements.gameBoard.querySelectorAll('.grid-cell.empty').forEach(cell => cell.classList.remove('empty')); }
-            updateProgressBar() { const filled = this.gridState.filter(c => c !== null).length; this.DOMElements.progressBarFill.style.width = `${(filled / (this.GRID_SIZE * this.GRID_SIZE)) * 100}%`; }
-            updateDiceDisplay() { [this.DOMElements.dice1El, this.DOMElements.dice2El].forEach((el, i) => { el.innerHTML = ''; if (this.currentRoll[i]) { const piece = this.currentRoll[i], img = document.createElement('img'); img.src = `${this.IMAGE_PATH}${piece.symbol.toLowerCase()}_${piece.quadrant}.svg`; el.appendChild(img); } else { el.textContent = '?'; } }); }
 
-            showNotification(message, type = 'info') {
-                const notification = document.createElement('div');
-                const bgColor = type === 'error' ? 'rgba(239, 68, 68, 0.95)' : 
-                                type === 'warning' ? 'rgba(251, 191, 36, 0.95)' : 
-                                'rgba(59, 130, 246, 0.95)';
-                notification.className = 'fixed top-4 right-4 px-6 py-3 rounded-lg z-[100] transform translate-x-0 transition-all duration-300 text-white font-semibold shadow-lg';
-                notification.style.background = bgColor;
-                notification.textContent = message;
-                document.body.appendChild(notification);
-                
-                setTimeout(() => {
-                    notification.style.transform = 'translateX(400px)';
-                    notification.style.opacity = '0';
-                    setTimeout(() => notification.remove(), 300);
-                }, 3000);
+            updateSuperpowerUI() {
+                const canUsePower = !this.isGameOver && 
+                                   this.placementState === 'AWAITING_ROLL' && 
+                                   this.usedSuperpowers.size < 2;
+
+                [
+                    this.DOMElements.rotateBtn,
+                    this.DOMElements.swapBtn,
+                    this.DOMElements.exchangeBtn,
+                    this.DOMElements.moveBtn
+                ].forEach(btn => {
+                    const powerName = btn.id.replace('-btn', '');
+                    const isUsed = this.usedSuperpowers.has(powerName);
+
+                    btn.disabled = !canUsePower || isUsed;
+                    btn.classList.toggle('opacity-50', !canUsePower || isUsed);
+                    btn.querySelector('.superpower-used-overlay').classList.toggle('hidden', !isUsed);
+                    btn.classList.toggle('superpower-btn--active', this.activeSuperpower === powerName);
+                });
+
+                this.DOMElements.spCharge1.classList.toggle('opacity-30', this.usedSuperpowers.size >= 1);
+                this.DOMElements.spCharge2.classList.toggle('opacity-30', this.usedSuperpowers.size >= 2);
+            }
+
+            placePiece(row, col, rollIndex) {
+                this.gridState[row * this.GRID_SIZE + col] = this.currentRoll[rollIndex];
+                this.renderCellWithAnimation(row, col);
+            }
+
+            renderCell(row, col) {
+                const index = row * this.GRID_SIZE + col;
+                const cell = this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`);
+                const piece = this.gridState[index];
+
+                if (!cell) return;
+
+                const tooltip = cell.querySelector('.premium-tooltip');
+                cell.innerHTML = '';
+                if (tooltip) cell.appendChild(tooltip);
+
+                if (piece) {
+                    cell.classList.remove('empty');
+                    const img = document.createElement('img');
+                    img.src = ImageLoader.getImageSrc(piece.symbol, piece.quadrant);
+                    img.alt = `${piece.symbol} ${piece.quadrant}`;
+                    cell.appendChild(img);
+                } else {
+                    cell.classList.add('empty');
+                }
             }
 
             renderCellWithAnimation(row, col) {
                 const index = row * this.GRID_SIZE + col;
                 const cell = this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`);
                 const piece = this.gridState[index];
-                
-                const tooltip = cell.querySelector('.debug-tooltip');
+
+                if (!cell) return;
+
+                const tooltip = cell.querySelector('.premium-tooltip');
                 cell.innerHTML = '';
                 if (tooltip) cell.appendChild(tooltip);
-                
+
                 if (piece) {
                     cell.classList.remove('empty');
+                    cell.classList.add('placing');
+                    
                     const img = document.createElement('img');
-                    img.src = `${this.IMAGE_PATH}${piece.symbol.toLowerCase()}_${piece.quadrant}.svg`;
+                    img.src = ImageLoader.getImageSrc(piece.symbol, piece.quadrant);
+                    img.alt = `${piece.symbol} ${piece.quadrant}`;
                     
                     img.style.opacity = '0';
                     img.style.transform = 'scale(0.5) rotate(-10deg)';
                     cell.appendChild(img);
-                    
-                    requestAnimationFrame(() => {
+
+                    const animationFrame = requestAnimationFrame(() => {
                         img.style.transition = 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
                         img.style.opacity = '1';
                         img.style.transform = 'scale(1) rotate(0deg)';
                     });
+                    this.animationFrames.push(animationFrame);
+
+                    setTimeout(() => cell.classList.remove('placing'), 500);
                 } else {
                     cell.classList.add('empty');
                 }
             }
 
+            generateRandomAlo() {
+                const symbol = this.SYMBOLS[Math.floor(Math.random() * this.SYMBOLS.length)];
+                const quadrant = this.QUADRANTS[Math.floor(Math.random() * this.QUADRANTS.length)];
+                return { symbol, quadrant };
+            }
+
+            checkGameOver() {
+                if (!this.gridState.includes(null)) return true;
+
+                for (let r = 0; r < this.GRID_SIZE; r++) {
+                    for (let c = 0; c < this.GRID_SIZE; c++) {
+                        if (!this.gridState[r * this.GRID_SIZE + c]) {
+                            if ((c < this.GRID_SIZE - 1 && !this.gridState[r * this.GRID_SIZE + c + 1]) ||
+                                (r < this.GRID_SIZE - 1 && !this.gridState[(r + 1) * this.GRID_SIZE + c])) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+                return true;
+            }
+
+            showGameOver() {
+                this.isGameOver = true;
+                this.DOMElements.finalScore.textContent = this.score;
+                this.DOMElements.gameOverModal.classList.remove('hidden');
+                this.DOMElements.rollDiceBtn.disabled = true;
+
+                // Cancel any active superpowers
+                if (this.activeSuperpower) {
+                    this.cancelSuperpower();
+                }
+
+                // Update UI to disable all superpowers
+                this.updateSuperpowerUI();
+
+                // Check no mistakes achievement
+                if (this.usedSuperpowers.size === 0) {
+                    const achievement = this.achievements.check('noMistakes');
+                    if (achievement) this.showAchievement(achievement);
+                }
+
+                NotificationSystem.show('Game Over!', 'info');
+            }
+
+            updateProgressBar() {
+                const filled = this.gridState.filter(c => c !== null).length;
+                const percentage = (filled / (this.GRID_SIZE * this.GRID_SIZE)) * 100;
+                this.DOMElements.progressBarFill.style.width = `${percentage}%`;
+            }
+
+            updateDiceDisplay() {
+                [this.DOMElements.dice1El, this.DOMElements.dice2El].forEach((el, i) => {
+                    el.innerHTML = '';
+                    if (this.currentRoll[i]) {
+                        const piece = this.currentRoll[i];
+                        const img = document.createElement('img');
+                        img.src = ImageLoader.getImageSrc(piece.symbol, piece.quadrant);
+                        img.alt = `${piece.symbol} ${piece.quadrant}`;
+                        el.appendChild(img);
+                    } else {
+                        el.textContent = '?';
+                    }
+                });
+            }
+
             celebrateNewHighScore() {
-                const rect = this.DOMElements.highScore.getBoundingClientRect();
+                const element = this.DOMElements.highScore;
+                element.classList.add('celebrating');
+                setTimeout(() => element.classList.remove('celebrating'), 500);
+
+                // Particle explosion
+                const rect = element.getBoundingClientRect();
                 const colors = ['#6a11cb', '#2575fc', '#c4b5fd', '#a78bfa'];
-                
+
                 for (let i = 0; i < 20; i++) {
                     const particle = document.createElement('div');
                     particle.style.cssText = `
@@ -671,12 +1985,12 @@
                         z-index: 1000;
                     `;
                     document.body.appendChild(particle);
-                    
+
                     const angle = (Math.PI * 2 * i) / 20;
                     const velocity = 100 + Math.random() * 100;
                     const tx = Math.cos(angle) * velocity;
                     const ty = Math.sin(angle) * velocity;
-                    
+
                     particle.animate([
                         { transform: 'translate(0, 0) scale(1)', opacity: 1 },
                         { transform: `translate(${tx}px, ${ty}px) scale(0)`, opacity: 0 }
@@ -685,54 +1999,49 @@
                         easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
                     }).onfinish = () => particle.remove();
                 }
+
+                NotificationSystem.show('🎉 New High Score!', 'success', 3000);
             }
 
             showComboIndicator(combo, multiplier) {
                 const indicator = document.createElement('div');
-                indicator.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-4xl md:text-6xl font-bold z-50 pointer-events-none';
-                indicator.style.cssText = `
-                    background: var(--accent-gradient);
-                    -webkit-background-clip: text;
-                    -webkit-text-fill-color: transparent;
-                    background-clip: text;
-                    text-shadow: 0 0 30px rgba(106, 17, 203, 0.3);
-                `;
+                indicator.className = 'combo-multiplier';
                 indicator.textContent = `${combo}x COMBO! 🔥`;
                 document.body.appendChild(indicator);
-                
-                indicator.animate([
-                    { opacity: 0, transform: 'translate(-50%, -50%) scale(0.5)' },
-                    { opacity: 1, transform: 'translate(-50%, -50%) scale(1.2)' },
-                    { opacity: 1, transform: 'translate(-50%, -50%) scale(1)' },
-                    { opacity: 0, transform: 'translate(-50%, -60%) scale(0.8)' }
-                ], {
-                    duration: 2000,
-                    easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)'
-                }).onfinish = () => indicator.remove();
+
+                setTimeout(() => indicator.remove(), 2000);
             }
 
             showAchievement(achievement) {
                 const notification = document.createElement('div');
-                notification.className = 'fixed top-20 right-4 glass-card rounded-xl p-4 z-[100] transform translate-x-0 transition-all duration-300 min-w-[200px]';
+                notification.className = 'fixed top-20 right-4 glass-card rounded-xl p-4 z-[100] transform translate-x-0 transition-all duration-300 min-w-[250px]';
                 notification.innerHTML = `
                     <div class="text-center">
-                        <div class="text-4xl mb-2">${achievement.icon}</div>
-                        <div class="font-bold text-sm" style="color: var(--accent);">Achievement Unlocked!</div>
-                        <div class="text-xs mt-1" style="color: var(--text-secondary);">${achievement.name}</div>
+                        <div class="text-5xl mb-2">${achievement.icon}</div>
+                        <div class="font-bold text-sm mb-1" style="color: var(--accent);">Achievement Unlocked!</div>
+                        <div class="font-semibold" style="color: var(--text);">${achievement.name}</div>
+                        <div class="text-xs mt-1" style="color: var(--text-secondary);">${achievement.description}</div>
                     </div>
                 `;
                 document.body.appendChild(notification);
-                
+
                 setTimeout(() => {
                     notification.style.transform = 'translateX(400px)';
                     notification.style.opacity = '0';
                     setTimeout(() => notification.remove(), 300);
                 }, 4000);
             }
-
         }
 
-        document.addEventListener('DOMContentLoaded', () => { gameManager.init(); });
+        // Initialize game when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                gameManager.init();
+            } catch (error) {
+                ErrorHandler.handle(error, 'Game');
+                document.body.innerHTML = '<div class="flex items-center justify-center min-h-screen"><div class="text-center p-8 glass-card rounded-2xl"><h1 class="text-2xl font-bold mb-4" style="color: var(--accent);">Error Loading Game</h1><p style="color: var(--text-secondary);">Please refresh the page to try again.</p></div></div>';
+            }
+        });
     </script>
 </body>
 </html>
