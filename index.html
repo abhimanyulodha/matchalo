@@ -169,7 +169,6 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
-            border-radius: 4px;
         }
 
         .grid-cell.empty { 
@@ -691,21 +690,7 @@
         class ErrorHandler {
             static handle(error, context) {
                 console.error(`Error in ${context}:`, error);
-                // In production, send to error tracking service
-                this.showUserFriendlyError(context);
-            }
-
-            static showUserFriendlyError(context) {
-                const messages = {
-                    'Storage': 'Unable to save game progress',
-                    'ImageLoader': 'Some images failed to load',
-                    'default': 'Something went wrong'
-                };
-                const message = messages[context] || messages.default;
-                // Don't show error for every small issue, only critical ones
-                if (context === 'Storage' || context === 'Game') {
-                    NotificationSystem.show(message, 'warning');
-                }
+                // Log errors silently without user notifications
             }
         }
 
@@ -791,92 +776,6 @@
             };
         };
 
-        // Enhanced Notification System
-        class NotificationSystem {
-            static queue = [];
-            static showing = false;
-
-            static show(message, type = 'info', duration = 3000) {
-                this.queue.push({ message, type, duration });
-                if (!this.showing) {
-                    this.showNext();
-                }
-            }
-
-            static showNext() {
-                if (this.queue.length === 0) {
-                    this.showing = false;
-                    return;
-                }
-
-                this.showing = true;
-                const { message, type, duration } = this.queue.shift();
-                
-                const notification = document.createElement('div');
-                const bgColor = type === 'error' ? 'rgba(239, 68, 68, 0.95)' : 
-                                type === 'warning' ? 'rgba(251, 191, 36, 0.95)' : 
-                                type === 'success' ? 'rgba(34, 197, 94, 0.95)' :
-                                'rgba(59, 130, 246, 0.95)';
-                
-                notification.className = 'fixed top-4 right-4 px-6 py-3 rounded-xl z-[100] transform translate-x-0 transition-all duration-300 text-white font-semibold shadow-xl';
-                notification.style.background = bgColor;
-                notification.style.backdropFilter = 'blur(10px)';
-                notification.textContent = message;
-                document.body.appendChild(notification);
-                
-                requestAnimationFrame(() => {
-                    notification.style.transform = 'translateX(0)';
-                });
-                
-                setTimeout(() => {
-                    notification.style.transform = 'translateX(400px)';
-                    notification.style.opacity = '0';
-                    setTimeout(() => {
-                        notification.remove();
-                        this.showNext();
-                    }, 300);
-                }, duration);
-            }
-        }
-
-        // Combo System
-        class ComboTracker {
-            constructor() {
-                this.combo = 0;
-                this.maxCombo = 0;
-                this.lastScoreTime = 0;
-                this.COMBO_TIMEOUT = 5000;
-            }
-            
-            recordScore(points) {
-                const now = Date.now();
-                if (now - this.lastScoreTime < this.COMBO_TIMEOUT && points > 0) {
-                    this.combo++;
-                    if (this.combo > this.maxCombo) this.maxCombo = this.combo;
-                    this.lastScoreTime = now;
-                    return this.combo;
-                } else if (points > 0) {
-                    this.combo = 1;
-                    this.lastScoreTime = now;
-                    return 1;
-                } else {
-                    this.combo = 0;
-                    return 0;
-                }
-            }
-            
-            getMultiplier() {
-                if (this.combo >= 5) return 2.0;
-                if (this.combo >= 3) return 1.5;
-                return 1.0;
-            }
-
-            reset() {
-                this.combo = 0;
-                this.lastScoreTime = 0;
-            }
-        }
-
         // Achievement System
         class AchievementSystem {
             constructor() {
@@ -885,12 +784,6 @@
                         name: 'Perfect Start', 
                         icon: '🎯', 
                         description: 'Score your first Perfect Shape',
-                        unlocked: false 
-                    },
-                    combo5: { 
-                        name: 'Combo Master', 
-                        icon: '🔥', 
-                        description: 'Achieve a 5x combo',
                         unlocked: false 
                     },
                     score500: { 
@@ -1086,11 +979,11 @@
                     MOVE: 'move'
                 };
                 
-                this.comboTracker = new ComboTracker();
                 this.achievements = new AchievementSystem();
                 this.previousScore = 0;
                 this.animationFrames = [];
                 this.eventListeners = [];
+                this.highScoreCelebrated = false;
                 
                 this.init();
             }
@@ -1143,6 +1036,7 @@
                     this.activeSuperpower = null;
                     this.superpowerState = {};
                     this.isGameOver = false;
+                    this.highScoreCelebrated = false;
 
                     this.DOMElements.gameBoard.innerHTML = '';
 
@@ -1276,9 +1170,6 @@
                         <li><b>Line Master:</b> 10 pts for a full row or column of the same color.</li>
                         <li><b>Diamond Heist (Penalty):</b> -10 pts for creating a diamond-shaped empty space.</li>
                     </ul>
-
-                    <h3 class="font-bold text-lg mt-4" style="color: var(--accent);">🔥 Combo System</h3>
-                    <p>Score multiple times within 5 seconds to build combos! 3x combo = 1.5x multiplier, 5x combo = 2x multiplier.</p>
                 `;
             }
 
@@ -1315,7 +1206,6 @@
                     this.renderCell(row, col);
                     this.firstPieceLocation = null;
                     this.placementState = 'AWAITING_FIRST_PLACEMENT';
-                    NotificationSystem.show('Piece picked up', 'info', 1500);
                 }
             }
 
@@ -1333,8 +1223,6 @@
                     if (isAdjacent && !this.gridState[index]) {
                         this.placePiece(row, col, 1);
                         this.endTurn();
-                    } else if (!isAdjacent) {
-                        NotificationSystem.show('Pieces must be adjacent', 'warning', 2000);
                     }
                 }
             }
@@ -1402,7 +1290,6 @@
                     this.activeSuperpower = powerName;
                     this.superpowerState = {};
                     this.updateSuperpowerUI();
-                    NotificationSystem.show(`${powerName} activated - Click on the board`, 'info', 2000);
                 }
             }
 
@@ -1418,7 +1305,6 @@
                 this.cancelSuperpower();
                 this.calculateTotalScore();
                 this.updateSuperpowerUI();
-                NotificationSystem.show(`${powerName} used!`, 'success', 2000);
             }
 
             handleSuperpowerClick(row, col) {
@@ -1713,25 +1599,15 @@
                         }
                     }
 
-                    // Calculate score with combo multiplier
-                    const rawScore = Object.values(scoreBreakdown).reduce((a, b) => a + b, 0);
-                    const scoreThisTurn = rawScore - this.previousScore;
-                    const combo = this.comboTracker.recordScore(scoreThisTurn);
-                    const multiplier = this.comboTracker.getMultiplier();
-
-                    this.score = Math.floor(rawScore * multiplier);
-                    this.previousScore = rawScore;
+                    // Calculate final score (no combo multipliers)
+                    const totalScore = Object.values(scoreBreakdown).reduce((a, b) => a + b, 0);
+                    this.score = totalScore;
 
                     // Highlight scoring cells
                     this.highlightScoringCells(scoringCells);
 
-                    // Show combo UI
-                    if (combo > 1) {
-                        this.showComboIndicator(combo, multiplier);
-                    }
-
                     // Check achievements
-                    this.checkAchievements(scoreBreakdown, combo);
+                    this.checkAchievements(scoreBreakdown);
 
                     this.updateScoreUI(scoreBreakdown);
 
@@ -1755,14 +1631,9 @@
                 });
             }
 
-            checkAchievements(breakdown, combo) {
+            checkAchievements(breakdown) {
                 if (breakdown.perfectShape >= 40) {
                     const achievement = this.achievements.check('firstPerfectShape');
-                    if (achievement) this.showAchievement(achievement);
-                }
-
-                if (combo >= 5) {
-                    const achievement = this.achievements.check('combo5');
                     if (achievement) this.showAchievement(achievement);
                 }
 
@@ -1803,7 +1674,12 @@
                 if (this.score > this.highScore) {
                     this.highScore = this.score;
                     Storage.set(`matchaloHighScore_${this.config.id}`, this.highScore);
-                    this.celebrateNewHighScore();
+                    
+                    // Celebrate only once per game
+                    if (!this.highScoreCelebrated) {
+                        this.celebrateNewHighScore();
+                        this.highScoreCelebrated = true;
+                    }
                 }
 
                 this.DOMElements.highScore.textContent = this.highScore;
@@ -1937,8 +1813,6 @@
                     const achievement = this.achievements.check('noMistakes');
                     if (achievement) this.showAchievement(achievement);
                 }
-
-                NotificationSystem.show('Game Over!', 'info');
             }
 
             updateProgressBar() {
@@ -1999,17 +1873,6 @@
                         easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
                     }).onfinish = () => particle.remove();
                 }
-
-                NotificationSystem.show('🎉 New High Score!', 'success', 3000);
-            }
-
-            showComboIndicator(combo, multiplier) {
-                const indicator = document.createElement('div');
-                indicator.className = 'combo-multiplier';
-                indicator.textContent = `${combo}x COMBO! 🔥`;
-                document.body.appendChild(indicator);
-
-                setTimeout(() => indicator.remove(), 2000);
             }
 
             showAchievement(achievement) {
