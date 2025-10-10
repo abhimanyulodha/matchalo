@@ -6,6 +6,7 @@
     <title>MATCHALO</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     
@@ -283,15 +284,10 @@
 
         /* Dice Enhancement */
         #dice-1, #dice-2 {
-            background: transparent; /* Changed */
-            box-shadow: none; /* Changed */
-            border: none; /* Changed */
-            transition: all 0.3s;
-        }
-
-        /* Bug Fix: No special styling on dice with images to prevent artifacts */
-        #dice-1:has(img), #dice-2:has(img) {
+            background: transparent;
             box-shadow: none;
+            border: none;
+            transition: all 0.3s;
         }
 
         .dice-tumble {
@@ -550,7 +546,9 @@
                 
                 <div class="p-4 rounded-2xl control-panel-card">
                     <div class="flex justify-center items-center gap-2">
-                        <button id="roll-dice-btn" class="transition-transform hover:scale-110 focus:outline-none text-6xl" aria-label="Roll dice">🎲</button>
+                        <button id="roll-dice-btn" class="transition-transform hover:scale-110 focus:outline-none w-20 h-20 p-2" aria-label="Roll dice">
+                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" zoomAndPan="magnify" viewBox="0 0 810 809.999993" preserveAspectRatio="xMidYMid meet" version="1.0"><defs><clipPath id="e22954cc75"><path d="M 76.496094 46 L 733.496094 46 L 733.496094 764 L 76.496094 764 Z M 76.496094 46 " clip-rule="nonzero"/></clipPath></defs><g clip-path="url(#e22954cc75)"><path fill="#1d2a89" d="M 470.445312 746.207031 L 667.625 632.363281 C 708.308594 609.066406 733.242188 565.761719 733.242188 518.84375 L 733.242188 291.15625 C 733.242188 244.238281 708.308594 201.261719 667.625 177.636719 L 470.445312 63.792969 C 429.765625 40.5 379.894531 40.5 339.542969 63.792969 L 142.363281 177.636719 C 101.683594 201.261719 76.746094 244.566406 76.746094 291.15625 L 76.746094 518.84375 C 76.746094 565.761719 101.683594 608.738281 142.363281 632.363281 L 339.542969 746.207031 C 379.894531 769.5 429.765625 769.5 470.445312 746.207031 Z M 470.445312 746.207031 " fill-opacity="1" fill-rule="nonzero"/></g><path fill="#ffffff" d="M 400.894531 392.859375 C 377.269531 392.859375 353.648438 386.628906 332.324219 374.488281 L 135.472656 260.644531 C 132.523438 259.003906 131.539062 255.394531 133.179688 252.441406 C 134.816406 249.488281 138.425781 248.503906 141.378906 250.144531 L 338.558594 363.988281 C 377.269531 386.300781 424.84375 386.300781 463.558594 363.988281 L 660.734375 250.472656 C 663.6875 248.832031 667.296875 249.816406 668.9375 252.769531 C 670.578125 255.722656 669.59375 259.332031 666.640625 260.972656 L 469.460938 374.488281 C 448.464844 386.957031 424.515625 392.859375 400.894531 392.859375 Z M 400.894531 392.859375 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 400.894531 716.679688 C 397.613281 716.679688 394.988281 714.054688 394.988281 710.773438 L 394.988281 482.753906 C 394.988281 433.871094 421.234375 388.597656 463.558594 364.316406 L 660.734375 250.472656 C 663.6875 248.832031 667.296875 249.816406 668.9375 252.769531 C 670.578125 255.722656 669.59375 259.332031 666.640625 260.972656 L 469.460938 374.488281 C 430.75 396.796875 406.796875 438.136719 406.796875 482.753906 L 406.796875 710.445312 C 406.796875 713.726562 404.175781 716.679688 400.894531 716.679688 Z M 400.894531 716.679688 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 400.894531 716.679688 C 397.613281 716.679688 394.988281 714.054688 394.988281 710.773438 L 394.988281 482.753906 C 394.988281 438.136719 371.039062 396.796875 332.324219 374.488281 L 135.472656 260.644531 C 132.523438 259.003906 131.539062 255.394531 133.179688 252.441406 C 134.816406 249.488281 138.425781 248.503906 141.378906 250.144531 L 338.558594 363.988281 C 380.878906 388.269531 407.125 433.871094 407.125 482.425781 L 407.125 710.117188 C 406.796875 713.726562 404.175781 716.679688 400.894531 716.679688 Z M 400.894531 716.679688 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 459.949219 248.503906 C 441.902344 258.675781 441.902344 275.40625 459.949219 285.90625 C 477.992188 296.078125 507.191406 296.078125 525.238281 285.90625 C 543.28125 275.734375 543.28125 259.003906 525.238281 248.503906 C 507.191406 238.003906 477.992188 238.003906 459.949219 248.503906 Z M 437.308594 298.703125 C 419.265625 288.53125 390.066406 288.53125 372.023438 298.703125 C 353.976562 308.871094 353.976562 325.605469 372.023438 336.101562 C 390.066406 346.273438 419.265625 346.273438 437.308594 336.101562 C 455.355469 325.605469 455.355469 308.871094 437.308594 298.703125 Z M 437.308594 97.914062 C 419.265625 87.742188 390.066406 87.742188 372.023438 97.914062 C 353.976562 108.085938 353.976562 124.816406 372.023438 135.316406 C 390.066406 145.488281 419.265625 145.488281 437.308594 135.316406 C 455.355469 124.816406 455.355469 108.085938 437.308594 97.914062 Z M 261.785156 235.382812 C 279.832031 225.210938 279.832031 208.476562 261.785156 197.980469 C 243.742188 187.808594 214.542969 187.808594 196.496094 197.980469 C 178.453125 208.148438 178.453125 224.882812 196.496094 235.382812 C 214.871094 245.878906 244.070312 245.878906 261.785156 235.382812 Z M 612.835938 235.382812 C 630.878906 225.210938 630.878906 208.476562 612.835938 197.980469 C 594.789062 187.808594 565.589844 187.808594 547.546875 197.980469 C 529.5 208.148438 529.5 224.882812 547.546875 235.382812 C 565.917969 245.878906 595.117188 245.878906 612.835938 235.382812 Z M 284.425781 148.109375 C 266.378906 158.28125 266.378906 175.015625 284.425781 185.511719 C 302.46875 195.683594 331.667969 195.683594 349.710938 185.511719 C 367.757812 175.34375 367.757812 158.609375 349.710938 148.109375 C 331.667969 137.613281 302.46875 137.613281 284.425781 148.109375 Z M 284.425781 148.109375 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 567.558594 462.085938 C 549.84375 472.257812 535.40625 496.863281 535.734375 517.203125 C 536.0625 537.546875 550.5 546.074219 568.214844 535.90625 C 585.933594 525.734375 600.367188 501.128906 600.039062 480.785156 C 599.710938 460.445312 585.277344 451.914062 567.558594 462.085938 Z M 567.558594 462.085938 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 480.617188 485.707031 C 498.332031 475.539062 512.769531 450.929688 512.441406 430.589844 C 512.113281 410.25 497.675781 401.71875 479.960938 411.890625 C 462.246094 422.058594 447.808594 446.667969 448.136719 467.007812 C 448.464844 487.347656 462.902344 495.550781 480.617188 485.707031 Z M 480.617188 485.707031 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 655.484375 586.429688 C 673.203125 576.257812 687.636719 551.652344 687.308594 531.3125 C 686.980469 510.972656 672.546875 502.441406 654.828125 512.609375 C 637.113281 522.78125 622.675781 547.386719 623.003906 567.730469 C 623.332031 588.070312 637.769531 596.601562 655.484375 586.429688 Z M 655.484375 586.429688 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 358.570312 469.304688 C 358.570312 448.636719 343.808594 423.371094 326.089844 412.875 C 308.046875 402.375 293.609375 410.90625 293.609375 431.574219 C 293.609375 452.242188 308.375 477.507812 326.089844 488.003906 C 344.136719 498.175781 358.570312 489.972656 358.570312 469.304688 Z M 184.03125 570.027344 C 184.03125 549.355469 169.265625 524.09375 151.550781 513.59375 C 133.503906 503.097656 119.070312 511.625 119.070312 532.296875 C 119.070312 552.964844 133.832031 578.226562 151.550781 588.726562 C 169.59375 598.898438 184.359375 590.695312 184.03125 570.027344 Z M 150.894531 311.167969 C 132.851562 300.667969 118.414062 309.199219 118.414062 329.867188 C 118.414062 350.539062 133.179688 375.800781 150.894531 386.300781 C 168.9375 396.796875 183.375 388.269531 183.375 367.597656 C 183.375 346.929688 168.9375 321.667969 150.894531 311.167969 Z M 326.417969 614.972656 C 308.375 604.472656 293.9375 613.003906 293.9375 633.671875 C 293.9375 654.34375 308.703125 679.605469 326.417969 690.105469 C 344.464844 700.601562 358.898438 692.074219 358.898438 671.402344 C 358.898438 650.734375 344.464844 625.472656 326.417969 614.972656 Z M 326.417969 614.972656 " fill-opacity="1" fill-rule="nonzero"/></svg>
+                        </button>
                         <div class="flex-1 grid grid-cols-2 gap-3">
                             <div id="dice-1" class="w-full aspect-square rounded-lg flex items-center justify-center text-4xl text-gray-400" aria-label="First dice">?</div>
                             <div id="dice-2" class="w-full aspect-square rounded-lg flex items-center justify-center text-4xl text-gray-400" aria-label="Second dice">?</div>
@@ -616,13 +614,11 @@
             <button id="close-modal-btn" class="absolute top-4 right-4 w-8 h-8 rounded-full text-xl flex items-center justify-center font-bold text-gray-500 hover:bg-gray-200/50" aria-label="Close">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
-            <h2 class="text-3xl font-bold mb-2 premium-header" style="color: var(--accent);">Game Over!</h2>
+            <h2 id="game-over-title" class="text-3xl font-bold mb-2 premium-header" style="color: var(--accent);">MatchAlo Game Over!</h2>
             <p class="mb-4" style="color: var(--text-secondary);">You can no longer make a move.</p>
             
-            <div class="my-4 p-4 rounded-xl bg-purple-50">
-                <p class="text-sm font-semibold" style="color: var(--text-secondary);">Final Score</p>
-                <div id="final-score" class="text-6xl font-bold my-2 premium-header" style="color: var(--accent);">0</div>
-            </div>
+            <p class="text-sm font-semibold" style="color: var(--text-secondary);">Final Score</p>
+            <div id="final-score" class="text-6xl font-bold my-2 premium-header" style="color: var(--accent);">0</div>
             
             <div id="game-over-stats" class="grid grid-cols-2 gap-x-4 gap-y-2 text-left text-sm my-4" style="color: var(--text-secondary);"></div>
 
@@ -661,8 +657,8 @@
         <div class="modal-content w-full max-w-lg glass-card rounded-2xl p-6 relative">
             <div class="flex justify-between items-start mb-4">
                 <div class="flex-grow">
-                    <h2 class="text-3xl font-bold" style="color: var(--accent);">How to Play Matchalo</h2>
-                    <p class="text-sm mt-2 font-bold" style="color: var(--text-secondary);">A fun and simple block based artwork game</p>
+                    <h2 id="help-title" class="text-3xl font-bold" style="color: var(--accent);">How to Play MatchAlo!</h2>
+                    <p id="help-subtitle" class="text-sm mt-2 font-bold" style="color: var(--text-secondary);">A fun and simple block based artwork game by Abhimanyu Lodha</p>
                 </div>
                 <button id="close-help-modal-btn" class="w-10 h-10 rounded-full text-xl flex items-center justify-center font-bold flex-shrink-0" aria-label="Close">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -696,7 +692,7 @@
             <div id="badges-content" class="grid grid-cols-3 gap-4 mb-4"></div>
             <button id="share-badges-btn" class="share-button w-full">
                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z"></path></svg>
-                Share Collection
+                Share Alo Badges
             </button>
         </div>
     </div>
@@ -705,15 +701,6 @@
 
     <script>
         // ===== FULL SCRIPT WITH ALL METHODS RESTORED =====
-        const SVGIcons = {
-            star: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-full h-full"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.007z" clip-rule="evenodd" /></svg>',
-            target: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-full h-full"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z" /><path fill-rule="evenodd" d="M1.323 11.447C2.811 6.976 7.028 3.75 12.001 3.75c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113C21.182 17.022 16.97 20.25 12.001 20.25c-4.97 0-9.185-3.223-10.675-7.69a.998.998 0 010-1.113zM12.001 18C15.866 18 19.342 15.667 20.672 12C19.342 8.332 15.866 6 12.001 6C8.134 6 4.658 8.332 3.328 12.001c1.33 3.667 4.808 6 8.673 6z" clip-rule="evenodd" /></svg>',
-            gem: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-full h-full"><path d="M12.001 2.25A2.25 2.25 0 009.75 4.5v1.342a1.125 1.125 0 01-1.342 1.059 10.42 10.42 0 00-4.322 2.05S3 14.323 3 16.5a3 3 0 003 3h12a3 3 0 003-3c0-2.177-1.085-7.549-1.085-7.549a10.42 10.42 0 00-4.322-2.05A1.125 1.125 0 0114.25 5.842V4.5A2.25 2.25 0 0012.001 2.25z" /></svg>',
-            crown: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-full h-full"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm11.378-3.917c-.89-1.423-2.573-1.423-3.463 0l-1.013.805A1.875 1.875 0 008.25 10.5v.183c0 .54.22 1.033.582 1.385l.74 1.233c.5.833 1.625.833 2.125 0l.74-1.233a1.875 1.875 0 00.582-1.385v-.183a1.875 1.875 0 00-.97-1.686l-1.013-.805z" clip-rule="evenodd" /></svg>',
-            ruler: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-full h-full"><path fill-rule="evenodd" d="M3.75 3A1.5 1.5 0 002.25 4.5v15A1.5 1.5 0 003.75 21h16.5a1.5 1.5 0 001.5-1.5V15a.75.75 0 00-1.5 0v3.75H3.75V4.5h3.75a.75.75 0 000-1.5H3.75zm17.78 6.97a.75.75 0 00-1.06-1.06l-1.5 1.5a.75.75 0 101.06 1.06l1.5-1.5zm-2.56.53a.75.75 0 010 1.06l-4.5 4.5a.75.75 0 01-1.06 0l-1.5-1.5a.75.75 0 011.06-1.06l.97.97 3.97-3.97a.75.75 0 011.06 0z" clip-rule="evenodd" /></svg>',
-            sparkles: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-full h-full"><path fill-rule="evenodd" d="M9.315 7.584C12.195 3.883 16.695 1.5 21.75 1.5a.75.75 0 01.75.75c0 5.056-2.383 9.555-6.084 12.436A6.75 6.75 0 019.75 22.5a.75.75 0 01-.75-.75v-7.19c0-1.767-.992-3.27-2.484-4.043a6.376 6.376 0 01-3.286-1.127.75.75 0 01.536-1.304 4.876 4.876 0 003.328 1.455c1.45.099 2.813-.34 3.985-1.22z" clip-rule="evenodd" /></svg>',
-        };
-
         const NotificationSystem = {
             show(message, type = 'success', duration = 3000) {
                 const container = document.getElementById('toast-container');
@@ -794,11 +781,11 @@
         class AchievementSystem {
              constructor() {
                 this.achievements = {
-                    firstPerfectShape: { name: 'Perfect Start', icon: SVGIcons.target, description: 'Score your first Perfect Shape', unlocked: false },
-                    score500: { name: 'High Roller', icon: SVGIcons.gem, description: 'Reach a score of 500', unlocked: false },
-                    fillBoard: { name: 'Completionist', icon: SVGIcons.crown, description: 'Fill the entire board', unlocked: false },
-                    lineMaster: { name: 'Line Master', icon: SVGIcons.ruler, description: 'Create a full line of same color', unlocked: false },
-                    noMistakes: { name: 'Perfectionist', icon: SVGIcons.sparkles, description: 'Complete a game without using superpowers', unlocked: false }
+                    firstPerfectShape: { name: 'Perfect Start', icon: '🎯', description: 'Score your first Perfect Shape', unlocked: false },
+                    score500: { name: 'High Roller', icon: '💎', description: 'Reach a score of 500', unlocked: false },
+                    fillBoard: { name: 'Completionist', icon: '👑', description: 'Fill the entire board', unlocked: false },
+                    lineMaster: { name: 'Line Master', icon: '📏', description: 'Create a full line of same color', unlocked: false },
+                    noMistakes: { name: 'Perfectionist', icon: '✨', description: 'Complete a game without using superpowers', unlocked: false }
                 };
                 this.loadProgress();
             }
@@ -862,10 +849,16 @@
                     }
                     button.textContent = config.name;
                     button.addEventListener('click', () => {
-                        this.switchEdition(config.id);
-                        document.getElementById('edition-select-modal').classList.add('hidden');
-                        this.populateEditionModal();
-                        NotificationSystem.show(`Switched to ${config.name} edition`);
+                        const isGameInProgress = this.currentGame && !this.currentGame.isGameOver && this.currentGame.gridState.some(c => c !== null);
+                        if (isGameInProgress) {
+                            if (confirm('Start a new game in this edition? Your current progress will be lost.')) {
+                                this.switchEdition(config.id);
+                                document.getElementById('edition-select-modal').classList.add('hidden');
+                            }
+                        } else {
+                            this.switchEdition(config.id);
+                            document.getElementById('edition-select-modal').classList.add('hidden');
+                        }
                     });
                     container.appendChild(button);
                 });
@@ -877,7 +870,7 @@
                 document.getElementById('close-edition-select-modal-btn').addEventListener('click', () => document.getElementById('edition-select-modal').classList.add('hidden'));
                 document.getElementById('badges-btn').addEventListener('click', () => this.showBadgesModal());
                 document.getElementById('close-badges-modal-btn').addEventListener('click', () => document.getElementById('badges-modal').classList.add('hidden'));
-                document.getElementById('share-score-btn').addEventListener('click', () => this.shareScore());
+                document.getElementById('share-score-btn').addEventListener('click', (e) => this.shareScore(e.currentTarget));
                 document.getElementById('share-badges-btn').addEventListener('click', () => this.shareBadges());
                 document.getElementById('confirm-restart-cancel-btn').addEventListener('click', () => document.getElementById('confirm-restart-modal').classList.add('hidden'));
                 document.getElementById('confirm-restart-ok-btn').addEventListener('click', () => {
@@ -885,21 +878,50 @@
                     this.switchEdition(this.activeEditionId);
                 });
             },
-            shareScore() {
+            async shareScore(button) {
+                const originalText = button.innerHTML;
+                button.disabled = true;
+                button.innerHTML = 'Preparing...';
+
                 const score = this.currentGame.score;
-                const message = `✨ I scored ${score} in MatchAlo! ✨\nThink you can beat my score? 🎲\n${window.location.href}`;
-                if (navigator.share) {
-                    navigator.share({ title: 'MatchAlo Score', text: message }).catch(err => {});
-                } else {
-                    this.copyToClipboard(message, 'Score copied to clipboard!');
+                const message = `✨ I scored ${score} in MatchAlo! ✨\nThink you can beat my score? 🎲\nhttps://abhimanyulodha.github.io/matchalo/`;
+                const title = 'My MatchAlo Score!';
+
+                try {
+                    const boardElement = document.getElementById('game-board');
+                    const canvas = await html2canvas(boardElement);
+                    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                    const file = new File([blob], 'matchalo-board.png', { type: 'image/png' });
+                    
+                    const shareData = {
+                        files: [file],
+                        title: title,
+                        text: message,
+                    };
+
+                    if (navigator.canShare && navigator.canShare(shareData)) {
+                        await navigator.share(shareData);
+                    } else {
+                        throw new Error('File sharing not supported');
+                    }
+                } catch (err) {
+                    // Fallback to text-only sharing
+                    try {
+                        await navigator.share({ title, text: message });
+                    } catch (textErr) {
+                        this.copyToClipboard(message, 'Score copied to clipboard!');
+                    }
+                } finally {
+                    button.disabled = false;
+                    button.innerHTML = originalText;
                 }
             },
             shareBadges() {
                 const unlockedBadges = Object.values(this.currentGame.achievements.achievements)
                     .filter(a => a.unlocked).map(a => a.name).join(', ');
-                const message = `🏆 My MatchAlo Badge Collection 🏆\n${unlockedBadges || 'Just starting my journey!'}\n${window.location.href}`;
+                const message = `🏆 My MatchAlo Badge Collection 🏆\n${unlockedBadges || 'Just starting my journey!'}\nhttps://abhimanyulodha.github.io/matchalo/`;
                 if (navigator.share) {
-                    navigator.share({ title: 'MatchAlo Badges', text: message }).catch(err => {});
+                    navigator.share({ title: 'My MatchAlo Badges', text: message }).catch(err => {});
                 } else {
                     this.copyToClipboard(message, 'Badge collection copied to clipboard!');
                 }
@@ -910,7 +932,7 @@
                         .then(() => NotificationSystem.show(successMessage))
                         .catch(err => ErrorHandler.handle(err, 'copyToClipboard', 'Could not copy to clipboard.'));
                 } else {
-                    alert('Sharing is not supported on this browser.');
+                    alert('Copying to clipboard is not supported on this browser.');
                 }
             },
             showBadgesModal() {
@@ -970,7 +992,8 @@
                     moveBtn: 'move-btn', exchangeModal: 'exchange-modal', exchangeOptions: 'exchange-options',
                     closeExchangeModalBtn: 'close-exchange-modal-btn', helpModalContent: 'help-modal-content',
                     gameOverStats: 'game-over-stats', confirmRestartModal: 'confirm-restart-modal',
-                    confirmRestartCancelBtn: 'confirm-restart-cancel-btn', confirmRestartOkBtn: 'confirm-restart-ok-btn'
+                    confirmRestartCancelBtn: 'confirm-restart-cancel-btn', confirmRestartOkBtn: 'confirm-restart-ok-btn',
+                    gameOverTitle: 'game-over-title', helpTitle: 'help-title', helpSubtitle: 'help-subtitle'
                 };
                 const elements = {};
                 for (const key in elementMap) {
@@ -1024,8 +1047,8 @@
                 this.updateProgressBar();
                 this.updateDiceDisplay();
                 this.updateSuperpowerUI();
-                this.DOMElements.spCharge1.innerHTML = SVGIcons.star;
-                this.DOMElements.spCharge2.innerHTML = SVGIcons.star;
+                this.DOMElements.spCharge1.innerHTML = '✨';
+                this.DOMElements.spCharge2.innerHTML = '✨';
                 this.DOMElements.gameOverModal.classList.add('hidden');
                 this.DOMElements.rollDiceBtn.disabled = false;
                 this.setupEventListeners();
@@ -1037,8 +1060,17 @@
             }
 
             setupEventListeners() {
+                const handleResetClick = () => {
+                    const isGameInProgress = !this.isGameOver && this.gridState.some(c => c !== null);
+                    if (isGameInProgress) {
+                        this.DOMElements.confirmRestartModal.classList.remove('hidden');
+                    } else {
+                        gameManager.switchEdition(gameManager.activeEditionId);
+                    }
+                };
+
                 this.addManagedEventListener(this.DOMElements.rollDiceBtn, 'click', this.handleRollDice.bind(this));
-                this.addManagedEventListener(this.DOMElements.resetBtn, 'click', () => this.DOMElements.confirmRestartModal.classList.remove('hidden'));
+                this.addManagedEventListener(this.DOMElements.resetBtn, 'click', handleResetClick);
                 this.addManagedEventListener(this.DOMElements.restartModalBtn, 'click', () => gameManager.switchEdition(gameManager.activeEditionId));
                 this.addManagedEventListener(this.DOMElements.closeModalBtn, 'click', () => this.DOMElements.gameOverModal.classList.add('hidden'));
                 this.addManagedEventListener(this.DOMElements.rotateBtn, 'click', () => this.activateSuperpower(this.SUPERPOWERS.ROTATE));
@@ -1418,7 +1450,7 @@
 
             showAchievement(achievement) {
                 this.stats.badgesUnlocked++;
-                NotificationSystem.show(`Achievement: ${achievement.name}`, 'success');
+                // Notifications are disabled as per user request
             }
 
             celebrateNewHighScore() {
