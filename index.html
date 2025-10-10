@@ -42,13 +42,188 @@
         hr { border-color: var(--faint-border); }
         .superpower-btn--active { background-color: var(--accent-light) !important; box-shadow: 0 0 0 2px var(--accent); }
         .pulsing-cell { animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(106, 17, 203, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(106, 17, 203, 0); } 100% { box-shadow: 0 0 0 0 rgba(106, 17, 203, 0); } }
-        @keyframes dice-tumble { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(-180deg) scale(1.1); } 100% { transform: rotate(-360deg) scale(1); } }
-        .dice-tumble { animation: dice-tumble 0.6s var(--ease-bounce); }
-        .modal-overlay { background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); }
-        .edition-selected { background-color: var(--accent-light) !important; font-weight: 700; color: var(--accent); }
-        .score-item h3 { min-height: 2.25rem; display: flex; align-items: center; justify-content: center; line-height: 1.2; }
+
+        /* Enhanced pulse with better performance */
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(106, 17, 203, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(106, 17, 203, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(106, 17, 203, 0); }
+        }
+
+        /* Score animation */
+        @keyframes score-pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .score-change {
+            animation: score-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Glow pulse for active superpowers */
+        @keyframes glow-pulse {
+            0%, 100% {
+                box-shadow: 0 0 0 2px var(--accent), 0 0 20px rgba(106, 17, 203, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 0 2px var(--accent), 0 0 30px rgba(106, 17, 203, 0.5);
+            }
+        }
+
+        .superpower-btn--active {
+            animation: glow-pulse 2s ease-in-out infinite;
+        }
+
+        /* Progress bar shimmer */
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .progress-bar-fill {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.5), 
+                transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        /* Modal animations */
+        @keyframes modal-fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes modal-slide-up {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-overlay {
+            animation: modal-fade-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .modal-content {
+            animation: modal-slide-up 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Enhanced button effects */
+        .themed-button {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .themed-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.3), 
+                transparent);
+            transition: left 0.5s;
+        }
+
+        .themed-button:hover::before {
+            left: 100%;
+        }
+
+        .themed-button:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        /* Grid cell hover effects */
+        .grid-cell {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .grid-cell::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, 
+                rgba(106, 17, 203, 0.05) 0%, 
+                transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .grid-cell:hover::after {
+            opacity: 1;
+        }
+
+        .grid-cell.empty:hover {
+            background: linear-gradient(135deg, 
+                rgba(106, 17, 203, 0.03) 0%, 
+                rgba(106, 17, 203, 0.08) 100%);
+            box-shadow: inset 0 0 0 2px var(--accent-light);
+        }
+
+        .grid-cell img {
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .grid-cell:hover img {
+            transform: scale(1.05);
+        }
+
+        /* Enhanced glass card */
+        .glass-card {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.95) 0%, 
+                rgba(255, 255, 255, 0.85) 100%);
+            backdrop-filter: blur(25px) saturate(200%);
+            -webkit-backdrop-filter: blur(25px) saturate(200%);
+            box-shadow: 
+                0 8px 32px rgba(106, 17, 203, 0.12),
+                0 2px 8px rgba(106, 17, 203, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        /* Dice enhancement */
+        #dice-1, #dice-2 {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.9) 0%, 
+                rgba(255, 255, 255, 0.6) 100%);
+            box-shadow: 
+                inset 0 2px 8px rgba(0, 0, 0, 0.08),
+                0 2px 12px rgba(106, 17, 203, 0.1);
+            transition: all 0.3s;
+        }
+
+        #dice-1:has(img), #dice-2:has(img) {
+            box-shadow: 
+                inset 0 2px 8px rgba(0, 0, 0, 0.08),
+                0 4px 20px rgba(106, 17, 203, 0.15);
+        }
+
         .debug-tooltip { position: absolute; bottom: 105%; left: 50%; transform: translateX(-50%); background-color: black; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; white-space: nowrap; z-index: 10; pointer-events: none; opacity: 0; transition: opacity 0.2s ease-in-out; }
+    
     </style>
 </head>
 <body class="p-2 lg:p-4 flex items-center justify-center min-h-screen">
@@ -124,6 +299,150 @@
     <div id="edition-select-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden"><div class="modal-content w-full max-w-sm glass-card rounded-2xl p-6 relative"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold" style="color: var(--accent);">Select Edition</h2><button id="close-edition-select-modal-btn" class="w-10 h-10 rounded-full text-xl flex items-center justify-center font-bold">×</button></div><div id="edition-options" class="flex flex-col gap-3 max-h-64 overflow-y-auto"></div></div></div>
     
     <script>
+
+        // ===== ERROR HANDLING & UTILITIES =====
+        class ErrorHandler {
+            static handle(error, context) {
+                console.error(`Error in ${context}:`, error);
+            }
+        }
+
+        class Storage {
+            static get(key, fallback = null) {
+                try {
+                    return localStorage.getItem(key) || fallback;
+                } catch (e) {
+                    ErrorHandler.handle(e, 'Storage.get');
+                    return fallback;
+                }
+            }
+            
+            static set(key, value) {
+                try {
+                    localStorage.setItem(key, value);
+                    return true;
+                } catch (e) {
+                    ErrorHandler.handle(e, 'Storage.set');
+                    return false;
+                }
+            }
+        }
+
+        class ImageLoader {
+            static async preloadImages(config) {
+                const promises = [];
+                const symbols = config.symbols;
+                const quadrants = ['TL', 'TR', 'BL', 'BR'];
+                
+                symbols.forEach(symbol => {
+                    quadrants.forEach(quadrant => {
+                        const promise = new Promise((resolve) => {
+                            const img = new Image();
+                            img.onload = () => resolve({ success: true, src: img.src });
+                            img.onerror = () => resolve({ success: false, src: img.src });
+                            img.src = `images/${symbol.toLowerCase()}_${quadrant}.svg`;
+                        });
+                        promises.push(promise);
+                    });
+                });
+                
+                return Promise.all(promises);
+            }
+        }
+
+        const debounce = (func, wait) => {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        };
+
+        class ComboTracker {
+            constructor() {
+                this.combo = 0;
+                this.maxCombo = 0;
+                this.lastScoreTime = 0;
+                this.COMBO_TIMEOUT = 5000;
+            }
+            
+            recordScore(points) {
+                const now = Date.now();
+                if (now - this.lastScoreTime < this.COMBO_TIMEOUT && points > 0) {
+                    this.combo++;
+                    if (this.combo > this.maxCombo) this.maxCombo = this.combo;
+                    this.lastScoreTime = now;
+                    return this.combo;
+                } else if (points > 0) {
+                    this.combo = 1;
+                    this.lastScoreTime = now;
+                    return 1;
+                } else {
+                    this.combo = 0;
+                    return 0;
+                }
+            }
+            
+            getMultiplier() {
+                if (this.combo >= 5) return 2.0;
+                if (this.combo >= 3) return 1.5;
+                return 1.0;
+            }
+        }
+
+        class AchievementSystem {
+            constructor() {
+                this.achievements = {
+                    firstPerfectShape: { name: 'Perfect Start', icon: '🎯', unlocked: false },
+                    combo5: { name: 'Combo Master', icon: '🔥', unlocked: false },
+                    score500: { name: 'High Roller', icon: '💎', unlocked: false },
+                    fillBoard: { name: 'Completionist', icon: '👑', unlocked: false },
+                };
+                this.loadProgress();
+            }
+            
+            check(key) {
+                if (!this.achievements[key]?.unlocked) {
+                    this.achievements[key].unlocked = true;
+                    this.saveProgress();
+                    return this.achievements[key];
+                }
+                return null;
+            }
+            
+            loadProgress() {
+                try {
+                    const saved = localStorage.getItem('matchalo_achievements');
+                    if (saved) {
+                        const progress = JSON.parse(saved);
+                        Object.keys(progress).forEach(key => {
+                            if (this.achievements[key]) {
+                                this.achievements[key].unlocked = progress[key];
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.error('Failed to load achievements', e);
+                }
+            }
+            
+            saveProgress() {
+                try {
+                    const progress = {};
+                    Object.keys(this.achievements).forEach(key => {
+                        progress[key] = this.achievements[key].unlocked;
+                    });
+                    localStorage.setItem('matchalo_achievements', JSON.stringify(progress));
+                } catch (e) {
+                    console.error('Failed to save achievements', e);
+                }
+            }
+        }
+
         const gameManager = {
             currentGame: null, activeEditionId: 'circles',
             editionConfigs: {
@@ -137,11 +456,20 @@
         };
 
         class Game {
-            constructor(config) { this.config = config; this.DOMElements = this.getDOMElements(); this.GRID_SIZE = 8; this.QUADRANTS = ['TL', 'TR', 'BL', 'BR']; this.IMAGE_PATH = 'images/'; this.SUPERPOWERS = { ROTATE: 'rotate', SWAP: 'swap', EXCHANGE: 'exchange', MOVE: 'move' }; this.init(); }
+            constructor(config) { this.config = config; this.DOMElements = this.getDOMElements(); this.GRID_SIZE = 8; this.QUADRANTS = ['TL', 'TR', 'BL', 'BR']; this.IMAGE_PATH = 'images/'; this.SUPERPOWERS = { ROTATE: 'rotate', SWAP: 'swap', EXCHANGE: 'exchange', MOVE: 'move' }; this.comboTracker = new ComboTracker(); this.achievements = new AchievementSystem(); this.previousScore = 0; this.init(); }
             getDOMElements() { return { gameBoard: document.getElementById('game-board'), rollDiceBtn: document.getElementById('roll-dice-btn'), resetBtn: document.getElementById('reset-btn'), dice1El: document.getElementById('dice-1'), dice2El: document.getElementById('dice-2'), progressBarFill: document.getElementById('progress-bar-fill'), totalScore: document.getElementById('total-score'), highScore: document.getElementById('high-score'), scorePerfectShape: document.getElementById('score-perfect-shape'), scoreHalfBaked: document.getElementById('score-half-baked'), scoreAlmostThere: document.getElementById('score-almost-there'), scoreGreatSequence: document.getElementById('score-great-sequence'), scoreLineMaster: document.getElementById('score-line-master'), scoreDiamondHeist: document.getElementById('score-diamond-heist'), gameOverModal: document.getElementById('game-over-modal'), finalScore: document.getElementById('final-score'), restartModalBtn: document.getElementById('restart-modal-btn'), closeModalBtn: document.getElementById('close-modal-btn'), spCharge1: document.getElementById('sp-charge-1'), spCharge2: document.getElementById('sp-charge-2'), rotateBtn: document.getElementById('rotate-btn'), swapBtn: document.getElementById('swap-btn'), exchangeBtn: document.getElementById('exchange-btn'), moveBtn: document.getElementById('move-btn'), exchangeModal: document.getElementById('exchange-modal'), exchangeOptions: document.getElementById('exchange-options'), closeExchangeModalBtn: document.getElementById('close-exchange-modal-btn'), helpModalContent: document.getElementById('help-modal-content'), }; }
             init() {
-                this.SYMBOLS = this.config.symbols; this.gridState = Array(this.GRID_SIZE * this.GRID_SIZE).fill(null); this.currentRoll = []; this.firstPieceLocation = null; this.placementState = 'AWAITING_ROLL'; this.score = 0; this.highScore = localStorage.getItem(`matchaloHighScore_${this.config.id}`) || 0; this.lastClick = { time: 0, row: -1, col: -1 }; this.usedSuperpowers = new Set(); this.activeSuperpower = null; this.superpowerState = {};
+                this.SYMBOLS = this.config.symbols; this.gridState = Array(this.GRID_SIZE * this.GRID_SIZE).fill(null); this.currentRoll = []; this.firstPieceLocation = null; this.placementState = 'AWAITING_ROLL'; this.score = 0; this.highScore = Storage.get(`matchaloHighScore_${this.config.id}`, 0); this.previousScore = 0; this.lastClick = { time: 0, row: -1, col: -1 }; this.usedSuperpowers = new Set(); this.activeSuperpower = null; this.superpowerState = {};
                 this.DOMElements.gameBoard.innerHTML = '';
+                // Preload images
+                ImageLoader.preloadImages(this.config).then(results => {
+                    const failed = results.filter(r => !r.success);
+                    if (failed.length > 0) {
+                        console.warn('Some images failed to load:', failed);
+                    }
+                }).catch(err => {
+                    ErrorHandler.handle(err, 'ImageLoader');
+                });
                 for (let i = 0; i < this.GRID_SIZE * this.GRID_SIZE; i++) { const cell = document.createElement('div'); cell.className = 'grid-cell empty relative'; cell.dataset.index = i; const row = Math.floor(i / this.GRID_SIZE), col = i % this.GRID_SIZE; cell.dataset.row = row; cell.dataset.col = col; const tooltip = document.createElement('div'); tooltip.className = 'debug-tooltip'; cell.appendChild(tooltip); cell.addEventListener('click', () => this.onCellClick(row, col)); cell.addEventListener('mouseenter', () => { const piece = this.gridState[i]; if (piece) { tooltip.textContent = `S: ${piece.symbol}, Q: ${piece.quadrant}`; tooltip.style.opacity = 1; } }); cell.addEventListener('mouseleave', () => { tooltip.style.opacity = 0; }); this.DOMElements.gameBoard.appendChild(cell); }
                 this.populateHelpModal(); this.calculateTotalScore(); this.updateProgressBar(); this.updateDiceDisplay(); this.updateSuperpowerUI();
                 this.DOMElements.gameOverModal.classList.add('hidden'); this.DOMElements.rollDiceBtn.disabled = false;
@@ -169,9 +497,9 @@
                 const index = row * this.GRID_SIZE + col;
                 const piece = this.gridState[index];
                 switch (this.activeSuperpower) {
-                    case this.SUPERPOWERS.ROTATE: if (!piece) return; const order = ['TL', 'TR', 'BR', 'BL']; piece.quadrant = order[(order.indexOf(piece.quadrant) + 1) % 4]; this.renderCell(row, col); this.consumeSuperpower(this.SUPERPOWERS.ROTATE); break;
-                    case this.SUPERPOWERS.MOVE: if (!this.superpowerState.source) { if (!piece) return; this.superpowerState.source = { row, col }; this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`).classList.add('pulsing-cell'); } else { if (piece) return; const srcIdx = this.superpowerState.source.row * this.GRID_SIZE + this.superpowerState.source.col; this.gridState[index] = this.gridState[srcIdx]; this.gridState[srcIdx] = null; this.renderCell(this.superpowerState.source.row, this.superpowerState.source.col); this.renderCell(row, col); this.consumeSuperpower(this.SUPERPOWERS.MOVE); } break;
-                    case this.SUPERPOWERS.SWAP: if (!this.superpowerState.source) { if (!piece) return; this.superpowerState.source = { row, col }; this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`).classList.add('pulsing-cell'); } else { if (!piece || Math.abs(this.superpowerState.source.row - row) + Math.abs(this.superpowerState.source.col - col) !== 1) return; const srcIdx = this.superpowerState.source.row * this.GRID_SIZE + this.superpowerState.source.col; const temp = this.gridState[srcIdx]; this.gridState[srcIdx] = this.gridState[index]; this.gridState[index] = temp; this.renderCell(this.superpowerState.source.row, this.superpowerState.source.col); this.renderCell(row, col); this.consumeSuperpower(this.SUPERPOWERS.SWAP); } break;
+                    case this.SUPERPOWERS.ROTATE: if (!piece) return; const order = ['TL', 'TR', 'BR', 'BL']; piece.quadrant = order[(order.indexOf(piece.quadrant) + 1) % 4]; this.renderCellWithAnimation(row, col); this.consumeSuperpower(this.SUPERPOWERS.ROTATE); break;
+                    case this.SUPERPOWERS.MOVE: if (!this.superpowerState.source) { if (!piece) return; this.superpowerState.source = { row, col }; this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`).classList.add('pulsing-cell'); } else { if (piece) return; const srcIdx = this.superpowerState.source.row * this.GRID_SIZE + this.superpowerState.source.col; this.gridState[index] = this.gridState[srcIdx]; this.gridState[srcIdx] = null; this.renderCell(this.superpowerState.source.row, this.superpowerState.source.col); this.renderCellWithAnimation(row, col); this.consumeSuperpower(this.SUPERPOWERS.MOVE); } break;
+                    case this.SUPERPOWERS.SWAP: if (!this.superpowerState.source) { if (!piece) return; this.superpowerState.source = { row, col }; this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`).classList.add('pulsing-cell'); } else { if (!piece || Math.abs(this.superpowerState.source.row - row) + Math.abs(this.superpowerState.source.col - col) !== 1) return; const srcIdx = this.superpowerState.source.row * this.GRID_SIZE + this.superpowerState.source.col; const temp = this.gridState[srcIdx]; this.gridState[srcIdx] = this.gridState[index]; this.gridState[index] = temp; this.renderCell(this.superpowerState.source.row, this.superpowerState.source.col); this.renderCellWithAnimation(row, col); this.consumeSuperpower(this.SUPERPOWERS.SWAP); } break;
                     case this.SUPERPOWERS.EXCHANGE:
                         if (!piece) return;
                         this.superpowerState.source = { row, col };
@@ -209,17 +537,199 @@
                 const visited = Array(this.GRID_SIZE * this.GRID_SIZE).fill(false); for (let i = 0; i < this.GRID_SIZE * this.GRID_SIZE; i++) { if (this.gridState[i] && !visited[i]) { const blob = [], queue = [i]; visited[i] = true; const symbol = this.gridState[i].symbol; while (queue.length > 0) { const currentIdx = queue.shift(); blob.push(currentIdx); const r = Math.floor(currentIdx / this.GRID_SIZE), c = currentIdx % this.GRID_SIZE; [[r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1]].forEach(([nr, nc]) => { const neighborIdx = nr * this.GRID_SIZE + nc; if (nr >= 0 && nr < this.GRID_SIZE && nc >= 0 && nc < this.GRID_SIZE && this.gridState[neighborIdx]?.symbol === symbol && !visited[neighborIdx]) { visited[neighborIdx] = true; queue.push(neighborIdx); } }); } if (blob.length > 1) { scoreBreakdown.greatSequence += blob.length; } } }
                 for (let r = 0; r < this.GRID_SIZE; r++) { const firstPiece = this.gridState[r * this.GRID_SIZE]; if (firstPiece) { const rowPieces = this.gridState.slice(r * this.GRID_SIZE, (r + 1) * this.GRID_SIZE); if (rowPieces.every(p => p?.symbol === firstPiece.symbol)) { scoreBreakdown.lineMaster += 10; } } }
                 for (let c = 0; c < this.GRID_SIZE; c++) { const firstPiece = this.gridState[c]; if (firstPiece) { let isLineMaster = true; for (let r = 1; r < this.GRID_SIZE; r++) { if (this.gridState[r * this.GRID_SIZE + c]?.symbol !== firstPiece.symbol) { isLineMaster = false; break; } } if (isLineMaster) { scoreBreakdown.lineMaster += 10; } } }
-                this.score = Object.values(scoreBreakdown).reduce((a, b) => a + b, 0); this.updateScoreUI(scoreBreakdown);
+
+                const rawScore = Object.values(scoreBreakdown).reduce((a, b) => a + b, 0);
+                const scoreThisTurn = rawScore - this.previousScore;
+                const combo = this.comboTracker.recordScore(scoreThisTurn);
+                const multiplier = this.comboTracker.getMultiplier();
+
+                this.score = Math.floor(rawScore * multiplier);
+                this.previousScore = rawScore;
+
+                // Show combo UI if active
+                if (combo > 1) {
+                    this.showComboIndicator(combo, multiplier);
+                }
+
+                // Check achievements
+                if (scoreBreakdown.perfectShape >= 40 && combo === 1) {
+                    const achievement = this.achievements.check('firstPerfectShape');
+                    if (achievement) this.showAchievement(achievement);
+                }
+
+                if (combo >= 5) {
+                    const achievement = this.achievements.check('combo5');
+                    if (achievement) this.showAchievement(achievement);
+                }
+
+                if (this.score >= 500) {
+                    const achievement = this.achievements.check('score500');
+                    if (achievement) this.showAchievement(achievement);
+                }
+
+                this.updateScoreUI(scoreBreakdown);
             }
-            updateScoreUI(breakdown) { this.DOMElements.totalScore.textContent = this.score; this.DOMElements.scorePerfectShape.textContent = breakdown.perfectShape; this.DOMElements.scoreHalfBaked.textContent = breakdown.halfBaked; this.DOMElements.scoreAlmostThere.textContent = breakdown.almostThere; this.DOMElements.scoreGreatSequence.textContent = breakdown.greatSequence; this.DOMElements.scoreLineMaster.textContent = breakdown.lineMaster; this.DOMElements.scoreDiamondHeist.textContent = breakdown.diamondHeist; if (this.score > this.highScore) { this.highScore = this.score; localStorage.setItem(`matchaloHighScore_${this.config.id}`, this.highScore); } this.DOMElements.highScore.textContent = this.highScore; }
+            
+            updateScoreUI(breakdown) {
+                const animateScore = (element, newValue) => {
+                    const oldValue = parseInt(element.textContent) || 0;
+                    if (newValue !== oldValue) {
+                        element.classList.add('score-change');
+                        setTimeout(() => element.classList.remove('score-change'), 500);
+                    }
+                    element.textContent = newValue;
+                };
+                
+                animateScore(this.DOMElements.totalScore, this.score);
+                animateScore(this.DOMElements.scorePerfectShape, breakdown.perfectShape);
+                animateScore(this.DOMElements.scoreHalfBaked, breakdown.halfBaked);
+                animateScore(this.DOMElements.scoreAlmostThere, breakdown.almostThere);
+                animateScore(this.DOMElements.scoreGreatSequence, breakdown.greatSequence);
+                animateScore(this.DOMElements.scoreLineMaster, breakdown.lineMaster);
+                animateScore(this.DOMElements.scoreDiamondHeist, breakdown.diamondHeist);
+                
+                const wasHighScore = this.score > this.highScore;
+                
+                if (wasHighScore) {
+                    this.highScore = this.score;
+                    Storage.set(`matchaloHighScore_${this.config.id}`, this.highScore);
+                    this.celebrateNewHighScore();
+                }
+                
+                this.DOMElements.highScore.textContent = this.highScore;
+            }
+            
             updateSuperpowerUI() { const canUsePower = this.placementState === 'AWAITING_ROLL' && this.usedSuperpowers.size < 2; [this.DOMElements.rotateBtn, this.DOMElements.swapBtn, this.DOMElements.exchangeBtn, this.DOMElements.moveBtn].forEach(btn => { const powerName = btn.id.replace('-btn', ''); const isUsed = this.usedSuperpowers.has(powerName); btn.disabled = !canUsePower || isUsed; btn.classList.toggle('opacity-50', !canUsePower || isUsed); btn.querySelector('.superpower-used-overlay').classList.toggle('hidden', !isUsed); btn.classList.toggle('superpower-btn--active', this.activeSuperpower === powerName); }); this.DOMElements.spCharge1.classList.toggle('opacity-30', this.usedSuperpowers.size >= 1); this.DOMElements.spCharge2.classList.toggle('opacity-30', this.usedSuperpowers.size >= 2); }
-            placePiece(row, col, rollIndex) { this.gridState[row * this.GRID_SIZE + col] = this.currentRoll[rollIndex]; this.renderCell(row, col); }
+            placePiece(row, col, rollIndex) { this.gridState[row * this.GRID_SIZE + col] = this.currentRoll[rollIndex]; this.renderCellWithAnimation(row, col); }
             renderCell(row, col) { const index = row * this.GRID_SIZE + col, cell = this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`), piece = this.gridState[index]; cell.innerHTML = ''; if (piece) { cell.classList.remove('empty'); const img = document.createElement('img'); img.src = `${this.IMAGE_PATH}${piece.symbol.toLowerCase()}_${piece.quadrant}.svg`; cell.appendChild(img); } else { cell.classList.add('empty'); } }
             generateRandomAlo() { const symbol = this.SYMBOLS[Math.floor(Math.random() * this.SYMBOLS.length)], quadrant = this.QUADRANTS[Math.floor(Math.random() * this.QUADRANTS.length)]; return { symbol, quadrant }; }
             isGameOver() { if (!this.gridState.includes(null)) return true; for (let r = 0; r < this.GRID_SIZE; r++) { for (let c = 0; c < this.GRID_SIZE; c++) { if (!this.gridState[r * this.GRID_SIZE + c]) { if ((c < this.GRID_SIZE - 1 && !this.gridState[r * this.GRID_SIZE + c + 1]) || (r < this.GRID_SIZE - 1 && !this.gridState[(r + 1) * this.GRID_SIZE + c])) return false; } } } return true; }
             showGameOver() { this.DOMElements.finalScore.textContent = this.score; this.DOMElements.gameOverModal.classList.remove('hidden'); this.DOMElements.rollDiceBtn.disabled = true; this.DOMElements.gameBoard.querySelectorAll('.grid-cell.empty').forEach(cell => cell.classList.remove('empty')); }
             updateProgressBar() { const filled = this.gridState.filter(c => c !== null).length; this.DOMElements.progressBarFill.style.width = `${(filled / (this.GRID_SIZE * this.GRID_SIZE)) * 100}%`; }
             updateDiceDisplay() { [this.DOMElements.dice1El, this.DOMElements.dice2El].forEach((el, i) => { el.innerHTML = ''; if (this.currentRoll[i]) { const piece = this.currentRoll[i], img = document.createElement('img'); img.src = `${this.IMAGE_PATH}${piece.symbol.toLowerCase()}_${piece.quadrant}.svg`; el.appendChild(img); } else { el.textContent = '?'; } }); }
+
+            showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                const bgColor = type === 'error' ? 'rgba(239, 68, 68, 0.95)' : 
+                                type === 'warning' ? 'rgba(251, 191, 36, 0.95)' : 
+                                'rgba(59, 130, 246, 0.95)';
+                notification.className = 'fixed top-4 right-4 px-6 py-3 rounded-lg z-[100] transform translate-x-0 transition-all duration-300 text-white font-semibold shadow-lg';
+                notification.style.background = bgColor;
+                notification.textContent = message;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.style.transform = 'translateX(400px)';
+                    notification.style.opacity = '0';
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+            }
+
+            renderCellWithAnimation(row, col) {
+                const index = row * this.GRID_SIZE + col;
+                const cell = this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`);
+                const piece = this.gridState[index];
+                
+                const tooltip = cell.querySelector('.debug-tooltip');
+                cell.innerHTML = '';
+                if (tooltip) cell.appendChild(tooltip);
+                
+                if (piece) {
+                    cell.classList.remove('empty');
+                    const img = document.createElement('img');
+                    img.src = `${this.IMAGE_PATH}${piece.symbol.toLowerCase()}_${piece.quadrant}.svg`;
+                    
+                    img.style.opacity = '0';
+                    img.style.transform = 'scale(0.5) rotate(-10deg)';
+                    cell.appendChild(img);
+                    
+                    requestAnimationFrame(() => {
+                        img.style.transition = 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                        img.style.opacity = '1';
+                        img.style.transform = 'scale(1) rotate(0deg)';
+                    });
+                } else {
+                    cell.classList.add('empty');
+                }
+            }
+
+            celebrateNewHighScore() {
+                const rect = this.DOMElements.highScore.getBoundingClientRect();
+                const colors = ['#6a11cb', '#2575fc', '#c4b5fd', '#a78bfa'];
+                
+                for (let i = 0; i < 20; i++) {
+                    const particle = document.createElement('div');
+                    particle.style.cssText = `
+                        position: fixed;
+                        width: 8px;
+                        height: 8px;
+                        background: ${colors[Math.floor(Math.random() * colors.length)]};
+                        border-radius: 50%;
+                        left: ${rect.left + rect.width / 2}px;
+                        top: ${rect.top + rect.height / 2}px;
+                        pointer-events: none;
+                        z-index: 1000;
+                    `;
+                    document.body.appendChild(particle);
+                    
+                    const angle = (Math.PI * 2 * i) / 20;
+                    const velocity = 100 + Math.random() * 100;
+                    const tx = Math.cos(angle) * velocity;
+                    const ty = Math.sin(angle) * velocity;
+                    
+                    particle.animate([
+                        { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+                        { transform: `translate(${tx}px, ${ty}px) scale(0)`, opacity: 0 }
+                    ], {
+                        duration: 800,
+                        easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+                    }).onfinish = () => particle.remove();
+                }
+            }
+
+            showComboIndicator(combo, multiplier) {
+                const indicator = document.createElement('div');
+                indicator.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-4xl md:text-6xl font-bold z-50 pointer-events-none';
+                indicator.style.cssText = `
+                    background: var(--accent-gradient);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
+                    text-shadow: 0 0 30px rgba(106, 17, 203, 0.3);
+                `;
+                indicator.textContent = `${combo}x COMBO! 🔥`;
+                document.body.appendChild(indicator);
+                
+                indicator.animate([
+                    { opacity: 0, transform: 'translate(-50%, -50%) scale(0.5)' },
+                    { opacity: 1, transform: 'translate(-50%, -50%) scale(1.2)' },
+                    { opacity: 1, transform: 'translate(-50%, -50%) scale(1)' },
+                    { opacity: 0, transform: 'translate(-50%, -60%) scale(0.8)' }
+                ], {
+                    duration: 2000,
+                    easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)'
+                }).onfinish = () => indicator.remove();
+            }
+
+            showAchievement(achievement) {
+                const notification = document.createElement('div');
+                notification.className = 'fixed top-20 right-4 glass-card rounded-xl p-4 z-[100] transform translate-x-0 transition-all duration-300 min-w-[200px]';
+                notification.innerHTML = `
+                    <div class="text-center">
+                        <div class="text-4xl mb-2">${achievement.icon}</div>
+                        <div class="font-bold text-sm" style="color: var(--accent);">Achievement Unlocked!</div>
+                        <div class="text-xs mt-1" style="color: var(--text-secondary);">${achievement.name}</div>
+                    </div>
+                `;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.style.transform = 'translateX(400px)';
+                    notification.style.opacity = '0';
+                    setTimeout(() => notification.remove(), 300);
+                }, 4000);
+            }
+
         }
 
         document.addEventListener('DOMContentLoaded', () => { gameManager.init(); });
