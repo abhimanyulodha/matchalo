@@ -6,7 +6,6 @@
     <title>MATCHALO</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     
@@ -627,7 +626,7 @@
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z"></path></svg>
                     Share
                 </button>
-                <button id="restart-modal-btn" class="themed-button primary flex-1 py-3 text-white text-sm">Play Again</button>
+                <button id="restart-modal-btn" class="themed-button primary flex-1 py-3 text-white">Play Again</button>
             </div>
         </div>
     </div>
@@ -700,7 +699,7 @@
     <div id="toast-container"></div>
 
     <script>
-        // ===== FULL SCRIPT WITH ALL METHODS RESTORED =====
+        // ===== FULL SCRIPT WITH MANUAL CANVAS RENDERING =====
         const NotificationSystem = {
             show(message, type = 'success', duration = 3000) {
                 const container = document.getElementById('toast-container');
@@ -778,26 +777,6 @@
 
             static getImageSrc(symbol, quadrant, imagePath) {
                 return imagePath + `${symbol.toLowerCase()}_${quadrant}.svg`;
-            }
-
-            static getDataURL(url) {
-                if (this.dataURLCache.has(url)) {
-                    return Promise.resolve(this.dataURLCache.get(url));
-                }
-                return new Promise((resolve, reject) => {
-                    fetch(url)
-                        .then(response => response.blob())
-                        .then(blob => {
-                            const reader = new FileReader();
-                            reader.onloadend = () => {
-                                this.dataURLCache.set(url, reader.result);
-                                resolve(reader.result);
-                            };
-                            reader.onerror = reject;
-                            reader.readAsDataURL(blob);
-                        })
-                        .catch(reject);
-                });
             }
         }
 
@@ -904,52 +883,112 @@
             async shareScore(button) {
                 const originalHTML = button.innerHTML;
                 button.disabled = true;
-                button.innerHTML = 'Preparing...';
+                button.innerHTML = '<svg class="animate-spin h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
 
                 const score = this.currentGame.score;
                 const message = `✨ I scored ${score} in MatchAlo! ✨\nThink you can beat my score? 🎲\nhttps://abhimanyulodha.github.io/matchalo/`;
                 const title = 'My MatchAlo Score!';
-                
-                const boardElement = document.getElementById('game-board');
-                const images = boardElement.querySelectorAll('img');
-                const originalSrcs = Array.from(images).map(img => img.src);
 
                 try {
-                    const conversionPromises = Array.from(images).map(img => ImageLoader.getDataURL(img.src));
-                    const dataUrls = await Promise.all(conversionPromises);
-                    images.forEach((img, index) => { if (dataUrls[index]) img.src = dataUrls[index]; });
+                    // Manual canvas rendering at 3x resolution
+                    const SCALE = 3;
+                    const GRID_SIZE = 8;
+                    const boardElement = document.getElementById('game-board');
+                    const cellSize = boardElement.offsetWidth / GRID_SIZE;
+                    const canvasSize = cellSize * GRID_SIZE * SCALE;
+                    const padding = 20 * SCALE;
 
-                    // Add this new line for a delay
-                    await new Promise(resolve => setTimeout(resolve, 200));
+                    const canvas = document.createElement('canvas');
+                    canvas.width = canvasSize + padding * 2;
+                    canvas.height = canvasSize + padding * 2;
+                    const ctx = canvas.getContext('2d');
 
-                    const canvas = await html2canvas(boardElement, { 
-                        useCORS: true, 
-                        backgroundColor: '#ffffff',
-                        scale: 2,
-                        logging: false,
-                        width: boardElement.offsetWidth,
-                        height: boardElement.offsetHeight
-                    });
+                    // Draw white background
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+                    // Translate to add padding
+                    ctx.save();
+                    ctx.translate(padding, padding);
 
-                    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                    // Draw grid lines
+                    ctx.strokeStyle = 'rgba(106, 17, 203, 0.1)';
+                    ctx.lineWidth = 1 * SCALE;
+                    for (let i = 0; i <= GRID_SIZE; i++) {
+                        const pos = i * cellSize * SCALE;
+                        // Vertical lines
+                        ctx.beginPath();
+                        ctx.moveTo(pos, 0);
+                        ctx.lineTo(pos, canvasSize);
+                        ctx.stroke();
+                        // Horizontal lines
+                        ctx.beginPath();
+                        ctx.moveTo(0, pos);
+                        ctx.lineTo(canvasSize, pos);
+                        ctx.stroke();
+                    }
+
+                    // Load and draw each piece
+                    const imagePromises = [];
+                    for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
+                        const piece = this.currentGame.gridState[i];
+                        if (piece) {
+                            const row = Math.floor(i / GRID_SIZE);
+                            const col = i % GRID_SIZE;
+                            const x = col * cellSize * SCALE;
+                            const y = row * cellSize * SCALE;
+                            const size = cellSize * SCALE;
+
+                            const imgSrc = ImageLoader.getImageSrc(piece.symbol, piece.quadrant, this.currentGame.IMAGE_PATH);
+                            
+                            const promise = new Promise((resolve, reject) => {
+                                const img = new Image();
+                                img.crossOrigin = 'anonymous';
+                                img.onload = () => {
+                                    try {
+                                        ctx.drawImage(img, x, y, size, size);
+                                        resolve();
+                                    } catch (e) {
+                                        console.warn(`Failed to draw image at ${row},${col}:`, e);
+                                        resolve(); // Continue even if one fails
+                                    }
+                                };
+                                img.onerror = (e) => {
+                                    console.warn(`Failed to load image: ${imgSrc}`);
+                                    resolve(); // Continue even if image fails to load
+                                };
+                                img.src = imgSrc;
+                            });
+                            imagePromises.push(promise);
+                        }
+                    }
+
+                    // Wait for all images to load and draw
+                    await Promise.all(imagePromises);
+
+                    ctx.restore();
+
+                    // Export as high-quality PNG
+                    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png', 1.0));
                     const file = new File([blob], 'matchalo-board.png', { type: 'image/png' });
                     
                     const shareData = { files: [file], title: title, text: message };
 
                     if (navigator.canShare && navigator.canShare(shareData)) {
                         await navigator.share(shareData);
+                        NotificationSystem.show('Board shared successfully!', 'success');
                     } else {
                         throw new Error('File sharing not supported');
                     }
                 } catch (err) {
+                    console.error('Share error:', err);
                     try {
                         await navigator.share({ title, text: message });
+                        NotificationSystem.show('Score shared!', 'success');
                     } catch (textErr) {
                         this.copyToClipboard(message, 'Score copied to clipboard!');
                     }
                 } finally {
-                    images.forEach((img, index) => { img.src = originalSrcs[index]; });
                     button.disabled = false;
                     button.innerHTML = originalHTML;
                 }
@@ -1488,7 +1527,6 @@
 
             showAchievement(achievement) {
                 this.stats.badgesUnlocked++;
-                // Notifications are disabled as per user request.
             }
 
             celebrateNewHighScore() {
