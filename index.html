@@ -14,7 +14,8 @@
             --bg: linear-gradient(135deg, #f5f7fa 0%, #e8e4f1 100%);
             --card: rgba(255, 255, 255, 0.85);
             --text: #4a0e69;
-            --text-secondary: #8a6aa0;
+            /* CHANGED: Darkened for better contrast */
+            --text-secondary: #6c5284;
             --accent: #6a11cb;
             --accent-light: rgba(106, 17, 203, 0.1);
             --accent-gradient: linear-gradient(135deg, #2575fc 0%, #6a11cb 100%);
@@ -172,6 +173,14 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
+            outline: none;
+        }
+        
+        /* NEW: Focus ring for keyboard accessibility */
+        .grid-cell:focus-visible {
+            box-shadow: inset 0 0 0 3px var(--accent), 0 0 20px rgba(106, 17, 203, 0.5) !important;
+            transform: scale(1.05);
+            z-index: 10;
         }
 
         .grid-cell.empty { 
@@ -309,7 +318,7 @@
             justify-content: center;
         }
 
-        .dice-empty-state svg {
+        .dice-empty-state img {
             width: 85%;
             height: 85%;
         }
@@ -644,19 +653,19 @@
 <body class="p-2 lg:p-4 flex items-center justify-center min-h-screen">
     <main id="game-container" class="w-full max-w-5xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6 items-center lg:items-stretch">
         
-        <div class="w-full lg:w-2/3">
+        <section class="w-full lg:w-2/3" aria-label="Game Board Area">
             <div class="p-4 lg:p-6 h-full glass-card rounded-2xl">
                 <div id="game-board" class="grid grid-cols-8 grid-rows-8 w-full aspect-square bg-white rounded-lg"></div>
             </div>
-        </div>
+        </section>
 
-        <div class="w-full lg:w-1/3">
+        <section class="w-full lg:w-1/3" aria-label="Control Panel">
             <div class="h-full p-4 lg:p-6 glass-card rounded-2xl flex flex-col gap-y-3">
                 
                 <div class="p-4 rounded-2xl control-panel-card">
                     <div class="flex justify-center items-center gap-2">
                         <button id="roll-dice-btn" class="transition-transform hover:scale-110 focus:outline-none w-16 h-16 p-1 themed-button" aria-label="Roll dice">
-                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" zoomAndPan="magnify" viewBox="0 0 810 809.999993" preserveAspectRatio="xMidYMid meet" version="1.0"><defs><clipPath id="e22954cc75"><path d="M 76.496094 46 L 733.496094 46 L 733.496094 764 L 76.496094 764 Z M 76.496094 46 " clip-rule="nonzero"/></clipPath></defs><g clip-path="url(#e22954cc75)"><path fill="#1d2a89" d="M 470.445312 746.207031 L 667.625 632.363281 C 708.308594 609.066406 733.242188 565.761719 733.242188 518.84375 L 733.242188 291.15625 C 733.242188 244.238281 708.308594 201.261719 667.625 177.636719 L 470.445312 63.792969 C 429.765625 40.5 379.894531 40.5 339.542969 63.792969 L 142.363281 177.636719 C 101.683594 201.261719 76.746094 244.566406 76.746094 291.15625 L 76.746094 518.84375 C 76.746094 565.761719 101.683594 608.738281 142.363281 632.363281 L 339.542969 746.207031 C 379.894531 769.5 429.765625 769.5 470.445312 746.207031 Z M 470.445312 746.207031 " fill-opacity="1" fill-rule="nonzero"/></g><path fill="#ffffff" d="M 400.894531 392.859375 C 377.269531 392.859375 353.648438 386.628906 332.324219 374.488281 L 135.472656 260.644531 C 132.523438 259.003906 131.539062 255.394531 133.179688 252.441406 C 134.816406 249.488281 138.425781 248.503906 141.378906 250.144531 L 338.558594 363.988281 C 377.269531 386.300781 424.84375 386.300781 463.558594 363.988281 L 660.734375 250.472656 C 663.6875 248.832031 667.296875 249.816406 668.9375 252.769531 C 670.578125 255.722656 669.59375 259.332031 666.640625 260.972656 L 469.460938 374.488281 C 448.464844 386.957031 424.515625 392.859375 400.894531 392.859375 Z M 400.894531 392.859375 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 400.894531 716.679688 C 397.613281 716.679688 394.988281 714.054688 394.988281 710.773438 L 394.988281 482.753906 C 394.988281 433.871094 421.234375 388.597656 463.558594 364.316406 L 660.734375 250.472656 C 663.6875 248.832031 667.296875 249.816406 668.9375 252.769531 C 670.578125 255.722656 669.59375 259.332031 666.640625 260.972656 L 469.460938 374.488281 C 430.75 396.796875 406.796875 438.136719 406.796875 482.753906 L 406.796875 710.445312 C 406.796875 713.726562 404.175781 716.679688 400.894531 716.679688 Z M 400.894531 716.679688 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 400.894531 716.679688 C 397.613281 716.679688 394.988281 714.054688 394.988281 710.773438 L 394.988281 482.753906 C 394.988281 438.136719 371.039062 396.796875 332.324219 374.488281 L 135.472656 260.644531 C 132.523438 259.003906 131.539062 255.394531 133.179688 252.441406 C 134.816406 249.488281 138.425781 248.503906 141.378906 250.144531 L 338.558594 363.988281 C 380.878906 388.269531 407.125 433.871094 407.125 482.425781 L 407.125 710.117188 C 406.796875 713.726562 404.175781 716.679688 400.894531 716.679688 Z M 400.894531 716.679688 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 459.949219 248.503906 C 441.902344 258.675781 441.902344 275.40625 459.949219 285.90625 C 477.992188 296.078125 507.191406 296.078125 525.238281 285.90625 C 543.28125 275.734375 543.28125 259.003906 525.238281 248.503906 C 507.191406 238.003906 477.992188 238.003906 459.949219 248.503906 Z M 437.308594 298.703125 C 419.265625 288.53125 390.066406 288.53125 372.023438 298.703125 C 353.976562 308.871094 353.976562 325.605469 372.023438 336.101562 C 390.066406 346.273438 419.265625 346.273438 437.308594 336.101562 C 455.355469 325.605469 455.355469 308.871094 437.308594 298.703125 Z M 437.308594 97.914062 C 419.265625 87.742188 390.066406 87.742188 372.023438 97.914062 C 353.976562 108.085938 353.976562 124.816406 372.023438 135.316406 C 390.066406 145.488281 419.265625 145.488281 437.308594 135.316406 C 455.355469 124.816406 455.355469 108.085938 437.308594 97.914062 Z M 261.785156 235.382812 C 279.832031 225.210938 279.832031 208.476562 261.785156 197.980469 C 243.742188 187.808594 214.542969 187.808594 196.496094 197.980469 C 178.453125 208.148438 178.453125 224.882812 196.496094 235.382812 C 214.871094 245.878906 244.070312 245.878906 261.785156 235.382812 Z M 612.835938 235.382812 C 630.878906 225.210938 630.878906 208.476562 612.835938 197.980469 C 594.789062 187.808594 565.589844 187.808594 547.546875 197.980469 C 529.5 208.148438 529.5 224.882812 547.546875 235.382812 C 565.917969 245.878906 595.117188 245.878906 612.835938 235.382812 Z M 284.425781 148.109375 C 266.378906 158.28125 266.378906 175.015625 284.425781 185.511719 C 302.46875 195.683594 331.667969 195.683594 349.710938 185.511719 C 367.757812 175.34375 367.757812 158.609375 349.710938 148.109375 C 331.667969 137.613281 302.46875 137.613281 284.425781 148.109375 Z M 284.425781 148.109375 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 567.558594 462.085938 C 549.84375 472.257812 535.40625 496.863281 535.734375 517.203125 C 536.0625 537.546875 550.5 546.074219 568.214844 535.90625 C 585.933594 525.734375 600.367188 501.128906 600.039062 480.785156 C 599.710938 460.445312 585.277344 451.914062 567.558594 462.085938 Z M 567.558594 462.085938 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 480.617188 485.707031 C 498.332031 475.539062 512.769531 450.929688 512.441406 430.589844 C 512.113281 410.25 497.675781 401.71875 479.960938 411.890625 C 462.246094 422.058594 447.808594 446.667969 448.136719 467.007812 C 448.464844 487.347656 462.902344 495.550781 480.617188 485.707031 Z M 480.617188 485.707031 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 655.484375 586.429688 C 673.203125 576.257812 687.636719 551.652344 687.308594 531.3125 C 686.980469 510.972656 672.546875 502.441406 654.828125 512.609375 C 637.113281 522.78125 622.675781 547.386719 623.003906 567.730469 C 623.332031 588.070312 637.769531 596.601562 655.484375 586.429688 Z M 655.484375 586.429688 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 358.570312 469.304688 C 358.570312 448.636719 343.808594 423.371094 326.089844 412.875 C 308.046875 402.375 293.609375 410.90625 293.609375 431.574219 C 293.609375 452.242188 308.375 477.507812 326.089844 488.003906 C 344.136719 498.175781 358.570312 489.972656 358.570312 469.304688 Z M 184.03125 570.027344 C 184.03125 549.355469 169.265625 524.09375 151.550781 513.59375 C 133.503906 503.097656 119.070312 511.625 119.070312 532.296875 C 119.070312 552.964844 133.832031 578.226562 151.550781 588.726562 C 169.59375 598.898438 184.359375 590.695312 184.03125 570.027344 Z M 150.894531 311.167969 C 132.851562 300.667969 118.414062 309.199219 118.414062 329.867188 C 118.414062 350.539062 133.179688 375.800781 150.894531 386.300781 C 168.9375 396.796875 183.375 388.269531 183.375 367.597656 C 183.375 346.929688 168.9375 321.667969 150.894531 311.167969 Z M 326.417969 614.972656 C 308.375 604.472656 293.9375 613.003906 293.9375 633.671875 C 293.9375 654.34375 308.703125 679.605469 326.417969 690.105469 C 344.464844 700.601562 358.898438 692.074219 358.898438 671.402344 C 358.898438 650.734375 344.464844 625.472656 326.417969 614.972656 Z M 326.417969 614.972656 " fill-opacity="1" fill-rule="nonzero"/></svg>
+                            <img src="https://abhimanyulodha.github.io/matchalo/images/dice-icon.svg" alt="Roll Dice Icon" class="w-full h-full object-contain">
                         </button>
                         <div class="flex-1 grid grid-cols-2 gap-3">
                             <div id="dice-1" class="w-full aspect-square rounded-lg flex items-center justify-center text-4xl text-gray-400" aria-label="First dice"></div>
@@ -683,11 +692,11 @@
                 </div>
 
                 <div class="p-4 rounded-2xl control-panel-card">
-                    <div class="flex justify-center items-center gap-3">
+                    <nav class="flex justify-center items-center gap-3">
                         <button id="help-btn" class="themed-button secondary text-xs flex-1 py-2">Help</button>
                         <button id="reset-btn" class="themed-button primary text-xs flex-1 py-2 text-white">New Game</button>
                         <button id="badges-btn" class="themed-button secondary text-xs flex-1 py-2">Badges</button>
-                    </div>
+                    </nav>
                     <div class="text-center mt-3">
                         <button id="select-edition-btn" class="w-full py-2 px-4 themed-button text-white text-sm flex items-center justify-center gap-2"></button>
                     </div>
@@ -715,10 +724,9 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
     </main>
 
-    <!-- Modals -->
     <div id="game-over-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden">
         <div class="modal-content w-full max-w-md glass-card rounded-2xl p-8 text-center relative">
             <button id="close-modal-btn" class="absolute top-4 right-4 w-8 h-8 rounded-full text-xl flex items-center justify-center font-bold text-gray-500 hover:bg-gray-200/50" aria-label="Close">
@@ -1073,11 +1081,49 @@
         };
 
         class Game {
+            // CHANGED: Added static constants for magic numbers, selectors, and classes
+            static CONSTANTS = {
+                GRID_SIZE: 8,
+                QUADRANTS: ['TL', 'TR', 'BL', 'BR'],
+                DOUBLE_CLICK_DELAY: 300,
+                DICE_TUMBLE_DURATION: 600,
+                PLACEMENT_ANIM_DURATION: 500,
+                SCORE_ANIM_DURATION: 500
+            };
+            
+            static SELECTORS = {
+                gameBoard: 'game-board', rollDiceBtn: 'roll-dice-btn', resetBtn: 'reset-btn',
+                dice1El: 'dice-1', dice2El: 'dice-2', progressBarFill: 'progress-bar-fill',
+                totalScore: 'total-score', highScore: 'high-score', scorePerfectShape: 'score-perfect-shape',
+                scoreHalfBaked: 'score-half-baked', scoreAlmostThere: 'score-almost-there',
+                scoreGreatSequence: 'score-great-sequence', scoreLineMaster: 'score-line-master',
+                scoreDiamondHeist: 'score-diamond-heist', gameOverModal: 'game-over-modal',
+                finalScore: 'final-score', restartModalBtn: 'restart-modal-btn',
+                closeModalBtn: 'close-modal-btn', spCharge1: 'sp-charge-1', spCharge2: 'sp-charge-2',
+                rotateBtn: 'rotate-btn', swapBtn: 'swap-btn', exchangeBtn: 'exchange-btn',
+                moveBtn: 'move-btn', exchangeModal: 'exchange-modal', exchangeOptions: 'exchange-options',
+                closeExchangeModalBtn: 'close-exchange-modal-btn', helpModalContent: 'help-modal-content',
+                gameOverStats: 'game-over-stats', confirmRestartModal: 'confirm-restart-modal'
+            };
+
+            static CSS_CLASSES = {
+                gridCell: 'grid-cell',
+                empty: 'empty',
+                placing: 'placing',
+                scoreHighlight: 'score-highlight',
+                diceTumble: 'dice-tumble',
+                pulsingCell: 'pulsing-cell',
+                superpowerActive: 'superpower-btn--active',
+                hidden: 'hidden',
+                scoreChange: 'score-change',
+                celebrating: 'celebrating'
+            };
+
             constructor(config) {
                 this.config = config;
                 this.DOMElements = this.getDOMElements();
-                this.GRID_SIZE = 8;
-                this.QUADRANTS = ['TL', 'TR', 'BL', 'BR'];
+                this.GRID_SIZE = Game.CONSTANTS.GRID_SIZE;
+                this.QUADRANTS = Game.CONSTANTS.QUADRANTS;
                 this.IMAGE_PATH = 'https://abhimanyulodha.github.io/matchalo/images/';
                 this.SUPERPOWERS = { ROTATE: 'rotate', SWAP: 'swap', EXCHANGE: 'exchange', MOVE: 'move' };
                 this.achievements = new AchievementSystem();
@@ -1086,24 +1132,10 @@
             }
 
             getDOMElements() {
-                const elementMap = {
-                    gameBoard: 'game-board', rollDiceBtn: 'roll-dice-btn', resetBtn: 'reset-btn',
-                    dice1El: 'dice-1', dice2El: 'dice-2', progressBarFill: 'progress-bar-fill',
-                    totalScore: 'total-score', highScore: 'high-score', scorePerfectShape: 'score-perfect-shape',
-                    scoreHalfBaked: 'score-half-baked', scoreAlmostThere: 'score-almost-there',
-                    scoreGreatSequence: 'score-great-sequence', scoreLineMaster: 'score-line-master',
-                    scoreDiamondHeist: 'score-diamond-heist', gameOverModal: 'game-over-modal',
-                    finalScore: 'final-score', restartModalBtn: 'restart-modal-btn',
-                    closeModalBtn: 'close-modal-btn', spCharge1: 'sp-charge-1', spCharge2: 'sp-charge-2',
-                    rotateBtn: 'rotate-btn', swapBtn: 'swap-btn', exchangeBtn: 'exchange-btn',
-                    moveBtn: 'move-btn', exchangeModal: 'exchange-modal', exchangeOptions: 'exchange-options',
-                    closeExchangeModalBtn: 'close-exchange-modal-btn', helpModalContent: 'help-modal-content',
-                    gameOverStats: 'game-over-stats', confirmRestartModal: 'confirm-restart-modal'
-                };
                 const elements = {};
-                for (const key in elementMap) {
-                    const element = document.getElementById(elementMap[key]);
-                    if (!element) throw new Error(`Missing element: #${elementMap[key]}`);
+                for (const key in Game.SELECTORS) {
+                    const element = document.getElementById(Game.SELECTORS[key]);
+                    if (!element) throw new Error(`Missing element: #${Game.SELECTORS[key]}`);
                     elements[key] = element;
                 }
                 return elements;
@@ -1132,8 +1164,9 @@
 
                 for (let i = 0; i < this.GRID_SIZE * this.GRID_SIZE; i++) {
                     const cell = document.createElement('div');
-                    cell.className = 'grid-cell empty relative';
+                    cell.className = `${Game.CSS_CLASSES.gridCell} ${Game.CSS_CLASSES.empty} relative`;
                     cell.dataset.index = i;
+                    cell.tabIndex = 0; // CHANGED: Added for keyboard accessibility
                     const row = Math.floor(i / this.GRID_SIZE), col = i % this.GRID_SIZE;
                     cell.dataset.row = row; cell.dataset.col = col;
                     cell.style.animationDelay = `${(row + col) * 0.02}s`;
@@ -1149,13 +1182,13 @@
                 }
                 
                 this.populateHelpModal();
-                this.processScoring(); // Initial score calculation
+                this.processScoring();
                 this.updateProgressBar();
                 this.updateDiceDisplay();
                 this.updateSuperpowerUI();
                 this.DOMElements.spCharge1.innerHTML = '✨';
                 this.DOMElements.spCharge2.innerHTML = '✨';
-                this.DOMElements.gameOverModal.classList.add('hidden');
+                this.DOMElements.gameOverModal.classList.add(Game.CSS_CLASSES.hidden);
                 this.DOMElements.rollDiceBtn.disabled = false;
                 this.setupEventListeners();
             }
@@ -1169,7 +1202,7 @@
                 const handleResetClick = () => {
                     const isGameInProgress = !this.isGameOver && this.gridState.some(c => c !== null);
                     if (isGameInProgress) {
-                        this.DOMElements.confirmRestartModal.classList.remove('hidden');
+                        this.DOMElements.confirmRestartModal.classList.remove(Game.CSS_CLASSES.hidden);
                     } else {
                         gameManager.switchEdition(gameManager.activeEditionId);
                     }
@@ -1178,12 +1211,45 @@
                 this.addManagedEventListener(this.DOMElements.rollDiceBtn, 'click', this.handleRollDice.bind(this));
                 this.addManagedEventListener(this.DOMElements.resetBtn, 'click', handleResetClick);
                 this.addManagedEventListener(this.DOMElements.restartModalBtn, 'click', () => gameManager.switchEdition(gameManager.activeEditionId));
-                this.addManagedEventListener(this.DOMElements.closeModalBtn, 'click', () => this.DOMElements.gameOverModal.classList.add('hidden'));
+                this.addManagedEventListener(this.DOMElements.closeModalBtn, 'click', () => this.DOMElements.gameOverModal.classList.add(Game.CSS_CLASSES.hidden));
                 this.addManagedEventListener(this.DOMElements.rotateBtn, 'click', () => this.activateSuperpower(this.SUPERPOWERS.ROTATE));
                 this.addManagedEventListener(this.DOMElements.swapBtn, 'click', () => this.activateSuperpower(this.SUPERPOWERS.SWAP));
                 this.addManagedEventListener(this.DOMElements.exchangeBtn, 'click', () => this.activateSuperpower(this.SUPERPOWERS.EXCHANGE));
                 this.addManagedEventListener(this.DOMElements.moveBtn, 'click', () => this.activateSuperpower(this.SUPERPOWERS.MOVE));
-                this.addManagedEventListener(this.DOMElements.closeExchangeModalBtn, 'click', () => this.DOMElements.exchangeModal.classList.add('hidden'));
+                this.addManagedEventListener(this.DOMElements.closeExchangeModalBtn, 'click', () => this.DOMElements.exchangeModal.classList.add(Game.CSS_CLASSES.hidden));
+                // CHANGED: Added for keyboard navigation
+                this.addManagedEventListener(this.DOMElements.gameBoard, 'keydown', this.handleKeyDown.bind(this));
+            }
+            
+            // CHANGED: New method for keyboard navigation
+            handleKeyDown(event) {
+                if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', ' '].includes(event.key)) {
+                    return;
+                }
+                event.preventDefault();
+                const targetCell = event.target.closest(`.${Game.CSS_CLASSES.gridCell}`);
+                if (!targetCell) return;
+
+                let row = parseInt(targetCell.dataset.row, 10);
+                let col = parseInt(targetCell.dataset.col, 10);
+
+                if (event.key === 'Enter' || event.key === ' ') {
+                    this.onCellClick(row, col);
+                    return;
+                }
+                
+                switch (event.key) {
+                    case 'ArrowUp':    row = Math.max(0, row - 1); break;
+                    case 'ArrowDown':  row = Math.min(this.GRID_SIZE - 1, row + 1); break;
+                    case 'ArrowLeft':  col = Math.max(0, col - 1); break;
+                    case 'ArrowRight': col = Math.min(this.GRID_SIZE - 1, col + 1); break;
+                }
+
+                const newIndex = row * this.GRID_SIZE + col;
+                const nextCell = this.DOMElements.gameBoard.querySelector(`[data-index='${newIndex}']`);
+                if (nextCell) {
+                    nextCell.focus();
+                }
             }
 
             cleanup() {
@@ -1225,7 +1291,7 @@
             onCellClick(row, col) {
                 if (this.isGameOver) return;
                 const now = Date.now();
-                if (now - this.lastClick.time < 300 && this.lastClick.row === row && this.lastClick.col === col) {
+                if (now - this.lastClick.time < Game.CONSTANTS.DOUBLE_CLICK_DELAY && this.lastClick.row === row && this.lastClick.col === col) {
                     this.handleDoubleClick(row, col);
                     this.lastClick = { time: 0, row: -1, col: -1 };
                     return;
@@ -1295,8 +1361,8 @@
                 if (this.isGameOver || this.placementState !== 'AWAITING_ROLL') return;
                 if (this.activeSuperpower) this.cancelSuperpower();
                 this.DOMElements.rollDiceBtn.disabled = true;
-                this.DOMElements.dice1El.classList.add('dice-tumble');
-                this.DOMElements.dice2El.classList.add('dice-tumble');
+                this.DOMElements.dice1El.classList.add(Game.CSS_CLASSES.diceTumble);
+                this.DOMElements.dice2El.classList.add(Game.CSS_CLASSES.diceTumble);
                 setTimeout(() => {
                     const piece1 = this.generateRandomAlo();
                     let piece2 = this.generateRandomAlo();
@@ -1305,9 +1371,9 @@
                     this.placementState = 'AWAITING_FIRST_PLACEMENT';
                     this.updateDiceDisplay();
                     this.updateSuperpowerUI();
-                    this.DOMElements.dice1El.classList.remove('dice-tumble');
-                    this.DOMElements.dice2El.classList.remove('dice-tumble');
-                }, 600);
+                    this.DOMElements.dice1El.classList.remove(Game.CSS_CLASSES.diceTumble);
+                    this.DOMElements.dice2El.classList.remove(Game.CSS_CLASSES.diceTumble);
+                }, Game.CONSTANTS.DICE_TUMBLE_DURATION);
             }
             
             activateSuperpower(powerName) {
@@ -1323,7 +1389,7 @@
             cancelSuperpower() {
                 this.activeSuperpower = null;
                 this.superpowerState = {};
-                document.querySelectorAll('.pulsing-cell').forEach(c => c.classList.remove('pulsing-cell'));
+                document.querySelectorAll(`.${Game.CSS_CLASSES.pulsingCell}`).forEach(c => c.classList.remove(Game.CSS_CLASSES.pulsingCell));
                 this.updateSuperpowerUI();
             }
 
@@ -1350,7 +1416,7 @@
                             if (!this.superpowerState.source) {
                                 if (!piece) return;
                                 this.superpowerState.source = { row, col };
-                                this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`).classList.add('pulsing-cell');
+                                this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`).classList.add(Game.CSS_CLASSES.pulsingCell);
                             } else {
                                 if (piece) return;
                                 const srcIdx = this.superpowerState.source.row * this.GRID_SIZE + this.superpowerState.source.col;
@@ -1365,7 +1431,7 @@
                             if (!this.superpowerState.source) {
                                 if (!piece) return;
                                 this.superpowerState.source = { row, col };
-                                this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`).classList.add('pulsing-cell');
+                                this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`).classList.add(Game.CSS_CLASSES.pulsingCell);
                             } else {
                                 const isAdjacent = Math.abs(this.superpowerState.source.row - row) + Math.abs(this.superpowerState.source.col - col) === 1;
                                 if (!piece || !isAdjacent) return;
@@ -1406,13 +1472,13 @@
                             const idx = this.superpowerState.source.row * this.GRID_SIZE + this.superpowerState.source.col;
                             this.gridState[idx] = alo;
                             this.renderCell(this.superpowerState.source.row, this.superpowerState.source.col);
-                            this.DOMElements.exchangeModal.classList.add('hidden');
+                            this.DOMElements.exchangeModal.classList.add(Game.CSS_CLASSES.hidden);
                             this.consumeSuperpower(this.SUPERPOWERS.EXCHANGE);
                         };
                     }
                     this.DOMElements.exchangeOptions.appendChild(option);
                 });
-                this.DOMElements.exchangeModal.classList.remove('hidden');
+                this.DOMElements.exchangeModal.classList.remove(Game.CSS_CLASSES.hidden);
             }
 
             createParticleBurst(cellElement) {
@@ -1668,11 +1734,11 @@
             }
             
             highlightScoringCells(allScoringCells, newlyScoredCells, scoreDiff) {
-                document.querySelectorAll('.score-highlight').forEach(cell => cell.classList.remove('score-highlight'));
+                document.querySelectorAll(`.${Game.CSS_CLASSES.scoreHighlight}`).forEach(cell => cell.classList.remove(Game.CSS_CLASSES.scoreHighlight));
                 allScoringCells.forEach(index => {
                     const cell = this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`);
                     if (cell) {
-                        cell.classList.add('score-highlight');
+                        cell.classList.add(Game.CSS_CLASSES.scoreHighlight);
                     }
                 });
                 
@@ -1710,8 +1776,8 @@
             updateScoreUI(breakdown) {
                 const animateScore = (element, newValue) => {
                     if (parseInt(element.textContent) !== newValue) {
-                        element.classList.add('score-change');
-                        setTimeout(() => element.classList.remove('score-change'), 500);
+                        element.classList.add(Game.CSS_CLASSES.scoreChange);
+                        setTimeout(() => element.classList.remove(Game.CSS_CLASSES.scoreChange), Game.CONSTANTS.SCORE_ANIM_DURATION);
                     }
                     element.textContent = newValue;
                 };
@@ -1739,8 +1805,8 @@
             }
 
             updateDiceDisplay() {
-                const diceSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 810 810"><defs><clipPath id="e22954cc75"><path d="M 76.496094 46 L 733.496094 46 L 733.496094 764 L 76.496094 764 Z M 76.496094 46 " clip-rule="nonzero"/></clipPath></defs><g clip-path="url(#e22954cc75)"><path fill="#1d2a89" d="M 470.445312 746.207031 L 667.625 632.363281 C 708.308594 609.066406 733.242188 565.761719 733.242188 518.84375 L 733.242188 291.15625 C 733.242188 244.238281 708.308594 201.261719 667.625 177.636719 L 470.445312 63.792969 C 429.765625 40.5 379.894531 40.5 339.542969 63.792969 L 142.363281 177.636719 C 101.683594 201.261719 76.746094 244.566406 76.746094 291.15625 L 76.746094 518.84375 C 76.746094 565.761719 101.683594 608.738281 142.363281 632.363281 L 339.542969 746.207031 C 379.894531 769.5 429.765625 769.5 470.445312 746.207031 Z M 470.445312 746.207031 " fill-opacity="1" fill-rule="nonzero"/></g><path fill="#ffffff" d="M 400.894531 392.859375 C 377.269531 392.859375 353.648438 386.628906 332.324219 374.488281 L 135.472656 260.644531 C 132.523438 259.003906 131.539062 255.394531 133.179688 252.441406 C 134.816406 249.488281 138.425781 248.503906 141.378906 250.144531 L 338.558594 363.988281 C 377.269531 386.300781 424.84375 386.300781 463.558594 363.988281 L 660.734375 250.472656 C 663.6875 248.832031 667.296875 249.816406 668.9375 252.769531 C 670.578125 255.722656 669.59375 259.332031 666.640625 260.972656 L 469.460938 374.488281 C 448.464844 386.957031 424.515625 392.859375 400.894531 392.859375 Z M 400.894531 392.859375 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 400.894531 716.679688 C 397.613281 716.679688 394.988281 714.054688 394.988281 710.773438 L 394.988281 482.753906 C 394.988281 433.871094 421.234375 388.597656 463.558594 364.316406 L 660.734375 250.472656 C 663.6875 248.832031 667.296875 249.816406 668.9375 252.769531 C 670.578125 255.722656 669.59375 259.332031 666.640625 260.972656 L 469.460938 374.488281 C 430.75 396.796875 406.796875 438.136719 406.796875 482.753906 L 406.796875 710.445312 C 406.796875 713.726562 404.175781 716.679688 400.894531 716.679688 Z M 400.894531 716.679688 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 400.894531 716.679688 C 397.613281 716.679688 394.988281 714.054688 394.988281 710.773438 L 394.988281 482.753906 C 394.988281 438.136719 371.039062 396.796875 332.324219 374.488281 L 135.472656 260.644531 C 132.523438 259.003906 131.539062 255.394531 133.179688 252.441406 C 134.816406 249.488281 138.425781 248.503906 141.378906 250.144531 L 338.558594 363.988281 C 380.878906 388.269531 407.125 433.871094 407.125 482.425781 L 407.125 710.117188 C 406.796875 713.726562 404.175781 716.679688 400.894531 716.679688 Z M 400.894531 716.679688 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 459.949219 248.503906 C 441.902344 258.675781 441.902344 275.40625 459.949219 285.90625 C 477.992188 296.078125 507.191406 296.078125 525.238281 285.90625 C 543.28125 275.734375 543.28125 259.003906 525.238281 248.503906 C 507.191406 238.003906 477.992188 238.003906 459.949219 248.503906 Z M 437.308594 298.703125 C 419.265625 288.53125 390.066406 288.53125 372.023438 298.703125 C 353.976562 308.871094 353.976562 325.605469 372.023438 336.101562 C 390.066406 346.273438 419.265625 346.273438 437.308594 336.101562 C 455.355469 325.605469 455.355469 308.871094 437.308594 298.703125 Z M 437.308594 97.914062 C 419.265625 87.742188 390.066406 87.742188 372.023438 97.914062 C 353.976562 108.085938 353.976562 124.816406 372.023438 135.316406 C 390.066406 145.488281 419.265625 145.488281 437.308594 135.316406 C 455.355469 124.816406 455.355469 108.085938 437.308594 97.914062 Z M 261.785156 235.382812 C 279.832031 225.210938 279.832031 208.476562 261.785156 197.980469 C 243.742188 187.808594 214.542969 187.808594 196.496094 197.980469 C 178.453125 208.148438 178.453125 224.882812 196.496094 235.382812 C 214.871094 245.878906 244.070312 245.878906 261.785156 235.382812 Z M 612.835938 235.382812 C 630.878906 225.210938 630.878906 208.476562 612.835938 197.980469 C 594.789062 187.808594 565.589844 187.808594 547.546875 197.980469 C 529.5 208.148438 529.5 224.882812 547.546875 235.382812 C 565.917969 245.878906 595.117188 245.878906 612.835938 235.382812 Z M 284.425781 148.109375 C 266.378906 158.28125 266.378906 175.015625 284.425781 185.511719 C 302.46875 195.683594 331.667969 195.683594 349.710938 185.511719 C 367.757812 175.34375 367.757812 158.609375 349.710938 148.109375 C 331.667969 137.613281 302.46875 137.613281 284.425781 148.109375 Z M 284.425781 148.109375 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 567.558594 462.085938 C 549.84375 472.257812 535.40625 496.863281 535.734375 517.203125 C 536.0625 537.546875 550.5 546.074219 568.214844 535.90625 C 585.933594 525.734375 600.367188 501.128906 600.039062 480.785156 C 599.710938 460.445312 585.277344 451.914062 567.558594 462.085938 Z M 567.558594 462.085938 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 480.617188 485.707031 C 498.332031 475.539062 512.769531 450.929688 512.441406 430.589844 C 512.113281 410.25 497.675781 401.71875 479.960938 411.890625 C 462.246094 422.058594 447.808594 446.667969 448.136719 467.007812 C 448.464844 487.347656 462.902344 495.550781 480.617188 485.707031 Z M 480.617188 485.707031 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 655.484375 586.429688 C 673.203125 576.257812 687.636719 551.652344 687.308594 531.3125 C 686.980469 510.972656 672.546875 502.441406 654.828125 512.609375 C 637.113281 522.78125 622.675781 547.386719 623.003906 567.730469 C 623.332031 588.070312 637.769531 596.601562 655.484375 586.429688 Z M 655.484375 586.429688 " fill-opacity="1" fill-rule="nonzero"/><path fill="#ffffff" d="M 358.570312 469.304688 C 358.570312 448.636719 343.808594 423.371094 326.089844 412.875 C 308.046875 402.375 293.609375 410.90625 293.609375 431.574219 C 293.609375 452.242188 308.375 477.507812 326.089844 488.003906 C 344.136719 498.175781 358.570312 489.972656 358.570312 469.304688 Z M 184.03125 570.027344 C 184.03125 549.355469 169.265625 524.09375 151.550781 513.59375 C 133.503906 503.097656 119.070312 511.625 119.070312 532.296875 C 119.070312 552.964844 133.832031 578.226562 151.550781 588.726562 C 169.59375 598.898438 184.359375 590.695312 184.03125 570.027344 Z M 150.894531 311.167969 C 132.851562 300.667969 118.414062 309.199219 118.414062 329.867188 C 118.414062 350.539062 133.179688 375.800781 150.894531 386.300781 C 168.9375 396.796875 183.375 388.269531 183.375 367.597656 C 183.375 346.929688 168.9375 321.667969 150.894531 311.167969 Z M 326.417969 614.972656 C 308.375 604.472656 293.9375 613.003906 293.9375 633.671875 C 293.9375 654.34375 308.703125 679.605469 326.417969 690.105469 C 344.464844 700.601562 358.898438 692.074219 358.898438 671.402344 C 358.898438 650.734375 344.464844 625.472656 326.417969 614.972656 Z M 326.417969 614.972656 " fill-opacity="1" fill-rule="nonzero"/></svg>`;
-                
+                const diceIcon = `<img src="https://abhimanyulodha.github.io/matchalo/images/dice-icon.svg" alt="Dice Icon">`;
+
                 [this.DOMElements.dice1El, this.DOMElements.dice2El].forEach((el, i) => {
                     el.innerHTML = '';
                     if (this.currentRoll[i]) {
@@ -1750,10 +1816,9 @@
                         img.alt = `${piece.symbol} ${piece.quadrant}`;
                         el.appendChild(img);
                     } else {
-                        // Show greyed out dice
                         const wrapper = document.createElement('div');
                         wrapper.className = 'dice-empty-state';
-                        wrapper.innerHTML = diceSVG;
+                        wrapper.innerHTML = diceIcon;
                         el.appendChild(wrapper);
                     }
                 });
@@ -1766,7 +1831,7 @@
                     const isUsed = this.usedSuperpowers.has(powerName);
                     btn.disabled = !canUsePower || isUsed;
                     btn.classList.toggle('opacity-50', !canUsePower || isUsed);
-                    btn.classList.toggle('superpower-btn--active', this.activeSuperpower === powerName);
+                    btn.classList.toggle(Game.CSS_CLASSES.superpowerActive, this.activeSuperpower === powerName);
                 });
                 this.DOMElements.spCharge1.classList.toggle('opacity-30', this.usedSuperpowers.size >= 1);
                 this.DOMElements.spCharge2.classList.toggle('opacity-30', this.usedSuperpowers.size >= 2);
@@ -1786,13 +1851,13 @@
                 cell.innerHTML = '';
                 if (tooltip) cell.appendChild(tooltip);
                 if (piece) {
-                    cell.classList.remove('empty');
+                    cell.classList.remove(Game.CSS_CLASSES.empty);
                     const img = document.createElement('img');
                     img.src = ImageLoader.getImageSrc(piece.symbol, piece.quadrant, this.IMAGE_PATH);
                     img.alt = `${piece.symbol} ${piece.quadrant}`;
                     cell.appendChild(img);
                 } else {
-                    cell.classList.add('empty');
+                    cell.classList.add(Game.CSS_CLASSES.empty);
                 }
             }
             
@@ -1800,9 +1865,9 @@
                 const index = row * this.GRID_SIZE + col;
                 const cell = this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`);
                 if (!cell) return;
-                cell.classList.add('placing');
+                cell.classList.add(Game.CSS_CLASSES.placing);
                 this.renderCell(row, col);
-                setTimeout(() => cell.classList.remove('placing'), 500);
+                setTimeout(() => cell.classList.remove(Game.CSS_CLASSES.placing), Game.CONSTANTS.PLACEMENT_ANIM_DURATION);
             }
 
             generateRandomAlo() {
@@ -1848,15 +1913,15 @@
                         <div><strong>Badges Unlocked:</strong> ${this.stats.badgesUnlocked}</div>
                         <div class="col-span-2"><strong>Highest Score From:</strong> ${this.stats.highestScoringPattern.name} (+${this.stats.highestScoringPattern.score} pts)</div>
                     `;
-                    this.DOMElements.gameOverModal.classList.remove('hidden');
+                    this.DOMElements.gameOverModal.classList.remove(Game.CSS_CLASSES.hidden);
                     this.DOMElements.rollDiceBtn.disabled = true;
                 }, 500);
             }
 
             celebrateNewHighScore() {
                 const element = this.DOMElements.highScore;
-                element.classList.add('celebrating');
-                setTimeout(() => element.classList.remove('celebrating'), 500);
+                element.classList.add(Game.CSS_CLASSES.celebrating);
+                setTimeout(() => element.classList.remove(Game.CSS_CLASSES.celebrating), 500);
                 const rect = element.getBoundingClientRect();
                 const colors = ['#6a11cb', '#2575fc', '#c4b5fd', '#a78bfa'];
                 for (let i = 0; i < 20; i++) {
