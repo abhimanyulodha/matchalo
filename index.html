@@ -223,18 +223,18 @@
         }
 
         .grid-cell.stuck {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(185, 28, 28, 0.15) 100%);
+            background: transparent;
             cursor: not-allowed;
         }
 
         .grid-cell.stuck::before {
-            content: '💔';
+            content: '😈';
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             font-size: 4rem;
-            opacity: 0.6;
+            opacity: 1.0;
             pointer-events: none;
         }
 
