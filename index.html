@@ -2848,6 +2848,7 @@
              * @param {Object} achievement - Achievement data
              */
             showAchievement(achievement) {
+                return; // <-- ADD THIS LINE
                 this.stats.badgesUnlocked++;
                 
                 AnalyticsTracker.trackAchievement(achievement.name);
