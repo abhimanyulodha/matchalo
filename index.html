@@ -21,6 +21,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js@11.0.1/dist/css/shepherd.css">
     <script src="https://cdn.jsdelivr.net/npm/shepherd.js@11.0.1/dist/js/shepherd.min.js"></script>
     
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+
     <style>
         :root {
             --bg: linear-gradient(135deg, #f5f7fa 0%, #e8e4f1 100%);
@@ -3021,6 +3024,14 @@
                 
                 document.body.appendChild(notification);
                 
+                // ADD THIS LINE HERE (after appendChild)
+                confetti({
+                    particleCount: 200,
+                    spread: 100,
+                    colors: ['#6a11cb', '#2575fc', '#c4b5fd'],
+                    origin: { y: 0.7 }
+                });
+
                 this.addManagedTimer(() => {
                     notification.classList.add('hiding');
                     this.addManagedTimer(() => notification.remove(), 300);
@@ -3432,6 +3443,14 @@
                         easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
                     }).onfinish = () => particle.remove();
                 }
+
+                // ADD THIS LINE HERE (after the for-loop)
+                confetti({
+                    particleCount: 150,
+                    spread: 100,
+                    origin: { y: 0.6 }
+                });
+
             }
 
             /**
