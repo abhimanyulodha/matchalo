@@ -42,6 +42,11 @@
             --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
             --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
             --animation-speed: 1;
+            --theme-ocean-bg: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --theme-forest-bg: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+            --theme-purple-bg: linear-gradient(135deg, #a78bfa 0%, #c4b5fd 100%);
+            --theme-dark-bg: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            --theme-pink-bg: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
         }
 
         body { 
@@ -743,6 +748,62 @@
             color: var(--text-secondary) !important;
         }
 
+        /* Theme body classes */
+        body.theme-default {
+            --bg: linear-gradient(135deg, #f5f7fa 0%, #e8e4f1 100%);
+            --card: rgba(255, 255, 255, 0.85);
+            --text: #4a0e69;
+            --accent: #6a11cb;
+            --accent-gradient: linear-gradient(135deg, #2575fc 0%, #6a11cb 100%);
+        }
+
+        body.theme-ocean {
+            --bg: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --card: rgba(255, 255, 255, 0.9);
+            --text: #003d5c;
+            --accent: #0080b3;
+            --accent-gradient: linear-gradient(135deg, #00b4db 0%, #0083b0 100%);
+            --grid-line-color: rgba(0, 128, 179, 0.15);
+        }
+
+        body.theme-forest {
+            --bg: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+            --card: rgba(255, 255, 255, 0.9);
+            --text: #2d5016;
+            --accent: #4a7c0f;
+            --accent-gradient: linear-gradient(135deg, #6aa121 0%, #4a7c0f 100%);
+            --grid-line-color: rgba(74, 124, 15, 0.15);
+        }
+
+        body.theme-purple {
+            --bg: linear-gradient(135deg, #a78bfa 0%, #c4b5fd 100%);
+            --card: rgba(255, 255, 255, 0.9);
+            --text: #4c1d95;
+            --accent: #7c3aed;
+            --accent-gradient: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            --grid-line-color: rgba(124, 58, 237, 0.15);
+        }
+
+        body.theme-dark {
+            --bg: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            --card: rgba(30, 30, 46, 0.9);
+            --text: #e0e0e0;
+            --accent: #6366f1;
+            --accent-gradient: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
+            --grid-line-color: rgba(99, 102, 241, 0.2);
+        }
+
+        body.theme-pink {
+            --bg: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
+            --card: rgba(255, 255, 255, 0.9);
+            --text: #831843;
+            --accent: #db2777;
+            --accent-gradient: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+            --grid-line-color: rgba(219, 39, 119, 0.15);
+        }
+
+        }
+
     </style>
 </head>
 <body class="p-2 lg:p-4 flex items-center justify-center min-h-screen">
@@ -792,14 +853,17 @@
                 </div>
 
                 <div class="p-4 rounded-2xl control-panel-card">
-                    <nav class="flex justify-center items-center gap-2">
+                    <!-- FIRST ROW: Help, Settings, Badges -->
+                    <nav class="flex justify-center items-center gap-2 mb-3">
                         <button id="help-btn" class="themed-button secondary text-xs flex-1 py-2">Help</button>
-                        <button id="reset-btn" class="themed-button primary text-xs flex-1 py-2 text-white">New Game</button>
+                        <button id="settings-btn" class="themed-button secondary text-xs flex-1 py-2">Settings</button>
                         <button id="badges-btn" class="themed-button secondary text-xs flex-1 py-2">Badges</button>
                     </nav>
-                    <div class="text-center mt-3">
-                        <button id="select-edition-btn" class="w-full py-2 px-4 themed-button text-white text-sm flex items-center justify-center gap-2"></button>
-                    </div>
+                    <!-- SECOND ROW: New Game, Edition -->
+                    <nav class="flex justify-center items-center gap-2">
+                        <button id="reset-btn" class="themed-button primary text-xs flex-1 py-2 text-white">New Game</button>
+                        <button id="select-edition-btn" class="themed-button secondary text-xs flex-1 py-2"></button>
+                    </nav>
                 </div>
                 
                 <div class="p-4 rounded-2xl control-panel-card flex-1">
@@ -930,6 +994,33 @@
             <div class="flex items-center gap-3">
                 <button id="resume-game-cancel-btn" class="themed-button secondary flex-1 py-2.5">New Game</button>
                 <button id="resume-game-ok-btn" class="themed-button primary flex-1 py-2.5 text-white">Resume</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden">
+        <div class="modal-content w-full max-w-sm glass-card rounded-2xl p-6 relative">
+            <button id="close-settings-modal-btn" class="absolute top-2 right-2 w-8 h-8 rounded-full text-xl flex items-center justify-center font-bold text-gray-500 hover:bg-gray-200/50" aria-label="Close">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h2 class="text-xl font-bold mb-4 premium-header" style="color: var(--accent);">Settings</h2>
+            <!-- THEME SECTION -->
+            <div class="mb-4">
+                <h3 class="text-lg font-semibold mb-2" style="color: var(--text);">🎨 Theme</h3>
+                <div class="grid grid-cols-3 gap-3">
+                    <button class="theme-option w-16 h-16 rounded-lg" style="background: var(--bg);" data-theme="default"></button>
+                    <button class="theme-option w-16 h-16 rounded-lg" style="background: var(--theme-ocean-bg);" data-theme="ocean"></button>
+                    <button class="theme-option w-16 h-16 rounded-lg" style="background: var(--theme-forest-bg);" data-theme="forest"></button>
+                    <button class="theme-option w-16 h-16 rounded-lg" style="background: var(--theme-purple-bg);" data-theme="purple"></button>
+                    <button class="theme-option w-16 h-16 rounded-lg" style="background: var(--theme-dark-bg);" data-theme="dark"></button>
+                    <button class="theme-option w-16 h-16 rounded-lg" style="background: var(--theme-pink-bg);" data-theme="pink"></button>
+                </div>
+            </div>
+            <!-- SOUND SECTION -->
+            <div class="mb-4">
+                <h3 class="text-lg font-semibold mb-2" style="color: var(--text);">🔊 Sound</h3>
+                <button id="toggle-sound-btn" class="themed-button tertiary text-xs py-1 px-3">🔇 Mute</button>
             </div>
         </div>
     </div>
@@ -1158,7 +1249,8 @@
                     sound: true,
                     particles: true,
                     darkMode: false,
-                    animationSpeed: 1
+                    animationSpeed: 1,
+                    theme: 'default'
                 };
                 this.load();
                 this.apply();
@@ -1184,15 +1276,57 @@
                 this.save();
                 this.apply();
             }
-            
+
             apply() {
+                // Store previous theme to detect changes
+                const previousTheme = document.body.className.match(/theme-\w+/)?.[0];
+                const newTheme = `theme-${this.settings.theme}`;
+                
+                // Remove all theme classes first
+                document.body.classList.remove('theme-ocean', 'theme-forest', 'theme-purple', 'theme-dark', 'theme-pink', 'theme-default');
+                
+                // Add the selected theme class
+                document.body.classList.add(newTheme);
+                
+                // Handle dark mode
                 if (this.settings.darkMode) {
                     document.body.classList.add('dark-mode');
                 } else {
                     document.body.classList.remove('dark-mode');
                 }
+                
                 document.documentElement.style.setProperty('--animation-speed', this.settings.animationSpeed);
+
+                // Update sound button text
+                const soundBtn = document.getElementById('toggle-sound-btn');
+                if (soundBtn) {
+                    soundBtn.textContent = this.settings.sound ? '🔇 Mute' : '🔊 Unmute';
+                }
+                
+                // 🎉 THIS IS THE CONFETTI CODE FOR THEME CHANGES! 🎉
+                if (previousTheme && previousTheme !== newTheme && typeof confetti !== 'undefined') {
+                    confetti({
+                        particleCount: 100,
+                        spread: 70,
+                        origin: { y: 0.6 },
+                        colors: this.getThemeColors(this.settings.theme)
+                    });
+                }
             }
+
+            // 🎨 HELPER METHOD FOR THEME COLORS (Add this after apply() method)
+            getThemeColors(theme) {
+                const themeColorMap = {
+                    default: ['#6a11cb', '#2575fc', '#c4b5fd', '#a78bfa'],
+                    ocean: ['#4facfe', '#00f2fe', '#00b4db', '#0083b0'],
+                    forest: ['#56ab2f', '#a8e063', '#6aa121', '#4a7c0f'],
+                    purple: ['#a78bfa', '#c4b5fd', '#8b5cf6', '#7c3aed'],
+                    dark: ['#818cf8', '#6366f1', '#4f46e5', '#4338ca'],
+                    pink: ['#f472b6', '#ec4899', '#db2777', '#be185d']
+                };
+                return themeColorMap[theme] || themeColorMap.default;
+            }
+
         }
         
         // ===== SCORE CALCULATOR =====
@@ -1889,6 +2023,7 @@
                 this.checkForSavedGame();
                 this.populateEditionModal();
                 this.attachGlobalListeners();
+                document.getElementById('select-edition-btn').textContent = `Edition: ${this.editionConfigs[this.activeEditionId].name}`;
             },
             
             /**
@@ -1969,14 +2104,13 @@
                 const config = this.editionConfigs[editionId];
                 this.currentGame = new Game(config);
                 
-                const btn = document.getElementById('select-edition-btn');
-                btn.innerHTML = `Edition: ${config.name} <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+                const btn = document.getElementById('select-edition-btn').textContent = `Edition: ${config.name}`;
                 
                 if (oldEdition !== editionId) {
                     AnalyticsTracker.trackEditionSwitch(oldEdition, editionId);
                 }
             },
-            
+
             /**
              * Populate edition selection modal
              */
@@ -2058,6 +2192,39 @@
                     Storage.remove(GAME_CONFIG.STORAGE_KEYS.GAME_STATE);
                     this.switchEdition(this.activeEditionId);
                 });
+
+                // Open/close settings modal
+                document.getElementById('settings-btn').addEventListener('click', () => {
+                    document.getElementById('settings-modal').classList.remove('hidden');
+                });
+                document.getElementById('close-settings-modal-btn').addEventListener('click', () => {
+                    document.getElementById('settings-modal').classList.add('hidden');
+                });
+
+                // Handle theme selection with visual feedback
+                document.querySelectorAll('.theme-option').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const theme = button.dataset.theme;
+                        
+                        // Add active state to clicked button
+                        document.querySelectorAll('.theme-option').forEach(btn => {
+                            btn.style.border = 'none';
+                            btn.style.transform = 'scale(1)';
+                        });
+                        button.style.border = '3px solid var(--accent)';
+                        button.style.transform = 'scale(1.1)';
+                        
+                        gameManager.settingsManager.set('theme', theme);
+                    });
+                });
+
+                // Handle sound toggle
+                document.getElementById('toggle-sound-btn').addEventListener('click', () => {
+                    const soundEnabled = gameManager.settingsManager.get('sound');
+                    gameManager.settingsManager.set('sound', !soundEnabled);
+                    document.getElementById('toggle-sound-btn').textContent = soundEnabled ? '🔊 Unmute' : '🔇 Mute';
+                });
+
             },
             
             /**
