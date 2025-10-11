@@ -207,6 +207,8 @@
             position: relative;
             overflow: hidden;
             outline: none;
+            will-change: transform;
+            transform: translateZ(0);
         }
         
         .grid-cell:focus-visible {
@@ -218,6 +220,22 @@
         .grid-cell.empty { 
             box-shadow: inset 0 0 0 1px var(--grid-line-color);
             background: rgba(255, 255, 255, 0.3);
+        }
+
+        .grid-cell.stuck {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(185, 28, 28, 0.15) 100%);
+            cursor: not-allowed;
+        }
+
+        .grid-cell.stuck::before {
+            content: '💔';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4rem;
+            opacity: 0.6;
+            pointer-events: none;
         }
 
         .grid-cell::after {
@@ -236,12 +254,16 @@
             opacity: 1;
         }
 
-        .grid-cell.empty:hover {
+        .grid-cell.empty:hover:not(.stuck) {
             background: linear-gradient(135deg, 
                 rgba(106, 17, 203, 0.05) 0%, 
                 rgba(106, 17, 203, 0.12) 100%);
             box-shadow: inset 0 0 0 2px var(--accent-light);
             transform: scale(1.05);
+        }
+
+        .grid-cell.stuck:hover::after {
+            opacity: 0;
         }
 
         .grid-cell img {
@@ -565,6 +587,7 @@
 
         .toast.error { background: linear-gradient(135deg, #ef4444, #b91c1c); }
         .toast.success { background: linear-gradient(135deg, #22c55e, #15803d); }
+        .toast.info { background: linear-gradient(135deg, #3b82f6, #1e40af); }
 
         @keyframes toast-in {
             from { opacity: 0; transform: translateY(20px); }
@@ -677,9 +700,28 @@
             color: var(--text-secondary);
             font-size: 0.85rem;
         }
+
+        /* Screen reader only */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
     </style>
 </head>
 <body class="p-2 lg:p-4 flex items-center justify-center min-h-screen">
+    <!-- ARIA Live Region for Accessibility -->
+    <div role="status" aria-live="polite" aria-atomic="true" class="sr-only">
+        <span id="score-announcement"></span>
+    </div>
+
     <main id="game-container" class="w-full max-w-5xl mx-auto flex flex-col lg:flex-row gap-4 lg:gap-6 items-center lg:items-stretch">
         
         <section class="w-full lg:w-2/3" aria-label="Game Board Area">
@@ -721,7 +763,7 @@
                 </div>
 
                 <div class="p-4 rounded-2xl control-panel-card">
-                    <nav class="flex justify-center items-center gap-3">
+                    <nav class="flex justify-center items-center gap-2">
                         <button id="help-btn" class="themed-button secondary text-xs flex-1 py-2">Help</button>
                         <button id="reset-btn" class="themed-button primary text-xs flex-1 py-2 text-white">New Game</button>
                         <button id="badges-btn" class="themed-button secondary text-xs flex-1 py-2">Badges</button>
@@ -806,7 +848,7 @@
             <div class="flex justify-between items-start mb-4">
                 <div class="flex-grow">
                     <h2 id="help-title" class="text-3xl font-bold" style="color: var(--accent);">How to Play MatchAlo!</h2>
-                    <p id="help-subtitle" class="text-sm mt-2 font-bold" style="color: var(--text-secondary);">A fun and simple block based artwork game by Abhimanyu Lodha</p>
+                    <p id="help-subtitle" class="text-sm mt-2 font-bold" style="color: var(--text-secondary);">A fun and simple artwork game by Abhimanyu Lodha</p>
                 </div>
                 <button id="close-help-modal-btn" class="w-10 h-10 rounded-full text-xl flex items-center justify-center font-bold flex-shrink-0" aria-label="Close">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -845,49 +887,119 @@
         </div>
     </div>
 
+    <div id="resume-game-modal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 z-50 hidden">
+        <div class="modal-content w-full max-w-sm glass-card rounded-2xl p-8 text-center relative">
+            <h2 class="text-xl font-bold mb-4 premium-header" style="color: var(--accent);">Resume Previous Game?</h2>
+            <p class="mb-2" style="color: var(--text-secondary);">You have a saved game in progress.</p>
+            <p class="mb-6 text-sm" style="color: var(--text-secondary);">Score: <span id="saved-game-score" class="font-bold"></span></p>
+            <div class="flex items-center gap-3">
+                <button id="resume-game-cancel-btn" class="themed-button secondary flex-1 py-2.5">New Game</button>
+                <button id="resume-game-ok-btn" class="themed-button primary flex-1 py-2.5 text-white">Resume</button>
+            </div>
+        </div>
+    </div>
+
     <div id="toast-container"></div>
 
     <script>
-        // ===== ENHANCED MATCHALO GAME WITH ALL IMPROVEMENTS =====
+        // ===== GAME CONFIGURATION =====
+        /**
+         * Central configuration object for game rules and settings
+         */
+        const GAME_CONFIG = {
+            GRID_SIZE: 8,
+            QUADRANTS: ['TL', 'TR', 'BL', 'BR'],
+            
+            SCORING: {
+                PERFECT_SHAPE_SAME: 40,
+                PERFECT_SHAPE_DIFF: 20,
+                ALMOST_THERE_SAME: 20,
+                ALMOST_THERE_DIFF: 15,
+                HALF_BAKED_SAME: 10,
+                HALF_BAKED_DIFF: 5,
+                LINE_MASTER: 10,
+                DIAMOND_HEIST_PENALTY: -10
+            },
+            
+            ANIMATIONS: {
+                DOUBLE_CLICK_DELAY: 300,
+                DICE_TUMBLE_DURATION: 600,
+                PLACEMENT_ANIM_DURATION: 500,
+                SCORE_ANIM_DURATION: 500
+            },
+            
+            STORAGE_KEYS: {
+                HIGH_SCORE: 'matchaloHighScore',
+                SETTINGS: 'matchalo_settings',
+                ACHIEVEMENTS: 'matchalo_achievements',
+                GAME_STATE: 'matchalo_game_state'
+            },
+            
+            DEBUG_MODE: false // Set to true for testing
+        };
         
         // ===== ANALYTICS TRACKER =====
+        /**
+         * Handles analytics event tracking via Google Analytics
+         */
         class AnalyticsTracker {
+            /**
+             * Track a custom event
+             * @param {string} eventName - Name of the event
+             * @param {Object} eventParams - Additional parameters
+             */
             static trackEvent(eventName, eventParams = {}) {
                 if (typeof gtag !== 'undefined') {
                     gtag('event', eventName, eventParams);
                 }
             }
+            
             static trackGameStart(edition) {
                 this.trackEvent('game_start', { edition, timestamp: new Date().toISOString() });
             }
+            
             static trackGameEnd(score, edition) {
                 this.trackEvent('game_end', { score, edition, value: score });
             }
+            
             static trackDiceRoll() {
                 this.trackEvent('dice_roll');
             }
+            
             static trackSuperpowerUsed(superpower) {
                 this.trackEvent('superpower_used', { superpower_type: superpower });
             }
+            
             static trackAchievement(achievementName) {
                 this.trackEvent('achievement_unlocked', { achievement_name: achievementName });
             }
+            
             static trackEditionSwitch(fromEdition, toEdition) {
                 this.trackEvent('edition_switch', { from: fromEdition, to: toEdition });
             }
+            
             static trackShare(shareType) {
                 this.trackEvent('share', { share_type: shareType, method: 'web_share_api' });
             }
+            
             static trackHighScore(score, edition) {
                 this.trackEvent('new_high_score', { score, edition, value: score });
+            }
+            
+            static trackGameResume() {
+                this.trackEvent('game_resume');
             }
         }
         
         // ===== LOADING MANAGER =====
+        /**
+         * Manages loading overlay and progress display
+         */
         class LoadingManager {
             static show(message = 'Loading game...') {
                 const existing = document.getElementById('loading-overlay');
                 if (existing) return;
+                
                 const overlay = document.createElement('div');
                 overlay.id = 'loading-overlay';
                 overlay.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center';
@@ -901,12 +1013,14 @@
                 `;
                 document.body.appendChild(overlay);
             }
+            
             static updateProgress(current, total) {
                 const progress = document.getElementById('loading-progress');
                 if (progress) {
                     progress.textContent = `${current} / ${total} assets loaded`;
                 }
             }
+            
             static hide() {
                 const overlay = document.getElementById('loading-overlay');
                 if (overlay) {
@@ -918,13 +1032,27 @@
         }
         
         // ===== SOUND MANAGER =====
+        /**
+         * Manages game sound effects using Web Audio API
+         */
         class SoundManager {
             constructor() {
                 this.sounds = {};
                 this.enabled = true;
                 this.audioContext = null;
             }
+            
+            /**
+             * Initialize the audio context and sound library
+             */
             async init() {
+                // Check for browser support
+                if (!window.AudioContext && !window.webkitAudioContext) {
+                    console.warn('Web Audio API not supported');
+                    this.enabled = false;
+                    return;
+                }
+                
                 try {
                     this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
                     this.sounds = {
@@ -932,40 +1060,63 @@
                         score: () => this.playTone(880, 0.2, 'sine'),
                         gameOver: () => this.playTone(220, 0.3, 'triangle'),
                         click: () => this.playTone(600, 0.05, 'square'),
-                        superpower: () => this.playTone(1200, 0.15, 'sine')
+                        superpower: () => this.playTone(1200, 0.15, 'sine'),
+                        stuck: () => this.playTone(200, 0.2, 'sawtooth')
                     };
                 } catch (e) {
-                    console.warn('Web Audio API not supported');
+                    console.warn('Error initializing Web Audio API:', e);
+                    this.enabled = false;
                 }
             }
+            
+            /**
+             * Play a tone with specified parameters
+             * @param {number} frequency - Frequency in Hz
+             * @param {number} duration - Duration in seconds
+             * @param {string} type - Oscillator type (sine, square, triangle, sawtooth)
+             */
             playTone(frequency, duration, type = 'sine') {
                 if (!this.enabled || !this.audioContext) return;
+                
                 try {
                     const oscillator = this.audioContext.createOscillator();
                     const gainNode = this.audioContext.createGain();
+                    
                     oscillator.connect(gainNode);
                     gainNode.connect(this.audioContext.destination);
+                    
                     oscillator.frequency.value = frequency;
                     oscillator.type = type;
+                    
                     gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
                     gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
+                    
                     oscillator.start(this.audioContext.currentTime);
                     oscillator.stop(this.audioContext.currentTime + duration);
                 } catch (e) {
                     console.warn('Error playing sound:', e);
                 }
             }
+            
+            /**
+             * Play a named sound effect
+             * @param {string} soundName - Name of the sound to play
+             */
             play(soundName) {
                 if (this.sounds[soundName]) {
                     this.sounds[soundName]();
                 }
             }
+            
             setEnabled(enabled) {
                 this.enabled = enabled;
             }
         }
         
         // ===== SETTINGS MANAGER =====
+        /**
+         * Manages game settings and preferences
+         */
         class SettingsManager {
             constructor() {
                 this.settings = {
@@ -977,23 +1128,28 @@
                 this.load();
                 this.apply();
             }
+            
             load() {
-                const saved = Storage.get('matchalo_settings');
+                const saved = Storage.get(GAME_CONFIG.STORAGE_KEYS.SETTINGS);
                 if (saved) {
                     this.settings = { ...this.settings, ...saved };
                 }
             }
+            
             save() {
-                Storage.set('matchalo_settings', this.settings);
+                Storage.set(GAME_CONFIG.STORAGE_KEYS.SETTINGS, this.settings);
             }
+            
             get(key) {
                 return this.settings[key];
             }
+            
             set(key, value) {
                 this.settings[key] = value;
                 this.save();
                 this.apply();
             }
+            
             apply() {
                 if (this.settings.darkMode) {
                     document.body.classList.add('dark-mode');
@@ -1005,21 +1161,20 @@
         }
         
         // ===== SCORE CALCULATOR =====
+        /**
+         * Handles all score calculations for the game
+         */
         class ScoreCalculator {
             constructor(gridSize) {
                 this.gridSize = gridSize;
-                this.SCORES = {
-                    PERFECT_SHAPE_SAME: 40,
-                    PERFECT_SHAPE_DIFF: 20,
-                    ALMOST_THERE_SAME: 20,
-                    ALMOST_THERE_DIFF: 15,
-                    HALF_BAKED_SAME: 10,
-                    HALF_BAKED_DIFF: 5,
-                    LINE_MASTER: 10,
-                    DIAMOND_HEIST_PENALTY: -10
-                };
+                this.SCORES = GAME_CONFIG.SCORING;
             }
 
+            /**
+             * Calculate score from perfect shape patterns (2x2 complete shapes)
+             * @param {Array} gridState - Current grid state
+             * @returns {Object} Score data including points, scored pieces, and scoring cells
+             */
             calculatePerfectShapes(gridState) {
                 let score = 0;
                 const scoredPieces = new Set();
@@ -1059,6 +1214,12 @@
                 return { score, scoredPieces, scoringCells, count };
             }
 
+            /**
+             * Calculate score from almost complete shapes (3 out of 4 pieces)
+             * @param {Array} gridState - Current grid state
+             * @param {Set} alreadyScored - Already scored piece indices
+             * @returns {Object} Score data
+             */
             calculateAlmostThere(gridState, alreadyScored) {
                 let score = 0;
                 const scoredPieces = new Set(alreadyScored);
@@ -1096,6 +1257,12 @@
                 return { score, scoredPieces, scoringCells };
             }
 
+            /**
+             * Calculate score from half-complete shapes (2 adjacent matching pieces)
+             * @param {Array} gridState - Current grid state
+             * @param {Set} alreadyScored - Already scored piece indices
+             * @returns {Object} Score data
+             */
             calculateHalfBaked(gridState, alreadyScored) {
                 let score = 0;
                 const scoredPieces = new Set(alreadyScored);
@@ -1139,6 +1306,11 @@
                 return { score, scoredPieces, scoringCells };
             }
 
+            /**
+             * Calculate score from connected sequences of same-colored pieces
+             * @param {Array} gridState - Current grid state
+             * @returns {Object} Score data
+             */
             calculateGreatSequence(gridState) {
                 let score = 0;
                 const scoringCells = new Set();
@@ -1176,6 +1348,11 @@
                 return { score, scoringCells };
             }
 
+            /**
+             * Calculate score from complete rows or columns of same color
+             * @param {Array} gridState - Current grid state
+             * @returns {Object} Score data
+             */
             calculateLineMaster(gridState) {
                 let score = 0;
                 const scoringCells = new Set();
@@ -1214,6 +1391,11 @@
                 return { score, scoringCells };
             }
 
+            /**
+             * Calculate penalty for diamond-shaped empty spaces (inverted shape)
+             * @param {Array} gridState - Current grid state
+             * @returns {number} Penalty score
+             */
             calculateDiamondHeist(gridState) {
                 let score = 0;
                 for (let r = 0; r < this.gridSize - 1; r++) {
@@ -1236,14 +1418,25 @@
         }
         
         // ===== NOTIFICATION SYSTEM =====
+        /**
+         * Displays toast notifications to the user
+         */
         const NotificationSystem = {
+            /**
+             * Show a notification toast
+             * @param {string} message - Message to display
+             * @param {string} type - Type of notification (success, error, info)
+             * @param {number} duration - Duration in milliseconds
+             */
             show(message, type = 'success', duration = 3000) {
                 const container = document.getElementById('toast-container');
                 if (!container) return;
+                
                 const toast = document.createElement('div');
                 toast.className = `toast ${type}`;
                 toast.textContent = message;
                 container.appendChild(toast);
+                
                 setTimeout(() => {
                     toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
                     toast.style.opacity = '0';
@@ -1253,19 +1446,44 @@
             }
         };
 
+        /**
+         * Centralized error handling utility
+         */
         class ErrorHandler {
+            /**
+             * Handle an error with optional recovery
+             * @param {Error} error - The error object
+             * @param {string} context - Context where error occurred
+             * @param {string} userFacingMessage - Optional message to show user
+             * @param {Function} recoveryAction - Optional recovery function
+             */
             static handle(error, context, userFacingMessage = null, recoveryAction = null) {
                 console.error(`Error in ${context}:`, error);
+                
                 if (userFacingMessage) {
                     NotificationSystem.show(userFacingMessage, 'error');
                 }
+                
                 if (recoveryAction) {
-                    recoveryAction();
+                    try {
+                        recoveryAction();
+                    } catch (recoveryError) {
+                        console.error('Recovery action failed:', recoveryError);
+                    }
                 }
             }
         }
         
+        /**
+         * Local storage wrapper with error handling
+         */
         class Storage {
+            /**
+             * Get value from localStorage
+             * @param {string} key - Storage key
+             * @param {*} fallback - Fallback value if not found
+             * @returns {*} Stored value or fallback
+             */
             static get(key, fallback = null) {
                 try {
                     const value = localStorage.getItem(key);
@@ -1275,63 +1493,125 @@
                     return fallback;
                 }
             }
+            
+            /**
+             * Set value in localStorage
+             * @param {string} key - Storage key
+             * @param {*} value - Value to store
+             * @returns {boolean} Success status
+             */
             static set(key, value) {
                 try {
                     localStorage.setItem(key, JSON.stringify(value));
                     return true;
                 } catch (e) {
-                    ErrorHandler.handle(e, 'Storage.set');
+                    ErrorHandler.handle(e, 'Storage.set', 'Unable to save data. Storage may be full.');
                     return false;
+                }
+            }
+            
+            /**
+             * Remove value from localStorage
+             * @param {string} key - Storage key
+             */
+            static remove(key) {
+                try {
+                    localStorage.removeItem(key);
+                } catch (e) {
+                    ErrorHandler.handle(e, 'Storage.remove');
                 }
             }
         }
 
+        /**
+         * Manages image preloading and caching
+         */
         class ImageLoader {
             static cache = new Map();
             static failedImages = new Set();
+            static maxRetries = 3;
 
+            /**
+             * Preload all game images with retry logic
+             * @param {Object} config - Game configuration
+             * @param {string} imagePath - Base path for images
+             * @returns {Promise<Array>} Load results
+             */
             static async preloadImages(config, imagePath) {
                 LoadingManager.show('Loading game assets...');
                 
                 const promises = [];
                 const symbols = config.symbols;
-                const quadrants = ['TL', 'TR', 'BL', 'BR'];
+                const quadrants = GAME_CONFIG.QUADRANTS;
                 const totalImages = symbols.length * quadrants.length;
                 let loadedCount = 0;
                 
                 symbols.forEach(symbol => {
                     quadrants.forEach(quadrant => {
                         const src = imagePath + `${symbol.toLowerCase()}_${quadrant}.svg`;
+                        
                         if (this.cache.has(src) || this.failedImages.has(src)) {
                             loadedCount++;
                             LoadingManager.updateProgress(loadedCount, totalImages);
                             return;
                         }
                         
-                        const promise = new Promise((resolve) => {
-                            const img = new Image();
-                            img.crossOrigin = 'anonymous';
-                            img.onload = () => {
-                                this.cache.set(src, img);
-                                loadedCount++;
-                                LoadingManager.updateProgress(loadedCount, totalImages);
-                                resolve({ success: true, src });
-                            };
-                            img.onerror = () => {
-                                this.failedImages.add(src);
-                                loadedCount++;
-                                LoadingManager.updateProgress(loadedCount, totalImages);
-                                resolve({ success: false, src });
-                            };
-                            img.src = src;
+                        const promise = this.loadImageWithRetry(src, 0).then(result => {
+                            loadedCount++;
+                            LoadingManager.updateProgress(loadedCount, totalImages);
+                            return result;
                         });
+                        
                         promises.push(promise);
                     });
                 });
                 
                 const results = await Promise.all(promises);
                 LoadingManager.hide();
+                
+                const failedCount = results.filter(r => !r.success).length;
+                if (failedCount > 0) {
+                    NotificationSystem.show(
+                        `${failedCount} images failed to load. Game may have visual issues.`,
+                        'error',
+                        5000
+                    );
+                }
+                
                 return results;
+            }
+
+            /**
+             * Load an image with retry logic
+             * @param {string} src - Image source URL
+             * @param {number} retryCount - Current retry attempt
+             * @returns {Promise<Object>} Load result
+             */
+            static loadImageWithRetry(src, retryCount) {
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.crossOrigin = 'anonymous';
+                    
+                    img.onload = () => {
+                        this.cache.set(src, img);
+                        resolve({ success: true, src });
+                    };
+                    
+                    img.onerror = () => {
+                        if (retryCount < this.maxRetries) {
+                            console.warn(`Retrying image load (${retryCount + 1}/${this.maxRetries}): ${src}`);
+                            setTimeout(() => {
+                                this.loadImageWithRetry(src, retryCount + 1).then(resolve);
+                            }, 1000 * (retryCount + 1));
+                        } else {
+                            this.failedImages.add(src);
+                            console.error(`Failed to load image after ${this.maxRetries} retries: ${src}`);
+                            resolve({ success: false, src });
+                        }
+                    };
+                    
+                    img.src = src;
+                });
             }
 
             static getImage(src) {
@@ -1343,17 +1623,51 @@
             }
         }
 
+        /**
+         * Manages game achievements and badges
+         */
         class AchievementSystem {
-             constructor() {
+            constructor() {
                 this.achievements = {
-                    firstPerfectShape: { name: 'Perfect Start', icon: '🎯', description: 'Score your first Perfect Shape', unlocked: false },
-                    score500: { name: 'High Roller', icon: '💎', description: 'Reach a score of 500', unlocked: false },
-                    fillBoard: { name: 'Completionist', icon: '👑', description: 'Fill the entire board', unlocked: false },
-                    lineMaster: { name: 'Line Master', icon: '📏', description: 'Create a full line of same color', unlocked: false },
-                    noMistakes: { name: 'Perfectionist', icon: '✨', description: 'Complete a game without using superpowers', unlocked: false }
+                    firstPerfectShape: { 
+                        name: 'Perfect Start', 
+                        icon: '🎯', 
+                        description: 'Score your first Perfect Shape', 
+                        unlocked: false 
+                    },
+                    score500: { 
+                        name: 'High Roller', 
+                        icon: '💎', 
+                        description: 'Reach a score of 500', 
+                        unlocked: false 
+                    },
+                    fillBoard: { 
+                        name: 'Completionist', 
+                        icon: '👑', 
+                        description: 'Fill the entire board', 
+                        unlocked: false 
+                    },
+                    lineMaster: { 
+                        name: 'Line Master', 
+                        icon: '📏', 
+                        description: 'Create a full line of same color', 
+                        unlocked: false 
+                    },
+                    noMistakes: { 
+                        name: 'Perfectionist', 
+                        icon: '✨', 
+                        description: 'Complete a game without using superpowers', 
+                        unlocked: false 
+                    }
                 };
                 this.loadProgress();
             }
+            
+            /**
+             * Check and unlock an achievement
+             * @param {string} key - Achievement key
+             * @returns {Object|null} Achievement data if newly unlocked
+             */
             check(key) {
                 if (!this.achievements[key]?.unlocked) {
                     this.achievements[key].unlocked = true;
@@ -1362,48 +1676,153 @@
                 }
                 return null;
             }
+            
             loadProgress() {
                 try {
-                    const progress = Storage.get('matchalo_achievements');
+                    const progress = Storage.get(GAME_CONFIG.STORAGE_KEYS.ACHIEVEMENTS);
                     if (progress) {
                         Object.keys(progress).forEach(key => {
-                            if (this.achievements[key]) this.achievements[key].unlocked = progress[key];
+                            if (this.achievements[key]) {
+                                this.achievements[key].unlocked = progress[key];
+                            }
                         });
                     }
-                } catch (e) { ErrorHandler.handle(e, 'AchievementSystem.load'); }
+                } catch (e) {
+                    ErrorHandler.handle(e, 'AchievementSystem.load');
+                }
             }
+            
             saveProgress() {
                 try {
                     const progress = {};
-                    Object.keys(this.achievements).forEach(key => { progress[key] = this.achievements[key].unlocked; });
-                    Storage.set('matchalo_achievements', progress);
-                } catch (e) { ErrorHandler.handle(e, 'AchievementSystem.save'); }
+                    Object.keys(this.achievements).forEach(key => {
+                        progress[key] = this.achievements[key].unlocked;
+                    });
+                    Storage.set(GAME_CONFIG.STORAGE_KEYS.ACHIEVEMENTS, progress);
+                } catch (e) {
+                    ErrorHandler.handle(e, 'AchievementSystem.save');
+                }
             }
-            getAll() { return Object.values(this.achievements); }
+            
+            getAll() {
+                return Object.values(this.achievements);
+            }
         }
 
+        /**
+         * Main game manager - coordinates game instances and UI
+         */
         const gameManager = {
             currentGame: null,
             activeEditionId: 'circles',
             settingsManager: null,
+            
             editionConfigs: {
-                circles: { id: 'circles', name: 'Circles', symbols: ['navyx', 'redx', 'bluex', 'greyx'] },
-                rings: { id: 'rings', name: 'Rings', symbols: ['ringa', 'ringb', 'ringc', 'ringd'] },
-                pyramids: { id: 'pyramids', name: 'Pyramids', symbols: ['marine', 'cyan', 'lilac', 'pink'] }
+                circles: { 
+                    id: 'circles', 
+                    name: 'Circles', 
+                    symbols: ['navyx', 'redx', 'bluex', 'greyx'] 
+                },
+                rings: { 
+                    id: 'rings', 
+                    name: 'Rings', 
+                    symbols: ['ringa', 'ringb', 'ringc', 'ringd'] 
+                },
+                pyramids: { 
+                    id: 'pyramids', 
+                    name: 'Pyramids', 
+                    symbols: ['marine', 'cyan', 'lilac', 'pink'] 
+                }
             },
+            
+            /**
+             * Initialize the game manager
+             */
             init() {
                 this.settingsManager = new SettingsManager();
-                this.switchEdition(this.activeEditionId);
+                this.checkForSavedGame();
                 this.populateEditionModal();
                 this.attachGlobalListeners();
             },
+            
+            /**
+             * Check for saved game and offer resume
+             */
+            checkForSavedGame() {
+                const savedState = Storage.get(GAME_CONFIG.STORAGE_KEYS.GAME_STATE);
+                
+                if (savedState && this.isRecentGame(savedState)) {
+                    this.showResumeGameModal(savedState);
+                } else {
+                    this.switchEdition(this.activeEditionId);
+                }
+            },
+            
+            /**
+             * Check if saved game is recent (within 24 hours)
+             * @param {Object} savedState - Saved game state
+             * @returns {boolean} Whether game is recent
+             */
+            isRecentGame(savedState) {
+                const hoursSinceLastPlay = (Date.now() - savedState.timestamp) / (1000 * 60 * 60);
+                return hoursSinceLastPlay < 24 && !savedState.isGameOver;
+            },
+            
+            /**
+             * Show modal to resume saved game
+             * @param {Object} savedState - Saved game state
+             */
+            showResumeGameModal(savedState) {
+                const modal = document.getElementById('resume-game-modal');
+                const scoreEl = document.getElementById('saved-game-score');
+                
+                scoreEl.textContent = savedState.score || 0;
+                modal.classList.remove('hidden');
+                
+                document.getElementById('resume-game-ok-btn').onclick = () => {
+                    modal.classList.add('hidden');
+                    this.resumeGame(savedState);
+                };
+                
+                document.getElementById('resume-game-cancel-btn').onclick = () => {
+                    modal.classList.add('hidden');
+                    Storage.remove(GAME_CONFIG.STORAGE_KEYS.GAME_STATE);
+                    this.switchEdition(this.activeEditionId);
+                };
+            },
+            
+            /**
+             * Resume a saved game
+             * @param {Object} savedState - Saved game state
+             */
+            resumeGame(savedState) {
+                AnalyticsTracker.trackGameResume();
+                
+                if (this.currentGame) this.currentGame.cleanup();
+                
+                this.activeEditionId = savedState.editionId;
+                const config = this.editionConfigs[savedState.editionId];
+                this.currentGame = new Game(config, savedState);
+                
+                const btn = document.getElementById('select-edition-btn');
+                btn.innerHTML = `Edition: ${config.name} <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+                
+                NotificationSystem.show('Game resumed!', 'success');
+            },
+            
+            /**
+             * Switch to a different edition
+             * @param {string} editionId - Edition identifier
+             */
             switchEdition(editionId) {
                 const oldEdition = this.activeEditionId;
                 
                 if (this.currentGame) this.currentGame.cleanup();
+                
                 this.activeEditionId = editionId;
                 const config = this.editionConfigs[editionId];
                 this.currentGame = new Game(config);
+                
                 const btn = document.getElementById('select-edition-btn');
                 btn.innerHTML = `Edition: ${config.name} <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
                 
@@ -1411,19 +1830,30 @@
                     AnalyticsTracker.trackEditionSwitch(oldEdition, editionId);
                 }
             },
+            
+            /**
+             * Populate edition selection modal
+             */
             populateEditionModal() {
                 const container = document.getElementById('edition-options');
                 container.innerHTML = '';
+                
                 Object.values(this.editionConfigs).forEach(config => {
                     const button = document.createElement('button');
                     button.className = 'w-full text-left p-3 rounded-lg font-semibold flex justify-between items-center transition-all hover:bg-gray-200/50';
+                    
                     if (config.id === this.activeEditionId) {
                         button.style.background = 'var(--accent-light)';
                         button.style.color = 'var(--accent)';
                     }
+                    
                     button.textContent = config.name;
+                    
                     button.addEventListener('click', () => {
-                        const isGameInProgress = this.currentGame && !this.currentGame.isGameOver && this.currentGame.gridState.some(c => c !== null);
+                        const isGameInProgress = this.currentGame && 
+                            !this.currentGame.isGameOver && 
+                            this.currentGame.gridState.some(c => c !== null);
+                        
                         if (isGameInProgress) {
                             if (confirm('Start a new game in this edition? Your current progress will be lost.')) {
                                 this.switchEdition(config.id);
@@ -1434,24 +1864,53 @@
                             document.getElementById('edition-select-modal').classList.add('hidden');
                         }
                     });
+                    
                     container.appendChild(button);
                 });
             },
+            
+            /**
+             * Attach global event listeners
+             */
             attachGlobalListeners() {
-                document.getElementById('help-btn').addEventListener('click', () => document.getElementById('help-modal').classList.remove('hidden'));
-                document.getElementById('close-help-modal-btn').addEventListener('click', () => document.getElementById('help-modal').classList.add('hidden'));
-                document.getElementById('select-edition-btn').addEventListener('click', () => document.getElementById('edition-select-modal').classList.remove('hidden'));
-                document.getElementById('close-edition-select-modal-btn').addEventListener('click', () => document.getElementById('edition-select-modal').classList.add('hidden'));
-                document.getElementById('badges-btn').addEventListener('click', () => this.showBadgesModal());
-                document.getElementById('close-badges-modal-btn').addEventListener('click', () => document.getElementById('badges-modal').classList.add('hidden'));
-                document.getElementById('share-score-btn').addEventListener('click', (e) => this.shareScore(e.currentTarget));
-                document.getElementById('share-badges-btn').addEventListener('click', () => this.shareBadges());
-                document.getElementById('confirm-restart-cancel-btn').addEventListener('click', () => document.getElementById('confirm-restart-modal').classList.add('hidden'));
+                document.getElementById('help-btn').addEventListener('click', () => 
+                    document.getElementById('help-modal').classList.remove('hidden'));
+                
+                document.getElementById('close-help-modal-btn').addEventListener('click', () => 
+                    document.getElementById('help-modal').classList.add('hidden'));
+                
+                document.getElementById('select-edition-btn').addEventListener('click', () => 
+                    document.getElementById('edition-select-modal').classList.remove('hidden'));
+                
+                document.getElementById('close-edition-select-modal-btn').addEventListener('click', () => 
+                    document.getElementById('edition-select-modal').classList.add('hidden'));
+                
+                document.getElementById('badges-btn').addEventListener('click', () => 
+                    this.showBadgesModal());
+                
+                document.getElementById('close-badges-modal-btn').addEventListener('click', () => 
+                    document.getElementById('badges-modal').classList.add('hidden'));
+                
+                document.getElementById('share-score-btn').addEventListener('click', (e) => 
+                    this.shareScore(e.currentTarget));
+                
+                document.getElementById('share-badges-btn').addEventListener('click', () => 
+                    this.shareBadges());
+                
+                document.getElementById('confirm-restart-cancel-btn').addEventListener('click', () => 
+                    document.getElementById('confirm-restart-modal').classList.add('hidden'));
+                
                 document.getElementById('confirm-restart-ok-btn').addEventListener('click', () => {
                     document.getElementById('confirm-restart-modal').classList.add('hidden');
+                    Storage.remove(GAME_CONFIG.STORAGE_KEYS.GAME_STATE);
                     this.switchEdition(this.activeEditionId);
                 });
             },
+            
+            /**
+             * Share game score with board image
+             * @param {HTMLElement} button - Share button element
+             */
             async shareScore(button) {
                 const originalHTML = button.innerHTML;
                 button.disabled = true;
@@ -1485,17 +1944,35 @@
                     AnalyticsTracker.trackShare('score');
                 }
             },
+            
+            /**
+             * Share badge collection
+             */
             shareBadges() {
                 const unlockedBadges = Object.values(this.currentGame.achievements.achievements)
-                    .filter(a => a.unlocked).map(a => a.name).join(', ');
+                    .filter(a => a.unlocked)
+                    .map(a => a.name)
+                    .join(', ');
+                
                 const message = `🏆 My MatchAlo Badge Collection 🏆\n${unlockedBadges || 'Just starting my journey!'}\nhttps://abhimanyulodha.github.io/matchalo/`;
+                
                 if (navigator.share) {
-                    navigator.share({ title: 'My MatchAlo Badges', text: message }).catch(err => {});
+                    navigator.share({ 
+                        title: 'My MatchAlo Badges', 
+                        text: message 
+                    }).catch(err => {});
                 } else {
                     this.copyToClipboard(message, 'Badge collection copied to clipboard!');
                 }
+                
                 AnalyticsTracker.trackShare('badges');
             },
+            
+            /**
+             * Copy text to clipboard
+             * @param {string} text - Text to copy
+             * @param {string} successMessage - Success message to show
+             */
             copyToClipboard(text, successMessage) {
                 if (navigator.clipboard) {
                     navigator.clipboard.writeText(text)
@@ -1505,11 +1982,18 @@
                     alert('Copying to clipboard is not supported on this browser.');
                 }
             },
+            
+
+            /**
+             * Show badges modal with all achievements
+             */
             showBadgesModal() {
                 const modal = document.getElementById('badges-modal');
                 const content = document.getElementById('badges-content');
                 content.innerHTML = '';
+                
                 const achievements = this.currentGame.achievements.getAll();
+                
                 achievements.forEach(achievement => {
                     const badge = document.createElement('div');
                     badge.className = 'text-center badge-card';
@@ -1518,27 +2002,26 @@
                         <div class="font-bold text-sm mb-1" style="color: var(--accent);">${achievement.name}</div>
                         <div class="badge-description text-xs" style="color: var(--text-secondary);">${achievement.description}</div>
                     `;
+                    
                     badge.addEventListener('click', e => {
                         e.stopPropagation();
-                        document.querySelectorAll('.badge-card.show-description').forEach(b => { if (b !== badge) b.classList.remove('show-description'); });
+                        document.querySelectorAll('.badge-card.show-description').forEach(b => {
+                            if (b !== badge) b.classList.remove('show-description');
+                        });
                         badge.classList.toggle('show-description');
                     });
+                    
                     content.appendChild(badge);
                 });
+                
                 modal.classList.remove('hidden');
             }
         };
 
+        /**
+         * Main Game class - handles game logic and state
+         */
         class Game {
-            static CONSTANTS = {
-                GRID_SIZE: 8,
-                QUADRANTS: ['TL', 'TR', 'BL', 'BR'],
-                DOUBLE_CLICK_DELAY: 300,
-                DICE_TUMBLE_DURATION: 600,
-                PLACEMENT_ANIM_DURATION: 500,
-                SCORE_ANIM_DURATION: 500
-            };
-            
             static SELECTORS = {
                 gameBoard: 'game-board', rollDiceBtn: 'roll-dice-btn', resetBtn: 'reset-btn',
                 dice1El: 'dice-1', dice2El: 'dice-2', progressBarFill: 'progress-bar-fill',
@@ -1551,12 +2034,14 @@
                 rotateBtn: 'rotate-btn', swapBtn: 'swap-btn', exchangeBtn: 'exchange-btn',
                 moveBtn: 'move-btn', exchangeModal: 'exchange-modal', exchangeOptions: 'exchange-options',
                 closeExchangeModalBtn: 'close-exchange-modal-btn', helpModalContent: 'help-modal-content',
-                gameOverStats: 'game-over-stats', confirmRestartModal: 'confirm-restart-modal'
+                gameOverStats: 'game-over-stats', confirmRestartModal: 'confirm-restart-modal',
+                scoreAnnouncement: 'score-announcement',
             };
 
             static CSS_CLASSES = {
                 gridCell: 'grid-cell',
                 empty: 'empty',
+                stuck: 'stuck',
                 placing: 'placing',
                 scoreHighlight: 'score-highlight',
                 diceTumble: 'dice-tumble',
@@ -1567,31 +2052,59 @@
                 celebrating: 'celebrating'
             };
 
-            constructor(config) {
+            /**
+             * Initialize a new game
+             * @param {Object} config - Game configuration
+             * @param {Object} savedState - Optional saved state to restore
+             */
+            constructor(config, savedState = null) {
                 this.config = config;
                 this.DOMElements = this.getDOMElements();
-                this.GRID_SIZE = Game.CONSTANTS.GRID_SIZE;
-                this.QUADRANTS = Game.CONSTANTS.QUADRANTS;
+                this.GRID_SIZE = GAME_CONFIG.GRID_SIZE;
+                this.QUADRANTS = GAME_CONFIG.QUADRANTS;
                 this.IMAGE_PATH = 'https://abhimanyulodha.github.io/matchalo/images/';
-                this.SUPERPOWERS = { ROTATE: 'rotate', SWAP: 'swap', EXCHANGE: 'exchange', MOVE: 'move' };
+                this.SUPERPOWERS = { 
+                    ROTATE: 'rotate', 
+                    SWAP: 'swap', 
+                    EXCHANGE: 'exchange', 
+                    MOVE: 'move' 
+                };
+                
                 this.achievements = new AchievementSystem();
                 this.scoreCalculator = new ScoreCalculator(this.GRID_SIZE);
                 this.soundManager = new SoundManager();
                 this.soundManager.init();
+                
                 this.eventListeners = [];
-                this.init();
+                this.cellElements = []; // Cache for performance
+                this.timers = []; // Track all timers for cleanup
+                
+                if (savedState) {
+                    this.restoreFromState(savedState);
+                } else {
+                    this.init();
+                }
             }
 
+            /**
+             * Get all required DOM elements
+             * @returns {Object} Map of element references
+             */
             getDOMElements() {
                 const elements = {};
                 for (const key in Game.SELECTORS) {
                     const element = document.getElementById(Game.SELECTORS[key]);
-                    if (!element) throw new Error(`Missing element: #${Game.SELECTORS[key]}`);
+                    if (!element) {
+                        throw new Error(`Missing element: #${Game.SELECTORS[key]}`);
+                    }
                     elements[key] = element;
                 }
                 return elements;
             }
 
+            /**
+             * Initialize a new game
+             */
             init() {
                 this.SYMBOLS = this.config.symbols;
                 this.gridState = Array(this.GRID_SIZE * this.GRID_SIZE).fill(null);
@@ -1599,84 +2112,156 @@
                 this.firstPieceLocation = null;
                 this.placementState = 'AWAITING_ROLL';
                 this.score = 0;
-                this.highScore = Storage.get(`matchaloHighScore_${this.config.id}`, 0);
+                this.highScore = Storage.get(`${GAME_CONFIG.STORAGE_KEYS.HIGH_SCORE}_${this.config.id}`, 0);
                 this.lastClick = { time: 0, row: -1, col: -1 };
                 this.usedSuperpowers = new Set();
                 this.activeSuperpower = null;
                 this.superpowerState = {};
                 this.isGameOver = false;
                 this.highScoreCelebrated = false;
-                this.stats = { perfectShapes: 0, highestScoringPattern: { name: 'None', score: 0 }, badgesUnlocked: 0 };
+                
+                this.stats = { 
+                    perfectShapes: 0, 
+                    highestScoringPattern: { name: 'None', score: 0 }, 
+                    badgesUnlocked: 0 
+                };
                 
                 this.previousScoringCells = new Set();
                 
-                this.DOMElements.gameBoard.innerHTML = '';
+                this.setupBoard();
                 ImageLoader.preloadImages(this.config, this.IMAGE_PATH);
+                this.populateHelpModal();
+                this.processScoring();
+                this.updateProgressBar();
+                this.updateDiceDisplay();
+                this.updateSuperpowerUI();
+                
+                this.DOMElements.spCharge1.innerHTML = '✨';
+                this.DOMElements.spCharge2.innerHTML = '✨';
+                this.DOMElements.gameOverModal.classList.add(Game.CSS_CLASSES.hidden);
+                this.DOMElements.rollDiceBtn.disabled = false;
+                
+                this.setupEventListeners();
+                
+                AnalyticsTracker.trackGameStart(this.config.id);
+            }
+
+            /**
+             * Setup the game board
+             */
+            setupBoard() {
+                this.DOMElements.gameBoard.innerHTML = '';
+                this.cellElements = [];
 
                 for (let i = 0; i < this.GRID_SIZE * this.GRID_SIZE; i++) {
                     const cell = document.createElement('div');
                     cell.className = `${Game.CSS_CLASSES.gridCell} ${Game.CSS_CLASSES.empty} relative`;
                     cell.dataset.index = i;
                     cell.tabIndex = 0;
-                    const row = Math.floor(i / this.GRID_SIZE), col = i % this.GRID_SIZE;
-                    cell.dataset.row = row; cell.dataset.col = col;
+                    
+                    const row = Math.floor(i / this.GRID_SIZE);
+                    const col = i % this.GRID_SIZE;
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
                     cell.style.animationDelay = `${(row + col) * 0.02}s`;
+                    
                     const tooltip = document.createElement('div');
                     tooltip.className = 'premium-tooltip';
                     cell.appendChild(tooltip);
+                    
                     this.addManagedEventListener(cell, 'click', () => this.onCellClick(row, col));
+                    
                     this.addManagedEventListener(cell, 'mouseenter', () => {
                         const piece = this.gridState[i];
-                        if (piece) tooltip.textContent = `${piece.symbol} ${piece.quadrant}`;
+                        if (piece) {
+                            tooltip.textContent = `${piece.symbol} ${piece.quadrant}`;
+                        }
                     });
+                    
                     this.DOMElements.gameBoard.appendChild(cell);
+                    this.cellElements.push(cell); // Cache for performance
                 }
-                
-                this.populateHelpModal();
-                this.processScoring();
-                this.updateProgressBar();
-                this.updateDiceDisplay();
-                this.updateSuperpowerUI();
-                this.DOMElements.spCharge1.innerHTML = '✨';
-                this.DOMElements.spCharge2.innerHTML = '✨';
-                this.DOMElements.gameOverModal.classList.add(Game.CSS_CLASSES.hidden);
-                this.DOMElements.rollDiceBtn.disabled = false;
-                this.setupEventListeners();
-                
-                AnalyticsTracker.trackGameStart(this.config.id);
             }
 
+            /**
+             * Add a managed event listener that will be cleaned up
+             * @param {HTMLElement} element - Element to attach listener to
+             * @param {string} event - Event name
+             * @param {Function} handler - Event handler
+             */
             addManagedEventListener(element, event, handler) {
                 element.addEventListener(event, handler);
                 this.eventListeners.push({ element, event, handler });
             }
 
+            /**
+             * Add a managed timer that will be cleaned up
+             * @param {Function} callback - Timer callback
+             * @param {number} delay - Delay in milliseconds
+             * @returns {number} Timer ID
+             */
+            addManagedTimer(callback, delay) {
+                const timerId = setTimeout(callback, delay);
+                this.timers.push(timerId);
+                return timerId;
+            }
+
+            /**
+             * Setup all event listeners
+             */
             setupEventListeners() {
                 const handleResetClick = () => {
                     const isGameInProgress = !this.isGameOver && this.gridState.some(c => c !== null);
                     if (isGameInProgress) {
                         this.DOMElements.confirmRestartModal.classList.remove(Game.CSS_CLASSES.hidden);
                     } else {
+                        Storage.remove(GAME_CONFIG.STORAGE_KEYS.GAME_STATE);
                         gameManager.switchEdition(gameManager.activeEditionId);
                     }
                 };
 
-                this.addManagedEventListener(this.DOMElements.rollDiceBtn, 'click', this.handleRollDice.bind(this));
+                this.addManagedEventListener(this.DOMElements.rollDiceBtn, 'click', 
+                    this.handleRollDice.bind(this));
+                
                 this.addManagedEventListener(this.DOMElements.resetBtn, 'click', handleResetClick);
-                this.addManagedEventListener(this.DOMElements.restartModalBtn, 'click', () => gameManager.switchEdition(gameManager.activeEditionId));
-                this.addManagedEventListener(this.DOMElements.closeModalBtn, 'click', () => this.DOMElements.gameOverModal.classList.add(Game.CSS_CLASSES.hidden));
-                this.addManagedEventListener(this.DOMElements.rotateBtn, 'click', () => this.activateSuperpower(this.SUPERPOWERS.ROTATE));
-                this.addManagedEventListener(this.DOMElements.swapBtn, 'click', () => this.activateSuperpower(this.SUPERPOWERS.SWAP));
-                this.addManagedEventListener(this.DOMElements.exchangeBtn, 'click', () => this.activateSuperpower(this.SUPERPOWERS.EXCHANGE));
-                this.addManagedEventListener(this.DOMElements.moveBtn, 'click', () => this.activateSuperpower(this.SUPERPOWERS.MOVE));
-                this.addManagedEventListener(this.DOMElements.closeExchangeModalBtn, 'click', () => this.DOMElements.exchangeModal.classList.add(Game.CSS_CLASSES.hidden));
-                this.addManagedEventListener(this.DOMElements.gameBoard, 'keydown', this.handleKeyDown.bind(this));
+                
+                this.addManagedEventListener(this.DOMElements.restartModalBtn, 'click', () => {
+                    Storage.remove(GAME_CONFIG.STORAGE_KEYS.GAME_STATE);
+                    gameManager.switchEdition(gameManager.activeEditionId);
+                });
+                
+                this.addManagedEventListener(this.DOMElements.closeModalBtn, 'click', () => 
+                    this.DOMElements.gameOverModal.classList.add(Game.CSS_CLASSES.hidden));
+                
+                this.addManagedEventListener(this.DOMElements.rotateBtn, 'click', () => 
+                    this.activateSuperpower(this.SUPERPOWERS.ROTATE));
+                
+                this.addManagedEventListener(this.DOMElements.swapBtn, 'click', () => 
+                    this.activateSuperpower(this.SUPERPOWERS.SWAP));
+                
+                this.addManagedEventListener(this.DOMElements.exchangeBtn, 'click', () => 
+                    this.activateSuperpower(this.SUPERPOWERS.EXCHANGE));
+                
+                this.addManagedEventListener(this.DOMElements.moveBtn, 'click', () => 
+                    this.activateSuperpower(this.SUPERPOWERS.MOVE));
+                
+                this.addManagedEventListener(this.DOMElements.closeExchangeModalBtn, 'click', () => 
+                    this.DOMElements.exchangeModal.classList.add(Game.CSS_CLASSES.hidden));
+                
+                this.addManagedEventListener(this.DOMElements.gameBoard, 'keydown', 
+                    this.handleKeyDown.bind(this));
+                
             }
             
+            /**
+             * Handle keyboard navigation and interaction
+             * @param {KeyboardEvent} event - Keyboard event
+             */
             handleKeyDown(event) {
                 if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', ' '].includes(event.key)) {
                     return;
                 }
+                
                 event.preventDefault();
                 const targetCell = event.target.closest(`.${Game.CSS_CLASSES.gridCell}`);
                 if (!targetCell) return;
@@ -1697,28 +2282,59 @@
                 }
 
                 const newIndex = row * this.GRID_SIZE + col;
-                const nextCell = this.DOMElements.gameBoard.querySelector(`[data-index='${newIndex}']`);
+                const nextCell = this.cellElements[newIndex];
                 if (nextCell) {
                     nextCell.focus();
                 }
             }
 
+            /**
+             * Clean up resources when switching games
+             */
             cleanup() {
-                this.eventListeners.forEach(({ element, event, handler }) => element.removeEventListener(event, handler));
+                // Remove event listeners
+                this.eventListeners.forEach(({ element, event, handler }) => {
+                    element?.removeEventListener(event, handler);
+                });
                 this.eventListeners = [];
-                if (this.DOMElements.gameBoard) this.DOMElements.gameBoard.innerHTML = '';
+                
+                // Clear timers
+                this.clearAllTimers();
+                
+                // Clear DOM
+                if (this.DOMElements.gameBoard) {
+                    this.DOMElements.gameBoard.innerHTML = '';
+                }
+                
+                this.cellElements = [];
+            }
+
+            /**
+             * Clear all managed timers
+             */
+            clearAllTimers() {
+                this.timers.forEach(timerId => clearTimeout(timerId));
+                this.timers = [];
             }
             
+            /**
+             * Populate help modal with instructions
+             */
             populateHelpModal() {
                 this.DOMElements.helpModalContent.innerHTML = `
                     <h3 class="font-bold text-lg" style="color: var(--accent);">🎯 The Goal</h3>
                     <p>Fill the 8x8 grid by placing pairs of 'Alos' (quadrant pieces). Score points by forming valuable patterns and sequences.</p>
+                    
                     <h3 class="font-bold text-lg mt-4" style="color: var(--accent);">🕹️ How to Play</h3>
                     <ol class="list-decimal list-inside space-y-2">
                         <li><b>Roll the Dice:</b> Click the dice icon to get two random Alos.</li>
                         <li><b>Place Your Pair:</b> Place the first Alo on any empty square. Place the second in an empty square directly next to it (not diagonally).</li>
                         <li><b>Mistake?</b> Before placing the second Alo, double-click the first one to pick it up and move it.</li>
                     </ol>
+                    
+                    <h3 class="font-bold text-lg mt-4" style="color: var(--accent);">💔 Stuck Blocks</h3>
+                    <p>If an empty block becomes completely surrounded by filled blocks, it becomes a "stuck block" marked with 💔. You cannot place Alos on stuck blocks.</p>
+                    
                     <h3 class="font-bold text-lg mt-4" style="color: var(--accent);">✨ Superpowers</h3>
                     <p>You can use any <strong>two different</strong> superpowers once per game, only between turns.</p>
                     <ul class="list-disc list-inside space-y-1">
@@ -1727,6 +2343,7 @@
                         <li><b>Exchange:</b> Click an Alo, then choose a new one to replace it.</li>
                         <li><b>Move:</b> Click an Alo, then click any empty square to move it there.</li>
                     </ul>
+                    
                     <h3 class="font-bold text-lg mt-4" style="color: var(--accent);">📈 Scoring</h3>
                     <ul class="list-disc list-inside space-y-1">
                         <li><b>Perfect Shape (4 pcs):</b> 40 pts (same color), 20 pts (different colors)</li>
@@ -1739,21 +2356,114 @@
                 `;
             }
 
-            onCellClick(row, col) {
+            /**
+             * Handle cell click
+             * @param {number} row - Row index
+             * @param {number} col - Column index
+             */
+
+             onCellClick(row, col) {
                 if (this.isGameOver) return;
+                
+                const index = row * this.GRID_SIZE + col;
+                
+                // Only check for stuck blocks when NOT in the middle of placing pieces
+                // Stuck blocks are only relevant between turns, not during placement
+                if (this.placementState === 'AWAITING_ROLL' && this.isStuckBlock(index)) {
+                    NotificationSystem.show('This block is stuck! Cannot place here.', 'error', 2000);
+                    return;
+                }
+                
                 const now = Date.now();
-                if (now - this.lastClick.time < Game.CONSTANTS.DOUBLE_CLICK_DELAY && this.lastClick.row === row && this.lastClick.col === col) {
+                if (now - this.lastClick.time < GAME_CONFIG.ANIMATIONS.DOUBLE_CLICK_DELAY && 
+                    this.lastClick.row === row && this.lastClick.col === col) {
                     this.handleDoubleClick(row, col);
                     this.lastClick = { time: 0, row: -1, col: -1 };
                     return;
                 }
+                
                 this.lastClick = { time: now, row, col };
-                if (this.activeSuperpower) this.handleSuperpowerClick(row, col);
-                else this.handlePlacementClick(row, col);
+                
+                if (this.activeSuperpower) {
+                    this.handleSuperpowerClick(row, col);
+                } else {
+                    this.handlePlacementClick(row, col);
+                }
             }
 
+            /**
+             * Check if a block is stuck (surrounded by filled blocks)
+             * @param {number} index - Cell index
+             * @returns {boolean} Whether the block is stuck
+             */
+            isStuckBlock(index) {
+                // If cell is already filled, it's not stuck
+                if (this.gridState[index]) return false;
+                
+                const row = Math.floor(index / this.GRID_SIZE);
+                const col = index % this.GRID_SIZE;
+                
+                // Check all 4 adjacent cells
+                const adjacentPositions = [
+                    [row - 1, col], // up
+                    [row + 1, col], // down
+                    [row, col - 1], // left
+                    [row, col + 1]  // right
+                ];
+                
+                let allAdjacentFilled = true;
+                let hasAtLeastOneAdjacent = false;
+                
+                for (const [r, c] of adjacentPositions) {
+                    // Check if position is within bounds
+                    if (r >= 0 && r < this.GRID_SIZE && c >= 0 && c < this.GRID_SIZE) {
+                        hasAtLeastOneAdjacent = true;
+                        const adjIndex = r * this.GRID_SIZE + c;
+                        
+                        // If any adjacent cell is empty, block is not stuck
+                        if (!this.gridState[adjIndex]) {
+                            allAdjacentFilled = false;
+                            break;
+                        }
+                    }
+                }
+                
+                return hasAtLeastOneAdjacent && allAdjacentFilled;
+            }
+
+            /**
+             * Mark all stuck blocks on the board
+             */
+            markStuckBlocks() {
+                for (let i = 0; i < this.GRID_SIZE * this.GRID_SIZE; i++) {
+                    const cell = this.cellElements[i];
+                    if (!cell) continue;
+                    
+                    if (this.isStuckBlock(i)) {
+                        if (!cell.classList.contains(Game.CSS_CLASSES.stuck)) {
+                            cell.classList.add(Game.CSS_CLASSES.stuck);
+                            
+                            if (gameManager.settingsManager.get('sound')) {
+                                this.soundManager.play('stuck');
+                            }
+                            
+                            NotificationSystem.show('A block has become stuck!', 'info', 2000);
+                        }
+                    } else {
+                        cell.classList.remove(Game.CSS_CLASSES.stuck);
+                    }
+                }
+            }
+
+            /**
+             * Handle double-click to pick up first piece
+             * @param {number} row - Row index
+             * @param {number} col - Column index
+             */
             handleDoubleClick(row, col) {
-                if (this.placementState === 'AWAITING_SECOND_PLACEMENT' && this.firstPieceLocation.row === row && this.firstPieceLocation.col === col) {
+                if (this.placementState === 'AWAITING_SECOND_PLACEMENT' && 
+                    this.firstPieceLocation.row === row && this.firstPieceLocation.col === col) {
+                    
                     this.gridState[row * this.GRID_SIZE + col] = null;
                     this.renderCell(row, col);
                     this.firstPieceLocation = null;
@@ -1761,53 +2471,126 @@
                 }
             }
 
+            /**
+             * Handle placement click
+             * @param {number} row - Row index
+             * @param {number} col - Column index
+             */
             handlePlacementClick(row, col) {
                 const index = row * this.GRID_SIZE + col;
+                
                 if (this.placementState === 'AWAITING_FIRST_PLACEMENT' && !this.gridState[index]) {
                     this.placePiece(row, col, 0);
                     this.firstPieceLocation = { row, col };
                     this.placementState = 'AWAITING_SECOND_PLACEMENT';
+                    
                 } else if (this.placementState === 'AWAITING_SECOND_PLACEMENT') {
-                    const isAdjacent = Math.abs(this.firstPieceLocation.row - row) + Math.abs(this.firstPieceLocation.col - col) === 1;
+                    const isAdjacent = Math.abs(this.firstPieceLocation.row - row) + 
+                                      Math.abs(this.firstPieceLocation.col - col) === 1;
+                    
                     if (isAdjacent && !this.gridState[index]) {
+                        
                         this.placePiece(row, col, 1);
                         this.endTurn();
                     }
                 }
             }
 
+            /**
+             * End current turn and check game state
+             */
             endTurn() {
                 this.firstPieceLocation = null;
                 this.placementState = 'AWAITING_ROLL';
                 this.currentRoll = [];
                 this.DOMElements.rollDiceBtn.disabled = false;
+                
                 this.processScoring();
                 this.updateProgressBar();
                 this.updateDiceDisplay();
                 this.updateSuperpowerUI();
+                this.markStuckBlocks();
+                this.saveGameState();
+                
                 if (this.checkGameOver()) {
                     this.showGameOver();
                 }
             }
 
+            /**
+             * Process all scoring calculations
+             */
             processScoring() {
                 try {
-                    const { scoreBreakdown, totalScore, scoringCells } = this.calculateTotalScore();
-                    const scoreDiff = totalScore - this.score;
-                    this.score = totalScore;
-
-                    const newlyScoredCells = new Set([...scoringCells].filter(x => !this.previousScoringCells.has(x)));
-
-                    this.highlightScoringCells(scoringCells, newlyScoredCells, scoreDiff);
-                    this.checkAchievements(scoreBreakdown);
-                    this.updateScoreUI(scoreBreakdown);
-
-                    this.previousScoringCells = scoringCells;
+                    const scoreData = this.calculateScores();
+                    this.updateVisualFeedback(scoreData);
+                    this.checkAndAwardAchievements(scoreData.scoreBreakdown);
+                    this.persistState();
                 } catch(e) {
                     ErrorHandler.handle(e, 'processScoring');
                 }
             }
 
+            /**
+             * Calculate all scores
+             * @returns {Object} Score data with breakdown and cells
+             */
+            calculateScores() {
+                const { scoreBreakdown, totalScore, scoringCells } = this.calculateTotalScore();
+                const scoreDiff = totalScore - this.score;
+                this.score = totalScore;
+                
+                const newlyScoredCells = new Set(
+                    [...scoringCells].filter(x => !this.previousScoringCells.has(x))
+                );
+                
+                return { scoreBreakdown, totalScore, scoringCells, newlyScoredCells, scoreDiff };
+            }
+
+            /**
+             * Update visual feedback for scoring
+             * @param {Object} scoreData - Score calculation results
+             */
+            updateVisualFeedback(scoreData) {
+                const { scoringCells, newlyScoredCells, scoreDiff } = scoreData;
+                
+                this.highlightScoringCells(scoringCells, newlyScoredCells, scoreDiff);
+                this.updateScoreUI(scoreData.scoreBreakdown);
+                
+                this.previousScoringCells = scoringCells;
+            }
+
+            /**
+             * Check and award achievements
+             * @param {Object} breakdown - Score breakdown
+             */
+            checkAndAwardAchievements(breakdown) {
+                if (breakdown.perfectShape > 0) {
+                    const a = this.achievements.check('firstPerfectShape');
+                    if (a) this.showAchievement(a);
+                }
+                
+                if (this.score >= 500) {
+                    const a = this.achievements.check('score500');
+                    if (a) this.showAchievement(a);
+                }
+                
+                if (breakdown.lineMaster > 0) {
+                    const a = this.achievements.check('lineMaster');
+                    if (a) this.showAchievement(a);
+                }
+            }
+
+            /**
+             * Persist current state
+             */
+            persistState() {
+                this.updateScoreUI({});
+            }
+
+            /**
+             * Handle dice roll
+             */
             handleRollDice() {
                 if (this.isGameOver || this.placementState !== 'AWAITING_ROLL') return;
                 if (this.activeSuperpower) this.cancelSuperpower();
@@ -1817,36 +2600,65 @@
                 this.DOMElements.rollDiceBtn.disabled = true;
                 this.DOMElements.dice1El.classList.add(Game.CSS_CLASSES.diceTumble);
                 this.DOMElements.dice2El.classList.add(Game.CSS_CLASSES.diceTumble);
-                setTimeout(() => {
+                
+                this.addManagedTimer(() => {
                     const piece1 = this.generateRandomAlo();
                     let piece2 = this.generateRandomAlo();
-                    while (piece2.quadrant === piece1.quadrant) piece2 = this.generateRandomAlo();
+                    
+                    // Ensure different quadrants
+                    while (piece2.quadrant === piece1.quadrant) {
+                        piece2 = this.generateRandomAlo();
+                    }
+                    
                     this.currentRoll = [piece1, piece2];
                     this.placementState = 'AWAITING_FIRST_PLACEMENT';
+                    
                     this.updateDiceDisplay();
                     this.updateSuperpowerUI();
+                    
                     this.DOMElements.dice1El.classList.remove(Game.CSS_CLASSES.diceTumble);
                     this.DOMElements.dice2El.classList.remove(Game.CSS_CLASSES.diceTumble);
-                }, Game.CONSTANTS.DICE_TUMBLE_DURATION);
+                }, GAME_CONFIG.ANIMATIONS.DICE_TUMBLE_DURATION);
             }
             
+            /**
+             * Activate a superpower
+             * @param {string} powerName - Name of the superpower
+             */
             activateSuperpower(powerName) {
-                if (this.isGameOver || this.placementState !== 'AWAITING_ROLL' || this.usedSuperpowers.size >= 2 || this.usedSuperpowers.has(powerName)) return;
-                if (this.activeSuperpower === powerName) this.cancelSuperpower();
-                else {
+                if (this.isGameOver || 
+                    this.placementState !== 'AWAITING_ROLL' || 
+                    this.usedSuperpowers.size >= 2 || 
+                    this.usedSuperpowers.has(powerName)) {
+                    return;
+                }
+                
+                if (this.activeSuperpower === powerName) {
+                    this.cancelSuperpower();
+                } else {
                     this.activeSuperpower = powerName;
                     this.superpowerState = {};
                     this.updateSuperpowerUI();
                 }
             }
 
+            /**
+             * Cancel active superpower
+             */
             cancelSuperpower() {
                 this.activeSuperpower = null;
                 this.superpowerState = {};
-                document.querySelectorAll(`.${Game.CSS_CLASSES.pulsingCell}`).forEach(c => c.classList.remove(Game.CSS_CLASSES.pulsingCell));
+                
+                document.querySelectorAll(`.${Game.CSS_CLASSES.pulsingCell}`).forEach(c => 
+                    c.classList.remove(Game.CSS_CLASSES.pulsingCell));
+                
                 this.updateSuperpowerUI();
             }
 
+            /**
+             * Consume a superpower (mark as used)
+             * @param {string} powerName - Name of the superpower
+             */
             consumeSuperpower(powerName) {
                 AnalyticsTracker.trackSuperpowerUsed(powerName);
                 
@@ -1854,11 +2666,18 @@
                 this.cancelSuperpower();
                 this.processScoring();
                 this.updateSuperpowerUI();
+                this.saveGameState();
             }
 
+            /**
+             * Handle superpower click
+             * @param {number} row - Row index
+             * @param {number} col - Column index
+             */
             handleSuperpowerClick(row, col) {
                 const index = row * this.GRID_SIZE + col;
                 const piece = this.gridState[index];
+                
                 try {
                     switch (this.activeSuperpower) {
                         case this.SUPERPOWERS.ROTATE:
@@ -1868,14 +2687,16 @@
                             this.renderCellWithAnimation(row, col);
                             this.consumeSuperpower(this.SUPERPOWERS.ROTATE);
                             break;
+                            
                         case this.SUPERPOWERS.MOVE:
                             if (!this.superpowerState.source) {
                                 if (!piece) return;
                                 this.superpowerState.source = { row, col };
-                                this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`).classList.add(Game.CSS_CLASSES.pulsingCell);
+                                this.cellElements[index].classList.add(Game.CSS_CLASSES.pulsingCell);
                             } else {
-                                if (piece) return;
-                                const srcIdx = this.superpowerState.source.row * this.GRID_SIZE + this.superpowerState.source.col;
+                                if (piece || this.isStuckBlock(index)) return;
+                                const srcIdx = this.superpowerState.source.row * this.GRID_SIZE + 
+                                              this.superpowerState.source.col;
                                 this.gridState[index] = this.gridState[srcIdx];
                                 this.gridState[srcIdx] = null;
                                 this.renderCell(this.superpowerState.source.row, this.superpowerState.source.col);
@@ -1883,23 +2704,29 @@
                                 this.consumeSuperpower(this.SUPERPOWERS.MOVE);
                             }
                             break;
+                            
                         case this.SUPERPOWERS.SWAP:
                             if (!this.superpowerState.source) {
                                 if (!piece) return;
                                 this.superpowerState.source = { row, col };
-                                this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`).classList.add(Game.CSS_CLASSES.pulsingCell);
+                                this.cellElements[index].classList.add(Game.CSS_CLASSES.pulsingCell);
                             } else {
-                                const isAdjacent = Math.abs(this.superpowerState.source.row - row) + Math.abs(this.superpowerState.source.col - col) === 1;
+                                const isAdjacent = Math.abs(this.superpowerState.source.row - row) + 
+                                                  Math.abs(this.superpowerState.source.col - col) === 1;
                                 if (!piece || !isAdjacent) return;
-                                const srcIdx = this.superpowerState.source.row * this.GRID_SIZE + this.superpowerState.source.col;
+                                
+                                const srcIdx = this.superpowerState.source.row * this.GRID_SIZE + 
+                                              this.superpowerState.source.col;
                                 const temp = this.gridState[srcIdx];
                                 this.gridState[srcIdx] = this.gridState[index];
                                 this.gridState[index] = temp;
+                                
                                 this.renderCell(this.superpowerState.source.row, this.superpowerState.source.col);
                                 this.renderCellWithAnimation(row, col);
                                 this.consumeSuperpower(this.SUPERPOWERS.SWAP);
                             }
                             break;
+                            
                         case this.SUPERPOWERS.EXCHANGE:
                             if (!piece) return;
                             this.superpowerState.source = { row, col };
@@ -1907,36 +2734,57 @@
                             break;
                     }
                 } catch (error) {
-                    ErrorHandler.handle(error, 'Superpower', 'A superpower error occurred.', () => this.cancelSuperpower());
+                    ErrorHandler.handle(
+                        error, 
+                        'Superpower', 
+                        'A superpower error occurred.', 
+                        () => this.cancelSuperpower()
+                    );
                 }
             }
 
+            /**
+             * Show exchange modal for piece selection
+             * @param {Object} currentPiece - Current piece to exchange
+             */
             showExchangeModal(currentPiece) {
                 this.DOMElements.exchangeOptions.innerHTML = '';
-                const allAlos = this.SYMBOLS.flatMap(s => this.QUADRANTS.map(q => ({ symbol: s, quadrant: q })));
+                const allAlos = this.SYMBOLS.flatMap(s => 
+                    this.QUADRANTS.map(q => ({ symbol: s, quadrant: q }))
+                );
+                
                 allAlos.forEach(alo => {
                     const option = document.createElement('div');
                     option.className = 'w-16 h-16 p-1 cursor-pointer hover:bg-white/50 rounded-lg transition-all';
+                    
                     const img = document.createElement('img');
                     img.src = ImageLoader.getImageSrc(alo.symbol, alo.quadrant, this.IMAGE_PATH);
                     img.alt = `${alo.symbol} ${alo.quadrant}`;
                     option.appendChild(img);
+                    
                     if (alo.symbol === currentPiece.symbol && alo.quadrant === currentPiece.quadrant) {
                         option.classList.add('opacity-30', 'cursor-not-allowed');
                     } else {
                         option.onclick = () => {
-                            const idx = this.superpowerState.source.row * this.GRID_SIZE + this.superpowerState.source.col;
+                            const idx = this.superpowerState.source.row * this.GRID_SIZE + 
+                                       this.superpowerState.source.col;
                             this.gridState[idx] = alo;
                             this.renderCell(this.superpowerState.source.row, this.superpowerState.source.col);
                             this.DOMElements.exchangeModal.classList.add(Game.CSS_CLASSES.hidden);
                             this.consumeSuperpower(this.SUPERPOWERS.EXCHANGE);
                         };
                     }
+                    
                     this.DOMElements.exchangeOptions.appendChild(option);
                 });
+                
                 this.DOMElements.exchangeModal.classList.remove(Game.CSS_CLASSES.hidden);
             }
 
+            /**
+             * Create particle burst effect
+             * @param {HTMLElement} cellElement - Cell element to burst from
+             */
             createParticleBurst(cellElement) {
                 if (!gameManager.settingsManager.get('particles')) return;
                 
@@ -1965,10 +2813,16 @@
                     particle.style.setProperty('--ty', `${ty}px`);
                     
                     document.body.appendChild(particle);
-                    setTimeout(() => particle.remove(), 800);
+                    this.addManagedTimer(() => particle.remove(), 800);
                 }
             }
 
+            /**
+             * Create flying score animation
+             * @param {number} points - Points scored
+             * @param {HTMLElement} fromElement - Starting element
+             * @param {HTMLElement} toElement - Target element
+             */
             createFlyingScore(points, fromElement, toElement) {
                 const fromRect = fromElement.getBoundingClientRect();
                 const toRect = toElement.getBoundingClientRect();
@@ -1986,9 +2840,13 @@
                 flyingScore.style.setProperty('--ty', `${ty}px`);
                 
                 document.body.appendChild(flyingScore);
-                setTimeout(() => flyingScore.remove(), 1000);
+                this.addManagedTimer(() => flyingScore.remove(), 1000);
             }
 
+            /**
+             * Show achievement notification
+             * @param {Object} achievement - Achievement data
+             */
             showAchievement(achievement) {
                 this.stats.badgesUnlocked++;
                 
@@ -2012,12 +2870,16 @@
                 
                 document.body.appendChild(notification);
                 
-                setTimeout(() => {
+                this.addManagedTimer(() => {
                     notification.classList.add('hiding');
-                    setTimeout(() => notification.remove(), 300);
+                    this.addManagedTimer(() => notification.remove(), 300);
                 }, 3000);
             }
             
+            /**
+             * Calculate total score from all patterns
+             * @returns {Object} Score breakdown and cells
+             */
             calculateTotalScore() {
                 const scoreBreakdown = {
                     perfectShape: 0,
@@ -2031,6 +2893,7 @@
                 const scoringCells = new Set();
                 this.stats.perfectShapes = 0;
                 
+                // Calculate each scoring pattern
                 const perfectResult = this.scoreCalculator.calculatePerfectShapes(this.gridState);
                 scoreBreakdown.perfectShape = perfectResult.score;
                 this.stats.perfectShapes = perfectResult.count;
@@ -2062,6 +2925,7 @@
                 
                 const totalScore = Object.values(scoreBreakdown).reduce((a, b) => a + b, 0);
                 
+                // Track highest scoring pattern
                 Object.entries(scoreBreakdown).forEach(([name, score]) => {
                     if (score > this.stats.highestScoringPattern.score) {
                         this.stats.highestScoringPattern = { 
@@ -2074,27 +2938,38 @@
                 return { scoreBreakdown, totalScore, scoringCells };
             }
             
+            /**
+             * Highlight scoring cells with animations
+             * @param {Set} allScoringCells - All cells that contribute to score
+             * @param {Set} newlyScoredCells - Newly scored cells this turn
+             * @param {number} scoreDiff - Score difference
+             */
             highlightScoringCells(allScoringCells, newlyScoredCells, scoreDiff) {
-                document.querySelectorAll(`.${Game.CSS_CLASSES.scoreHighlight}`).forEach(cell => cell.classList.remove(Game.CSS_CLASSES.scoreHighlight));
+                // Remove previous highlights
+                document.querySelectorAll(`.${Game.CSS_CLASSES.scoreHighlight}`).forEach(cell => 
+                    cell.classList.remove(Game.CSS_CLASSES.scoreHighlight));
+                
+                // Add highlights to all scoring cells
                 allScoringCells.forEach(index => {
-                    const cell = this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`);
+                    const cell = this.cellElements[index];
                     if (cell) {
                         cell.classList.add(Game.CSS_CLASSES.scoreHighlight);
                     }
                 });
                 
+                // Special effects for newly scored cells
                 if (scoreDiff > 0) {
                     if (gameManager.settingsManager.get('sound')) {
                         this.soundManager.play('score');
                     }
                     
                     newlyScoredCells.forEach(index => {
-                        const cell = this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`);
+                        const cell = this.cellElements[index];
                         if (cell) this.createParticleBurst(cell);
                     });
 
                     if (newlyScoredCells.size > 0) {
-                        const firstNewCell = this.DOMElements.gameBoard.querySelector(`[data-index='${Array.from(newlyScoredCells)[0]}']`);
+                        const firstNewCell = this.cellElements[Array.from(newlyScoredCells)[0]];
                         const totalScoreEl = this.DOMElements.totalScore;
                         if (firstNewCell && totalScoreEl) {
                             this.createFlyingScore(scoreDiff, firstNewCell, totalScoreEl);
@@ -2102,40 +2977,38 @@
                     }
                 }
             }
-
-            checkAchievements(breakdown) {
-                if (breakdown.perfectShape > 0) {
-                    const a = this.achievements.check('firstPerfectShape');
-                    if (a) this.showAchievement(a);
-                }
-                if (this.score >= 500) {
-                    const a = this.achievements.check('score500');
-                    if (a) this.showAchievement(a);
-                }
-                if (breakdown.lineMaster > 0) {
-                    const a = this.achievements.check('lineMaster');
-                    if (a) this.showAchievement(a);
-                }
-            }
             
+            /**
+             * Update score UI with animations
+             * @param {Object} breakdown - Score breakdown
+             */
             updateScoreUI(breakdown) {
                 const animateScore = (element, newValue) => {
                     if (parseInt(element.textContent) !== newValue) {
                         element.classList.add(Game.CSS_CLASSES.scoreChange);
-                        setTimeout(() => element.classList.remove(Game.CSS_CLASSES.scoreChange), Game.CONSTANTS.SCORE_ANIM_DURATION);
+                        this.addManagedTimer(() => 
+                            element.classList.remove(Game.CSS_CLASSES.scoreChange), 
+                            GAME_CONFIG.ANIMATIONS.SCORE_ANIM_DURATION
+                        );
                     }
                     element.textContent = newValue;
                 };
+                
                 animateScore(this.DOMElements.totalScore, this.score);
-                animateScore(this.DOMElements.scorePerfectShape, breakdown.perfectShape);
-                animateScore(this.DOMElements.scoreHalfBaked, breakdown.halfBaked);
-                animateScore(this.DOMElements.scoreAlmostThere, breakdown.almostThere);
-                animateScore(this.DOMElements.scoreGreatSequence, breakdown.greatSequence);
-                animateScore(this.DOMElements.scoreLineMaster, breakdown.lineMaster);
-                animateScore(this.DOMElements.scoreDiamondHeist, breakdown.diamondHeist);
+                
+                if (breakdown.perfectShape !== undefined) {
+                    animateScore(this.DOMElements.scorePerfectShape, breakdown.perfectShape);
+                    animateScore(this.DOMElements.scoreHalfBaked, breakdown.halfBaked);
+                    animateScore(this.DOMElements.scoreAlmostThere, breakdown.almostThere);
+                    animateScore(this.DOMElements.scoreGreatSequence, breakdown.greatSequence);
+                    animateScore(this.DOMElements.scoreLineMaster, breakdown.lineMaster);
+                    animateScore(this.DOMElements.scoreDiamondHeist, breakdown.diamondHeist);
+                }
+                
+                // Update high score
                 if (this.score > this.highScore) {
                     this.highScore = this.score;
-                    Storage.set(`matchaloHighScore_${this.config.id}`, this.highScore);
+                    Storage.set(`${GAME_CONFIG.STORAGE_KEYS.HIGH_SCORE}_${this.config.id}`, this.highScore);
                     
                     AnalyticsTracker.trackHighScore(this.score, this.config.id);
                     
@@ -2144,14 +3017,26 @@
                         this.highScoreCelebrated = true;
                     }
                 }
+                
                 this.DOMElements.highScore.textContent = this.highScore;
+                
+                // Update accessibility announcement
+                this.DOMElements.scoreAnnouncement.textContent = 
+                    `Score updated to ${this.score} points`;
             }
 
+            /**
+             * Update progress bar
+             */
             updateProgressBar() {
                 const filled = this.gridState.filter(c => c !== null).length;
-                this.DOMElements.progressBarFill.style.width = `${(filled / (this.GRID_SIZE * this.GRID_SIZE)) * 100}%`;
+                const percentage = (filled / (this.GRID_SIZE * this.GRID_SIZE)) * 100;
+                this.DOMElements.progressBarFill.style.width = `${percentage}%`;
             }
 
+            /**
+             * Update dice display
+             */
             updateDiceDisplay() {
                 const diceIcon = `<img src="https://abhimanyulodha.github.io/matchalo/images/dice-icon.svg" alt="Dice Icon">`;
 
@@ -2172,19 +3057,35 @@
                 });
             }
 
+            /**
+             * Update superpower UI state
+             */
             updateSuperpowerUI() {
-                 const canUsePower = !this.isGameOver && this.placementState === 'AWAITING_ROLL' && this.usedSuperpowers.size < 2;
-                [this.DOMElements.rotateBtn, this.DOMElements.swapBtn, this.DOMElements.exchangeBtn, this.DOMElements.moveBtn].forEach(btn => {
+                const canUsePower = !this.isGameOver && 
+                                   this.placementState === 'AWAITING_ROLL' && 
+                                   this.usedSuperpowers.size < 2;
+                
+                [this.DOMElements.rotateBtn, this.DOMElements.swapBtn, 
+                 this.DOMElements.exchangeBtn, this.DOMElements.moveBtn].forEach(btn => {
                     const powerName = btn.id.replace('-btn', '');
                     const isUsed = this.usedSuperpowers.has(powerName);
+                    
                     btn.disabled = !canUsePower || isUsed;
                     btn.classList.toggle('opacity-50', !canUsePower || isUsed);
-                    btn.classList.toggle(Game.CSS_CLASSES.superpowerActive, this.activeSuperpower === powerName);
+                    btn.classList.toggle(Game.CSS_CLASSES.superpowerActive, 
+                                       this.activeSuperpower === powerName);
                 });
+                
                 this.DOMElements.spCharge1.classList.toggle('opacity-30', this.usedSuperpowers.size >= 1);
                 this.DOMElements.spCharge2.classList.toggle('opacity-30', this.usedSuperpowers.size >= 2);
             }
             
+            /**
+             * Place a piece on the board
+             * @param {number} row - Row index
+             * @param {number} col - Column index
+             * @param {number} rollIndex - Index in currentRoll array
+             */
             placePiece(row, col, rollIndex) {
                 this.gridState[row * this.GRID_SIZE + col] = this.currentRoll[rollIndex];
                 this.renderCellWithAnimation(row, col);
@@ -2194,16 +3095,26 @@
                 }
             }
 
+            /**
+             * Render a single cell
+             * @param {number} row - Row index
+             * @param {number} col - Column index
+             */
             renderCell(row, col) {
                 const index = row * this.GRID_SIZE + col;
-                const cell = this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`);
+                const cell = this.cellElements[index];
                 const piece = this.gridState[index];
+                
                 if (!cell) return;
+                
                 const tooltip = cell.querySelector('.premium-tooltip');
                 cell.innerHTML = '';
                 if (tooltip) cell.appendChild(tooltip);
+                
                 if (piece) {
                     cell.classList.remove(Game.CSS_CLASSES.empty);
+                    cell.classList.remove(Game.CSS_CLASSES.stuck);
+                    
                     const img = document.createElement('img');
                     img.src = ImageLoader.getImageSrc(piece.symbol, piece.quadrant, this.IMAGE_PATH);
                     img.alt = `${piece.symbol} ${piece.quadrant}`;
@@ -2213,15 +3124,30 @@
                 }
             }
             
+            /**
+             * Render cell with placement animation
+             * @param {number} row - Row index
+             * @param {number} col - Column index
+             */
             renderCellWithAnimation(row, col) {
                 const index = row * this.GRID_SIZE + col;
-                const cell = this.DOMElements.gameBoard.querySelector(`[data-index='${index}']`);
+                const cell = this.cellElements[index];
+                
                 if (!cell) return;
+                
                 cell.classList.add(Game.CSS_CLASSES.placing);
                 this.renderCell(row, col);
-                setTimeout(() => cell.classList.remove(Game.CSS_CLASSES.placing), Game.CONSTANTS.PLACEMENT_ANIM_DURATION);
+                
+                this.addManagedTimer(() => 
+                    cell.classList.remove(Game.CSS_CLASSES.placing), 
+                    GAME_CONFIG.ANIMATIONS.PLACEMENT_ANIM_DURATION
+                );
             }
 
+            /**
+             * Generate random Alo piece
+             * @returns {Object} Piece with symbol and quadrant
+             */
             generateRandomAlo() {
                 return {
                     symbol: this.SYMBOLS[Math.floor(Math.random() * this.SYMBOLS.length)],
@@ -2229,32 +3155,64 @@
                 };
             }
             
+            /**
+             * Check if game is over
+             * @returns {boolean} Whether game is over
+             */
             checkGameOver() {
+                // If board is full, game over
                 if (!this.gridState.includes(null)) return true;
+                
+                // Check if there are any valid placements (two adjacent empty cells)
                 for (let r = 0; r < this.GRID_SIZE; r++) {
                     for (let c = 0; c < this.GRID_SIZE; c++) {
-                        if (!this.gridState[r * this.GRID_SIZE + c]) {
-                            if ((c < this.GRID_SIZE - 1 && !this.gridState[r * this.GRID_SIZE + c + 1]) ||
-                                (r < this.GRID_SIZE - 1 && !this.gridState[(r + 1) * this.GRID_SIZE + c])) {
-                                return false;
+                        const index = r * this.GRID_SIZE + c;
+                        
+                        // Skip if current cell is filled or stuck
+                        if (this.gridState[index] || this.isStuckBlock(index)) continue;
+                        
+                        // Check right neighbor
+                        if (c < this.GRID_SIZE - 1) {
+                            const rightIndex = r * this.GRID_SIZE + c + 1;
+                            if (!this.gridState[rightIndex] && !this.isStuckBlock(rightIndex)) {
+                                return false; // Found valid placement
+                            }
+                        }
+                        
+                        // Check bottom neighbor
+                        if (r < this.GRID_SIZE - 1) {
+                            const bottomIndex = (r + 1) * this.GRID_SIZE + c;
+                            if (!this.gridState[bottomIndex] && !this.isStuckBlock(bottomIndex)) {
+                                return false; // Found valid placement
                             }
                         }
                     }
                 }
-                return true;
+                
+                return true; // No valid placements found
             }
 
+            /**
+             * Show game over modal
+             */
             showGameOver() {
                 this.isGameOver = true;
                 
                 AnalyticsTracker.trackGameEnd(this.score, this.config.id);
                 
+                // Clear saved game state
+                Storage.remove(GAME_CONFIG.STORAGE_KEYS.GAME_STATE);
+                
                 if (this.activeSuperpower) this.cancelSuperpower();
+                
                 this.updateSuperpowerUI();
+                
+                // Check final achievements
                 if (this.usedSuperpowers.size === 0) {
                     const a = this.achievements.check('noMistakes');
                     if (a) this.showAchievement(a);
                 }
+                
                 if (!this.gridState.includes(null)) {
                     const a = this.achievements.check('fillBoard');
                     if (a) this.showAchievement(a);
@@ -2264,33 +3222,57 @@
                     this.soundManager.play('gameOver');
                 }
                 
-                setTimeout(() => {
+                this.addManagedTimer(() => {
                     this.DOMElements.finalScore.textContent = this.score;
+                    
                     const statsEl = this.DOMElements.gameOverStats;
                     statsEl.innerHTML = `
                         <div><strong>Perfect Shapes:</strong> ${this.stats.perfectShapes}</div>
                         <div><strong>Badges Unlocked:</strong> ${this.stats.badgesUnlocked}</div>
                         <div class="col-span-2"><strong>Highest Score From:</strong> ${this.stats.highestScoringPattern.name} (+${this.stats.highestScoringPattern.score} pts)</div>
                     `;
+                    
                     this.DOMElements.gameOverModal.classList.remove(Game.CSS_CLASSES.hidden);
                     this.DOMElements.rollDiceBtn.disabled = true;
                 }, 500);
             }
 
+            /**
+             * Celebrate new high score with animation
+             */
             celebrateNewHighScore() {
                 const element = this.DOMElements.highScore;
                 element.classList.add(Game.CSS_CLASSES.celebrating);
-                setTimeout(() => element.classList.remove(Game.CSS_CLASSES.celebrating), 500);
+                
+                this.addManagedTimer(() => 
+                    element.classList.remove(Game.CSS_CLASSES.celebrating), 
+                    500
+                );
+                
                 const rect = element.getBoundingClientRect();
                 const colors = ['#6a11cb', '#2575fc', '#c4b5fd', '#a78bfa'];
+                
                 for (let i = 0; i < 20; i++) {
                     const particle = document.createElement('div');
-                    particle.style.cssText = `position: fixed; width: 8px; height: 8px; background: ${colors[Math.floor(Math.random() * colors.length)]}; border-radius: 50%; left: ${rect.left + rect.width / 2}px; top: ${rect.top + rect.height / 2}px; pointer-events: none; z-index: 1000;`;
+                    particle.style.cssText = `
+                        position: fixed; 
+                        width: 8px; 
+                        height: 8px; 
+                        background: ${colors[Math.floor(Math.random() * colors.length)]}; 
+                        border-radius: 50%; 
+                        left: ${rect.left + rect.width / 2}px; 
+                        top: ${rect.top + rect.height / 2}px; 
+                        pointer-events: none; 
+                        z-index: 1000;
+                    `;
+                    
                     document.body.appendChild(particle);
+                    
                     const angle = (Math.PI * 2 * i) / 20;
                     const velocity = 100 + Math.random() * 100;
                     const tx = Math.cos(angle) * velocity;
                     const ty = Math.sin(angle) * velocity;
+                    
                     particle.animate([
                         { transform: 'translate(0, 0) scale(1)', opacity: 1 },
                         { transform: `translate(${tx}px, ${ty}px) scale(0)`, opacity: 0 }
@@ -2301,51 +3283,75 @@
                 }
             }
 
+            /**
+             * Create canvas snapshot of current board
+             * @returns {Promise<HTMLCanvasElement>} Canvas with board image
+             */
             async createBoardCanvas() {
                 const SCALE = 3;
                 const boardElement = this.DOMElements.gameBoard;
                 const cellSize = boardElement.offsetWidth / this.GRID_SIZE;
                 const canvasSize = cellSize * this.GRID_SIZE * SCALE;
+                
                 const canvas = document.createElement('canvas');
                 canvas.width = canvasSize;
                 canvas.height = canvasSize;
                 const ctx = canvas.getContext('2d');
 
+                // Draw background
                 ctx.fillStyle = '#FFFFFF';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw grid lines
                 ctx.strokeStyle = 'rgba(106, 17, 203, 0.1)';
                 ctx.lineWidth = 1 * SCALE;
+                
                 for (let i = 0; i <= this.GRID_SIZE; i++) {
                     const pos = i * cellSize * SCALE;
-                    ctx.beginPath(); ctx.moveTo(pos, 0); ctx.lineTo(pos, canvasSize); ctx.stroke();
-                    ctx.beginPath(); ctx.moveTo(0, pos); ctx.lineTo(canvasSize, pos); ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(pos, 0);
+                    ctx.lineTo(pos, canvasSize);
+                    ctx.stroke();
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(0, pos);
+                    ctx.lineTo(canvasSize, pos);
+                    ctx.stroke();
                 }
 
+                // Draw pieces
                 const imagePromises = [];
+                
                 for (let i = 0; i < this.GRID_SIZE * this.GRID_SIZE; i++) {
                     const piece = this.gridState[i];
+                    
                     if (piece) {
                         const row = Math.floor(i / this.GRID_SIZE);
                         const col = i % this.GRID_SIZE;
                         const x = col * cellSize * SCALE;
                         const y = row * cellSize * SCALE;
                         const size = cellSize * SCALE;
-                        const imgSrc = ImageLoader.getImageSrc(piece.symbol, piece.quadrant, this.IMAGE_PATH);
                         
+                        const imgSrc = ImageLoader.getImageSrc(piece.symbol, piece.quadrant, this.IMAGE_PATH);
                         let img = ImageLoader.getImage(imgSrc);
+                        
                         if (img) {
-                             ctx.drawImage(img, x, y, size, size);
+                            ctx.drawImage(img, x, y, size, size);
                         } else {
+                            // Load image if not cached
                             const promise = new Promise((resolve) => {
                                 const newImg = new Image();
                                 newImg.crossOrigin = 'anonymous';
+                                
                                 newImg.onload = () => {
                                     ctx.drawImage(newImg, x, y, size, size);
                                     resolve();
                                 };
+                                
                                 newImg.onerror = () => resolve();
                                 newImg.src = imgSrc;
                             });
+                            
                             imagePromises.push(promise);
                         }
                     }
@@ -2354,14 +3360,152 @@
                 await Promise.all(imagePromises);
                 return canvas;
             }
+
+            /**
+             * Save current game state to localStorage
+             */
+            saveGameState() {
+                if (this.isGameOver) return;
+                
+                const state = {
+                    editionId: this.config.id,
+                    gridState: this.gridState.map(cell => cell ? { ...cell } : null),
+                    score: this.score,
+                    currentRoll: this.currentRoll.map(piece => ({ ...piece })),
+                    placementState: this.placementState,
+                    firstPieceLocation: this.firstPieceLocation,
+                    usedSuperpowers: Array.from(this.usedSuperpowers),
+                    timestamp: Date.now(),
+                    isGameOver: false
+                };
+                
+                Storage.set(GAME_CONFIG.STORAGE_KEYS.GAME_STATE, state);
+            }
+
+            /**
+             * Restore game from saved state
+             * @param {Object} savedState - Saved game state
+             */
+            restoreFromState(savedState) {
+                this.SYMBOLS = this.config.symbols;
+                this.gridState = savedState.gridState.map(cell => cell ? { ...cell } : null);
+                this.currentRoll = savedState.currentRoll.map(piece => ({ ...piece }));
+                this.placementState = savedState.placementState;
+                this.firstPieceLocation = savedState.firstPieceLocation;
+                this.usedSuperpowers = new Set(savedState.usedSuperpowers);
+                this.score = savedState.score;
+                this.highScore = Storage.get(`${GAME_CONFIG.STORAGE_KEYS.HIGH_SCORE}_${this.config.id}`, 0);
+                this.isGameOver = false;
+                this.highScoreCelebrated = false;
+                this.activeSuperpower = null;
+                this.superpowerState = {};
+                this.lastClick = { time: 0, row: -1, col: -1 };
+                
+                this.stats = { 
+                    perfectShapes: 0, 
+                    highestScoringPattern: { name: 'None', score: 0 }, 
+                    badgesUnlocked: 0 
+                };
+                
+                this.previousScoringCells = new Set();
+                
+                this.setupBoard();
+                ImageLoader.preloadImages(this.config, this.IMAGE_PATH);
+                
+                // Render all cells
+                for (let i = 0; i < this.GRID_SIZE * this.GRID_SIZE; i++) {
+                    const row = Math.floor(i / this.GRID_SIZE);
+                    const col = i % this.GRID_SIZE;
+                    this.renderCell(row, col);
+                }
+                
+                this.populateHelpModal();
+                this.processScoring();
+                this.updateProgressBar();
+                this.updateDiceDisplay();
+                this.updateSuperpowerUI();
+                this.markStuckBlocks();
+                
+                this.DOMElements.spCharge1.innerHTML = '✨';
+                this.DOMElements.spCharge2.innerHTML = '✨';
+                this.DOMElements.gameOverModal.classList.add(Game.CSS_CLASSES.hidden);
+                this.DOMElements.rollDiceBtn.disabled = this.placementState !== 'AWAITING_ROLL';
+                
+                this.setupEventListeners();
+            }
         }
 
+        // ===== DEBUG HELPERS (for development) =====
+        if (GAME_CONFIG.DEBUG_MODE) {
+            window.gameDebug = {
+                getGame: () => gameManager.currentGame,
+                setGridCell: (index, symbol, quadrant) => {
+                    const game = gameManager.currentGame;
+                    if (game) {
+                        game.gridState[index] = { symbol, quadrant };
+                        const row = Math.floor(index / game.GRID_SIZE);
+                        const col = index % game.GRID_SIZE;
+                        game.renderCell(row, col);
+                    }
+                },
+                forceGameOver: () => {
+                    const game = gameManager.currentGame;
+                    if (game) game.showGameOver();
+                },
+                fillBoard: () => {
+                    const game = gameManager.currentGame;
+                    if (game) {
+                        for (let i = 0; i < game.GRID_SIZE * game.GRID_SIZE; i++) {
+                            game.gridState[i] = game.generateRandomAlo();
+                            const row = Math.floor(i / game.GRID_SIZE);
+                            const col = i % game.GRID_SIZE;
+                            game.renderCell(row, col);
+                        }
+                        game.processScoring();
+                    }
+                },
+                clearBoard: () => {
+                    const game = gameManager.currentGame;
+                    if (game) {
+                        game.gridState = Array(game.GRID_SIZE * game.GRID_SIZE).fill(null);
+                        for (let i = 0; i < game.GRID_SIZE * game.GRID_SIZE; i++) {
+                            const row = Math.floor(i / game.GRID_SIZE);
+                            const col = i % game.GRID_SIZE;
+                            game.renderCell(row, col);
+                        }
+                    }
+                }
+            };
+            
+            console.log('Debug mode enabled. Use window.gameDebug for testing.');
+        }
+
+        // ===== INITIALIZE GAME ON PAGE LOAD =====
         document.addEventListener('DOMContentLoaded', () => {
             try {
                 gameManager.init();
             } catch (error) {
-                ErrorHandler.handle(error, 'GameInitialization', 'Error loading game. Please refresh.');
-                document.body.innerHTML = '<div class="flex items-center justify-center min-h-screen"><div class="text-center p-8 glass-card rounded-2xl"><h1 class="text-2xl font-bold mb-4" style="color: var(--accent);">Error Loading Game</h1><p style="color: var(--text-secondary);">Please refresh the page.</p></div></div>';
+                ErrorHandler.handle(
+                    error, 
+                    'GameInitialization', 
+                    'Error loading game. Please refresh.'
+                );
+                
+                document.body.innerHTML = `
+                    <div class="flex items-center justify-center min-h-screen">
+                        <div class="text-center p-8 glass-card rounded-2xl">
+                            <h1 class="text-2xl font-bold mb-4" style="color: var(--accent);">
+                                Error Loading Game
+                            </h1>
+                            <p style="color: var(--text-secondary);">
+                                Please refresh the page.
+                            </p>
+                            <button onclick="location.reload()" class="themed-button primary mt-4 py-2 px-6 text-white">
+                                Refresh
+                            </button>
+                        </div>
+                    </div>
+                `;
             }
         });
     </script>
